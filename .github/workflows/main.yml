@@ -1,0 +1,19 @@
+name: "Deploy to 404 Server"
+
+on:
+    push:
+        branches:
+            - master
+            - main
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.HOST }}
+                  username: ${{ secrets.USERNAME }}
+                  key: ${{ secrets.KEY }}
+                  script: whoami && pwd && ls -al
