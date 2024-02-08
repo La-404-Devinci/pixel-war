@@ -8,12 +8,12 @@ dotenv.config();
 
 // Import route controllers
 // TODO: Import the GetCanvas function from the CanvasController file
-import { GetCanvas } from "./controllers/CanvasController";
+// import { GetCanvas } from "./controllers/CanvasController";
 // TODO: Create others controllers for the user and auth routes
 
 // Import websocket endpoints
 // TODO: Import the PlacePixel function from the CanvasController file
-import { PlacePixel } from "./routes/canvas/CanvasController";
+// import { PlacePixel } from "./routes/canvas/CanvasController";
 // TODO: Create others websocket endpoints for the user and auth routes
 
 // Create Express app
@@ -23,13 +23,13 @@ const server = http.createServer(app);
 // Create Socket.io server
 const io = new Server(server);
 
-// Express routes
-app.get("/canvas", GetCanvas);
+// // Express routes
+// app.get("/canvas", GetCanvas);
 
-// Socket.io events
-io.on("connection", (socket: Socket) => {
-    socket.on("placePixel", PlacePixel);
-});
+// // Socket.io events
+// io.on("connection", (socket: Socket) => {
+//     socket.on("placePixel", PlacePixel);
+// });
 
 // Start the server
 const port = process.env.PORT || 3000;
