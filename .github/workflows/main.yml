@@ -16,4 +16,15 @@ jobs:
                   host: ${{ secrets.HOST }}
                   username: ${{ secrets.USERNAME }}
                   key: ${{ secrets.KEY }}
-                  script: whoami && pwd && ls -al
+                  script: |
+                      cd ${{ secrets.DIR }}
+                      git pull
+                      cd frontend
+                      npm install
+                      npm run build
+                      cd ../backend
+                      npm install
+                      npm run build
+                      screen -S 404 -X quit
+                      screen -S 404 -d -m npm start
+                      echo "Deployed!"
