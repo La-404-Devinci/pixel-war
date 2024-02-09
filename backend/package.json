@@ -6,7 +6,9 @@
     "scripts": {
         "dev": "ts-node index.ts",
         "build": "tsc",
-        "start": "node index.js"
+        "start": "node index.js",
+        "lint": "eslint . --ext .ts",
+        "format": "prettier --write ."
     },
     "author": "",
     "license": "ISC",
@@ -16,9 +18,11 @@
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.21.0",
         "eslint": "^8.56.0",
+        "prettier": "^3.2.5",
         "typescript": "^5.3.3"
     },
     "dependencies": {
+        "common": "file:../common",
         "dotenv": "^16.4.1",
         "express": "^4.18.2",
         "socket.io": "^4.7.4"

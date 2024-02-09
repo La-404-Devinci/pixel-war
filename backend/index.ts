@@ -1,7 +1,8 @@
 import express from "express";
 import http from "http";
-import { Server, Socket } from "socket.io";
+import { Socket } from "socket.io";
 import dotenv from "dotenv";
+import WSS from "./server/Websocket";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -21,15 +22,23 @@ const app = express();
 const server = http.createServer(app);
 
 // Create Socket.io server
-const io = new Server(server);
+WSS.init(server);
+
+WSS.io.on("connection", (socket: Socket) => {
+    const ip = socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
+    const userAgent = socket.handshake.headers["user-agent"];
+    console.log(`Socket connected from ${ip} using ${userAgent}`);
+
+    // // Socket.io events
+    // socket.on("placePixel", PlacePixel);
+
+    socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+    });
+});
 
 // // Express routes
 // app.get("/canvas", GetCanvas);
-
-// // Socket.io events
-// io.on("connection", (socket: Socket) => {
-//     socket.on("placePixel", PlacePixel);
-// });
 
 // Start the server
 const port = process.env.PORT || 3000;
