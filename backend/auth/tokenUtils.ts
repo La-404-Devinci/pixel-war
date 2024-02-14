@@ -1,6 +1,5 @@
 import Token from "../models/Token";
-
-const jwt = require("jsonwebtoken");
+import * as jwt from "jsonwebtoken";
 
 /**
  * Generate a JWT token
@@ -10,9 +9,9 @@ const jwt = require("jsonwebtoken");
  * @returns The generated JWT token
  */
 const generateJwtToken = (data: Token, exp: number): string => {
-	const secret = process.env.JWT_SECRET;
-	const token = jwt.sign(data, secret, { expiresIn: exp });
-	return token;
+    const secret: string = process.env.JWT_SECRET ?? "";
+    const token = jwt.sign(data, secret, { expiresIn: exp });
+    return token;
 };
 
 /**
@@ -23,16 +22,16 @@ const generateJwtToken = (data: Token, exp: number): string => {
  * @returns The decoded token
  */
 const verifyJwtToken = (token: string, targetEmail: string): Token | null => {
-	try {
-		const secret = process.env.JWT_SECRET;
-		const decodedToken = jwt.verify(token, secret);
-		if (decodedToken.devinciEmail === targetEmail) {
-			return decodedToken;
-		}
-		return null;
-	} catch (error) {
-		return null;
-	}
+    try {
+        const secret: string = process.env.JWT_SECRET ?? "";
+        const decodedToken = jwt.verify(token, secret) as jwt.JwtPayload;
+        if (decodedToken.devinciEmail === targetEmail) {
+            return decodedToken as Token;
+        }
+        return null;
+    } catch (error) {
+        return null;
+    }
 };
 
 /**
@@ -42,11 +41,8 @@ const verifyJwtToken = (token: string, targetEmail: string): Token | null => {
  * @returns The generated authorization token
  */
 const generateAuthorizationToken = (devinciEmail: string): string => {
-	const authorizationExpiration = 60 * 15; // 15 minutes
-	return generateJwtToken(
-		{ devinciEmail, type: "authorization" },
-		authorizationExpiration
-	);
+    const authorizationExpiration = 60 * 15; // 15 minutes
+    return generateJwtToken({ devinciEmail, type: "authorization" }, authorizationExpiration);
 };
 
 /**
@@ -56,11 +52,8 @@ const generateAuthorizationToken = (devinciEmail: string): string => {
  * @returns The generated authentication token
  */
 const generateAuthenticationToken = (devinciEmail: string): string => {
-	const authenticationExpiration = 60 * 60 * 24 * 14; // 14 days
-	return generateJwtToken(
-		{ devinciEmail, type: "authentication" },
-		authenticationExpiration
-	);
+    const authenticationExpiration = 60 * 60 * 24 * 14; // 14 days
+    return generateJwtToken({ devinciEmail, type: "authentication" }, authenticationExpiration);
 };
 
 /**
@@ -70,12 +63,10 @@ const generateAuthenticationToken = (devinciEmail: string): string => {
  * @param targetEmail The email to be verified
  * @returns Whether the token is valid
  */
-const verifyAuthorizationToken = (
-	token: string,
-	targetEmail: string
-): boolean => {
-	const decodedToken = verifyJwtToken(token, targetEmail);
-	return decodedToken.type === "authorization";
+const verifyAuthorizationToken = (token: string, targetEmail: string): boolean => {
+    const decodedToken = verifyJwtToken(token, targetEmail);
+    if (decodedToken === null) return false;
+    return decodedToken.type === "authorization";
 };
 
 /**
@@ -85,17 +76,10 @@ const verifyAuthorizationToken = (
  * @param targetEmail The email to be verified
  * @returns Whether the token is valid
  */
-const verifyAuthenticationToken = (
-	token: string,
-	targetEmail: string
-): boolean => {
-	const decodedToken = verifyJwtToken(token, targetEmail);
-	return decodedToken.type === "authentication";
+const verifyAuthenticationToken = (token: string, targetEmail: string): boolean => {
+    const decodedToken = verifyJwtToken(token, targetEmail);
+    if (decodedToken === null) return false;
+    return decodedToken.type === "authentication";
 };
 
-export {
-	generateAuthorizationToken,
-	generateAuthenticationToken,
-	verifyAuthorizationToken,
-	verifyAuthenticationToken,
-};
+export { generateAuthorizationToken, generateAuthenticationToken, verifyAuthorizationToken, verifyAuthenticationToken };
