@@ -27,7 +27,7 @@ const verifyJwtToken = (token: string, targetEmail: string): Token | null => {
 		const secret = process.env.JWT_SECRET;
 		const decodedToken = jwt.verify(token, secret);
 		if (decodedToken.devinciEmail === targetEmail) {
-			return decodedToken;
+            return decodedToken;
 		}
 		return null;
 	} catch (error) {
