@@ -1,7 +1,8 @@
 node_modules
-dist
-out
-build
+dist/
+out/
+build/
 .env
 .*.local.env
 index.js
+data/
