@@ -23,6 +23,7 @@ jobs:
                       npm install
                       npm run build
                       cd ../backend
+                      docker compose up -d
                       npm install
                       npm run build
                       screen -S 404 -X quit
