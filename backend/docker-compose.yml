@@ -8,8 +8,6 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: root
             MYSQL_DATABASE: pixelwar
-            MYSQL_USER: pixelwar
-            MYSQL_PASSWORD: pixelwar
         ports:
             - "0.0.0.0:3336:3306"
         volumes:
