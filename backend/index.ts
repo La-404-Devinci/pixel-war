@@ -31,7 +31,7 @@ WSS.io.on("connection", (socket: Socket) => {
 });
 
 // Express routes
-app.post("/auth/sendMagicLink", AccountController.sendMagicLink);
+app.post("/auth/send-magic-link", AccountController.sendMagicLink);
 app.post("/auth/login", AccountController.login);
 app.get("/canvas/image", CanvasController.getCanvasImage);
 
