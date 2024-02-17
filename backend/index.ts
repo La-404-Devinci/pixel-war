@@ -25,6 +25,10 @@ WSS.io.on("connection", (socket: Socket) => {
     socket.on("place-pixel", (data) => CanvasController.placePixel(data, socket));
     socket.on("message", (data) => ChatController.broadcastMessage(data, socket));
 
+    socket.on('ev', (data) => {
+      console.log(data)
+    })
+
     socket.on("disconnect", () => {
         console.log("Socket disconnected");
     });
