@@ -3,19 +3,12 @@ import http from "http";
 import { Socket } from "socket.io";
 import dotenv from "dotenv";
 import WSS from "./server/Websocket";
+import AccountController from "./controllers/Account";
+import CanvasController from "./controllers/Canvas";
+import ChatController from "./controllers/Chat";
 
 // Load environment variables from .env file
 dotenv.config();
-
-// Import route controllers
-// TODO: Import the GetCanvas function from the CanvasController file
-// import { GetCanvas } from "./controllers/CanvasController";
-// TODO: Create others controllers for the user and auth routes
-
-// Import websocket endpoints
-// TODO: Import the PlacePixel function from the CanvasController file
-// import { PlacePixel } from "./routes/canvas/CanvasController";
-// TODO: Create others websocket endpoints for the user and auth routes
 
 // Create Express app
 const app = express();
@@ -29,16 +22,25 @@ WSS.io.on("connection", (socket: Socket) => {
     const userAgent = socket.handshake.headers["user-agent"];
     console.log(`Socket connected from ${ip} using ${userAgent}`);
 
-    // // Socket.io events
-    // socket.on("placePixel", PlacePixel);
+    socket.on("placePixel", (data) => CanvasController.placePixel(data, socket));
+    socket.on("message", (data) => ChatController.broadcastMessage(data, socket));
 
     socket.on("disconnect", () => {
         console.log("Socket disconnected");
     });
 });
 
-// // Express routes
-// app.get("/canvas", GetCanvas);
+// Express routes
+app.post("/auth/sendMagicLink", AccountController.sendMagicLink);
+app.post("/auth/login", AccountController.login);
+app.get("/canvas/image", CanvasController.getCanvasImage);
+
+app.post("/admin/auth/mute", AccountController.muteUser);
+app.post("/admin/auth/ban", AccountController.banUser);
+app.post("/admin/canvas/reset", CanvasController.resetCanvas);
+app.post("/admin/canvas/size", CanvasController.changeCanvasSize);
+app.post("/admin/canvas/countdown", CanvasController.changePixelPlacementCooldown);
+app.post("/admin/canvas/palette", CanvasController.editCanvasColorPalette);
 
 // Start the server
 const port = process.env.PORT || 3000;
