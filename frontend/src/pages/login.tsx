@@ -1,5 +1,5 @@
 import { useState } from "react";
-import './styles/login.module.css';
+import styles from '../styles/login.module.css';
 
 const LoginComponent = () => {
     
@@ -25,8 +25,8 @@ const LoginComponent = () => {
     };
   
     return (
-      <div id="login">
-        <div id="login-title">
+      <div id={styles.login}>
+        <div id={styles['login-title']}>
           <p>Login</p>
         </div>
         <label>Enter your devinci email</label>
