@@ -1,5 +1,5 @@
-import {Socket} from 'socket.io'
-import ChatMessagePayload from '../../common/requests/ChatMessagePayload'
+import {Socket} from "socket.io";
+import ChatMessagePayload from "../../common/requests/ChatMessagePayload";
 
 class ChatController {
     /**

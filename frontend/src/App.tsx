@@ -6,7 +6,9 @@ import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
 
 function App() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [classement, setClassement] = useState<classementItem[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
