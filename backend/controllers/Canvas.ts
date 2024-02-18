@@ -1,5 +1,4 @@
 import Canvas from "../models/Canvas";
-import type PlacePixelPayload from "common/requests/PlacePixel";
 import type express from "express";
 import type SocketIO from "socket.io";
 
