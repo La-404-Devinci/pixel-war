@@ -12,14 +12,14 @@ datasource db {
 
 model Account {
     id                   Int      @id @default(autoincrement())
-    devinciEmail         String
-    isMuted              Boolean
-    isBanned             Boolean
-    isAdmin              Boolean
-    placedPixels         Int
-    timeAlive            Int
-    lastPixelTime        Int
-    lastSentMessageTimes Json
+    devinciEmail         String @unique()
+    isMuted              Boolean @default(false)
+    isBanned             Boolean @default(false)
+    isAdmin              Boolean @default(false)
+    placedPixels         Int @default(0)
+    timeAlive            Int?
+    lastPixelTime        DateTime?
+    lastSentMessageTimes Json?
 }
 
 model LogEntry {
