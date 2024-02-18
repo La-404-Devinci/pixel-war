@@ -1,3 +1,6 @@
+import {Socket} from 'socket.io'
+import ChatMessagePayload from '../../common/requests/ChatMessagePayload'
+
 class ChatController {
     /**
      * Broadcasts a message to all connected clients
@@ -6,7 +9,7 @@ class ChatController {
      * @param data The message data
      * @param socket The client socket
      */
-    public static async broadcastMessage(data: ChatMessagePayload, socket: SocketIO.Socket) {
+    public static async broadcastMessage(data: ChatMessagePayload, socket: Socket) {
         // TODO: Broadcast the message to all clients
         /**
          * VALIDATION

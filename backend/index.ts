@@ -22,12 +22,10 @@ WSS.io.on("connection", (socket: Socket) => {
     const userAgent = socket.handshake.headers["user-agent"];
     console.log(`Socket connected from ${ip} using ${userAgent}`);
 
+    WSS.updateClassement(socket)
+
     socket.on("place-pixel", (data) => CanvasController.placePixel(data, socket));
     socket.on("message", (data) => ChatController.broadcastMessage(data, socket));
-
-    socket.on('ev', (data) => {
-      console.log(data)
-    })
 
     socket.on("disconnect", () => {
         console.log("Socket disconnected");
