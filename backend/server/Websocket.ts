@@ -1,11 +1,12 @@
 import type http from "http";
 import SocketIO from "socket.io";
+import type { Server, Socket } from "socket.io";
 import { PrismaClient } from "@prisma/client";
 
 const client = new PrismaClient();
 
 class WSS {
-    public static io: SocketIO.Server;
+    public static io: Server;
 
     public static init(server: http.Server) {
         WSS.io = new SocketIO.Server(server, {
@@ -15,7 +16,7 @@ class WSS {
         });
     }
 
-    static async updateClassement(socket?: SocketIO.Socket) {
+    static async updateClassement(socket?: Socket) {
         const classement = await client.account.findMany({
             select: {
                 devinciEmail: true,
