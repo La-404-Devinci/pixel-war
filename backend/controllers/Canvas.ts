@@ -37,10 +37,10 @@ class CanvasController {
      * Place a pixel on the canvas
      * @server WebSocket
      *
-     * @param data The pixel data
      * @param socket The socket that sent the pixel data
+     * @param data The payload
      */
-    public static async placePixel(data: PlacePixelPayload, socket: SocketIO.Socket) {
+    public static async placePixel(socket: SocketIO.Socket, ...data: unknown[]) {
         // TODO: Place the pixel on the canvas
         /**
          * VALIDATION

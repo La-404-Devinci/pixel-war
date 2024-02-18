@@ -1,4 +1,6 @@
+import type SocketIO from "socket.io";
 import type express from "express";
+import { verifyAuthenticationToken } from "../auth/tokenUtils";
 
 class AccountController {
     /**
@@ -93,6 +95,15 @@ class AccountController {
          * * Send an error message if the user ID is invalid
          */
     }
+
+    /**
+     * Auth a websocket client
+     * @server WebSocket
+     *
+     * @param socket The client socket
+     * @param data The payload
+     */
+    public static async authSocket(socket: SocketIO.Socket, ...data: unknown[]) {}
 }
 
 export default AccountController;
