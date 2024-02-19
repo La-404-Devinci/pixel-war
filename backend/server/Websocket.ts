@@ -16,6 +16,11 @@ class WSS {
         });
     }
 
+    /**
+     * Sends an 'updateClassement' event to one socket if provided. \
+     * If no socket is provided, broadcast the event to all connected clients.
+     * @param socket 
+     */
     static async updateClassement(socket?: Socket) {
         const classement = await client.account.findMany({
             select: {
