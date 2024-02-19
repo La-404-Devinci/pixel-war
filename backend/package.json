@@ -8,7 +8,8 @@
         "build": "tsc",
         "start": "node index.js",
         "lint": "eslint . --ext .ts",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "seed": "ts-node prisma/seed.ts"
     },
     "author": "",
     "license": "ISC",
