@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from './App.module.css';
-import ProfilComponent from './pages/profil';
+import ProfilComponent from './components/profil';
 // import LoginComponent from './pages/login';
 
 interface AppProps {}
