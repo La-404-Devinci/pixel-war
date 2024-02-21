@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import styles from '../styles/profil.module.css';
 
 interface ProfilComponentProps {
@@ -8,10 +8,11 @@ interface ProfilComponentProps {
 
 const ProfilComponent: React.FC<ProfilComponentProps> = ({userEmail, onHideProfil}) => {
 
-    const [pixelPoses, setPixelPoses] = useState(0);
-    const [messagesEnvoyes, setMessagesEnvoyes] = useState(0);
-    const [depuisDernierPixel, setDepuisDernierPixel] = useState(0);
-    const [pixesParHeure, setPixesParHeure] = useState(0);
+    // A UTILISER POUR LE BACKEND
+    // const [pixelPoses, setPixelPoses] = useState(0);
+    // const [messagesEnvoyes, setMessagesEnvoyes] = useState(0);
+    // const [depuisDernierPixel, setDepuisDernierPixel] = useState(0);
+    // const [pixesParHeure, setPixesParHeure] = useState(0);
 
     const handleClose = () => {
         onHideProfil();
@@ -25,19 +26,19 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({userEmail, onHideProfi
             </div>
             <div className={styles.containerStats}>
                 <div className={styles.blockStats}>
-                    <p>{pixelPoses}</p>
+                    {/* <p>{pixelPoses}</p> */}
                     <p>Pixel posés</p>
                 </div>
                 <div className={styles.blockStats}>
-                    <p>{messagesEnvoyes}</p>
+                    {/* <p>{messagesEnvoyes}</p> */}
                     <p>Messages envoyés</p>
                 </div>
                 <div className={styles.blockStats}>
-                    <p>{depuisDernierPixel}</p>
+                    {/* <p>{depuisDernierPixel}</p> */}
                     <p>Depuis le dernier pixel posé</p>
                 </div>
                 <div className={styles.blockStats}>
-                    <p>{pixesParHeure}</p>
+                    {/* <p>{pixesParHeure}</p> */}
                     <p>Pixes par heure (en moyenne)</p>
                 </div>
             </div>

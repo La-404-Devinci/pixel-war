@@ -8,7 +8,7 @@ interface AppProps {}
 function App(props: AppProps) {
 
   const [userEmail, setUserEmail] = useState("")
-  const [isValidEmail, setIsValidEmail] = useState(false);
+  // const [isValidEmail, setIsValidEmail] = useState(false);
   const [afficher, setAfficher] = useState(false);
 
   const handleLogin = (email:string) => {
@@ -28,9 +28,9 @@ function App(props: AppProps) {
     }
   }
 
-  const isLoged = () => {
-    // need liaison with backend
-  }
+  // const isLoged = () => {
+  //   // need liaison with backend
+  // }
 
   // affichage (render)
   return (
