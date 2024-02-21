@@ -5,11 +5,10 @@ interface LoginComponentProps {
   onLogin: (email: string) => void;
 }
 
-const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin}) => {
+const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
     
     const [email, setEmail] = useState("");
     const [isValidEmail, setIsValidEmail] = useState(false);
-  
     
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const newEmail = event.target.value;
