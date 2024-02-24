@@ -103,7 +103,18 @@ class AccountController {
      * @param socket The client socket
      * @param data The payload
      */
-    public static async authSocket(socket: SocketIO.Socket, ...data: unknown[]) {}
+    public static async authSocket(socket: SocketIO.Socket, ...data: unknown[]) {
+        const token = (data[0] as string) ?? "";
+        const email = (data[1] as string) ?? "";
+        if (verifyAuthenticationToken(token, email)) {
+            socket.data.token = token;
+            socket.data.email = email;
+
+            socket.emit("auth-callback", true);
+        } else {
+            socket.emit("auth-callback", false);
+        }
+    }
 }
 
 export default AccountController;
