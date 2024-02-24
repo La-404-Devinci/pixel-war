@@ -1,4 +1,6 @@
-import type express from "express";
+import express from "express";
+import nodemailer from "nodemailer";
+import { generateAuthorizationToken } from "../auth/tokenUtils";
 
 class AccountController {
     /**
@@ -14,6 +16,7 @@ class AccountController {
          * VALIDATION
          * * Validate the user email (must be a Devinci email)
          *
+         
          * PROCESS
          * * Generate an AUTHORIZATION token
          * * Send the magic link to the user's email
@@ -22,6 +25,46 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the email is invalid
          */
+        const { email } = req.body;
+
+        const isDevinciEmail = (email: string): boolean => {
+            const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci.fr$/;
+
+            return expression.test(email);
+        };
+
+        if (isDevinciEmail(email) == true) {
+            const token: string = generateAuthorizationToken(email);
+            const link: string = `url/login?token=${token}`;
+
+            const transporter = nodemailer.createTransport({
+                host: "your_host",
+                port: 587,
+                secure: true,
+                auth: {
+                    user: "your_email_address",
+                    pass: "your_email_password"
+                }
+            });
+        
+            const message = {
+                from: "your_email", 
+                to: email,
+                subject: "Lien pour se connecter",
+                html: `Clique pour te connecter: <a href="${link}">${link}</a>`
+            };
+            
+            try {
+                await transporter.sendMail(message);
+                res.status(200).send("Lien envoyé. Regarder vos mails.");
+            } catch (error) {
+                res.status(500).send("Une erreur s'est produite.");
+            }
+
+        } else {
+            res.send("Email non valide");
+        }
+
     }
 
     /**

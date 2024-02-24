@@ -1,36 +1,39 @@
-import { useState } from 'react';
-import styles from './App.module.css';
-import ProfilComponent from './components/profil';
-import LoginComponent from './components/login';
+// import { useState } from 'react'
+import { useEffect, useState } from 'react';
+import './App.css'
+import LoginComponent from './pages/login'
+import { socket } from './socket';
+import classementItem from '../../common/interfaces/classementItem.interface'
 
-interface AppProps {}
+function App() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [classement, setClassement] = useState<classementItem[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isConnected, setIsConnected] = useState(socket.connected);
 
-function App(props: AppProps) {
-
-  const [userEmail, setUserEmail] = useState("")
-  // const [isValidEmail, setIsValidEmail] = useState(false);
-  const [display, setdisplay] = useState(false);
-
-  const handleLogin = (email:string) => {
-    console.log(`Email: ${email}`);
-    setUserEmail(email);
-  }
-
-  const handledisplayProfile = () => {
-    setdisplay(!display);
-    // modifier fonction pour savoir sur quel bouton on a cliqué pour pas display les deux en même temps
-  }
-
-  const handleShow = () => {
-    const loginComponent = document.getElementById("loginComponent");
-    if (loginComponent) {
-      loginComponent.style.display = "block";
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
     }
-  }
 
-  // const isLoged = () => {
-  //   // need liaison with backend
-  // }
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    function onclassementUpdate(data: classementItem[]) {
+      setClassement(data)
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('classementUpdate', onclassementUpdate);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('classementUpdate', onclassementUpdate);
+    };
+  }, []);
 
   // affichage (render)
   return (
