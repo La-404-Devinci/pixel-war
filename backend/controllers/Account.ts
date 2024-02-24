@@ -102,7 +102,7 @@ class AccountController {
                 });
             }
         } catch (error) {
-            return res.status(500).send("Internal server error");
+            return res.status(500).send("Unable to connect to the database");
         }
 
         return res.status(200).send(generateAuthenticationToken(email));
