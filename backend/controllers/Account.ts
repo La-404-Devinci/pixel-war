@@ -25,7 +25,7 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the email is invalid
          */
-        const { email } = req;
+        const { email } = req.body;
 
         const isDevinciEmail = (email: string): boolean => {
             const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci.fr$/;
