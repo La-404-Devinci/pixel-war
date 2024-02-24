@@ -1,4 +1,6 @@
 import type SocketIO from "socket.io";
+import type { Socket } from "socket.io";
+import ChatMessagePayload from "../../common/requests/ChatMessagePayload";
 
 class ChatController {
     /**
