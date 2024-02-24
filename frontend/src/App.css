@@ -1,8 +1,17 @@
+@import url("styles/canvas.css");
+@import url("styles/login.module.css");
+@import url("styles/palette.css");
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
+}
+
+body {
+  height: 100vh;
+  background-color: #010101
 }
 
 #test-login {
