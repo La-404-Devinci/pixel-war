@@ -7,22 +7,26 @@ import getRedisClient from "../database/redis";
 
 class CanvasController {
     private static canvas: Canvas;
-    private static canvasHeight: 100;
-    private static canvasWidth: 100;
+
+    // TODO: Add the canvas size to the environment variables
+    private static _canvasHeight: 100;
+    private static _canvasWidth: 100;
 
     public static async init() {
-        // TODO: Log the canvas initialization
-        const canvas = await getRedisClient.get("canvas");
+        const canvasBuffer = await getRedisClient.get("canvas");
 
-        if (!canvas) {
+        if (!canvasBuffer) {
             this.canvas = {
                 pixels: Buffer.alloc(this.canvasHeight * this.canvasWidth),
                 changes: 0,
             };
 
+            // TODO: Log the canvas initialization (waiting merge)
+            console.log("Canvas not found in the database, creating a new one");
             await getRedisClient.set("canvas", JSON.stringify(this.canvas));
         } else {
-            this.canvas = JSON.parse(canvas);
+            console.log("Canvas found in the database, loading it");
+            this.canvas = JSON.parse(canvasBuffer);
         }
     }
     /**
