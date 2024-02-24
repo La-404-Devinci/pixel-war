@@ -13,31 +13,43 @@
 }
 
 .btnProfil {
-    width: 5%;
-    height: 10%;
+    width: 5em;
+    padding: 1.5em;
     background-color: white;
     border-radius: 10px;
     border: none;
     box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
+    position: fixed;
+    margin-top: 1em;
+    margin-right: 1em;
+    right: 0;
 }
 
 .btnProfil img {
-    width: 30%;
-    height: 30%;
+    width: 100%;
 }
 
 .btnLogin {
-    padding: 1%;
+    padding: 1.5em;
     background-color: white;
     border-radius: 10px;
     border: none;
     box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
+    font-size: 0.9em;
+    margin-bottom: 1em;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .loginComponent {
     display: none;
 }
 
-.log {
-    display: none;
+
+@media screen and (max-width: 768px){
+    .btnLogin {
+        padding: 1.4em;
+    }
 }

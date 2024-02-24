@@ -21,30 +21,47 @@
   width: 20%;
   padding: 2em;
   border-radius: 16px;
-  position: relative;
   box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .loginTitle {
   border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-  margin-bottom: 10%;
+  margin-bottom: 1em;
   padding-bottom: 1em;
   font-weight: bold;
   font-size: 1.4em;
 }
 
 .login input {
-  margin-block: 5%;
+  margin-block: 1em;
   padding: 1em;
   border-radius: 8px;
   border: 2px solid rgba(0, 0, 0, 0.25);
 }
 
 .login button {
+  cursor: pointer;
   padding: 1em;
   border-radius: 8px;
   border: 2px solid rgba(0, 0, 0, 0.25);
   background-color: #333333;
   cursor: pointer;
   color: white;
+}
+
+
+@media screen and (max-width: 768px){
+  
+  .login {
+    width: 90%;
+    padding: 3em;
+  }
+
+  .login button {
+    font-size: 1.2em;
+  }
 }

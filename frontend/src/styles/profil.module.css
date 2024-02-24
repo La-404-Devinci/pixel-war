@@ -6,6 +6,8 @@
     height: 100vh;
     padding: 2em;
     background-color: white;
+    position: fixed;
+    right: 0;
 }
 
 .btnLogOut {
@@ -16,7 +18,7 @@
     background-color: #333333;
     cursor: pointer;
     color: white;
-    margin-top: 2%;
+    margin-top: 1em;
 }
 
 .profilTitle {
@@ -25,7 +27,7 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    margin-bottom: 10%;
+    margin-bottom: 1em;
     padding-bottom: 1em;
     font-weight: bold;
     font-size: 20px;
@@ -43,7 +45,7 @@
 .blockStats {
     display: flex;
     justify-content: space-between;
-    margin-block: 5%;
+    margin-block: 1em;
 }
 
 .blockStats p:nth-child(1) {

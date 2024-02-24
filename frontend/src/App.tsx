@@ -9,16 +9,16 @@ function App(props: AppProps) {
 
   const [userEmail, setUserEmail] = useState("")
   // const [isValidEmail, setIsValidEmail] = useState(false);
-  const [afficher, setAfficher] = useState(false);
+  const [display, setdisplay] = useState(false);
 
   const handleLogin = (email:string) => {
     console.log(`Email: ${email}`);
     setUserEmail(email);
   }
 
-  const handleAfficherProfil = () => {
-    setAfficher(!afficher);
-    // modifier fonction pour savoir sur quel bouton on a cliqué pour pas afficher les deux en même temps
+  const handledisplayProfile = () => {
+    setdisplay(!display);
+    // modifier fonction pour savoir sur quel bouton on a cliqué pour pas display les deux en même temps
   }
 
   const handleShow = () => {
@@ -42,10 +42,8 @@ function App(props: AppProps) {
         </div>
       </div>
 
-      <div id="Log" className={styles.log}>
-        {!afficher && <button onClick={handleAfficherProfil} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
-        {afficher && <ProfilComponent userEmail={userEmail} onHideProfil={handleAfficherProfil} />}
-      </div>
+      {!display && <button onClick={handledisplayProfile} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
+      {display && <ProfilComponent userEmail={userEmail} onHideProfil={handledisplayProfile} />}
 
     </div>
   );

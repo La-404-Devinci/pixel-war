@@ -30,12 +30,12 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
     return (
 	<div className={styles.login}>
 		<div className={styles.loginTitle}>
-		<p>Login</p>
+			<p>Login</p>
 		</div>
 		<label>Enter your devinci email</label>
 		<input type="email" placeholder="email@edu.devinci.fr" value={email} onChange={handleEmailChange} />
-		<button onClick={handleLoginClick} disabled={!isValidEmail}>
-		Send magic link
+		<button onClick={handleLoginClick} disabled={!isValidEmail}> 
+			Send magic link		
 		</button>
 	</div>
     );
