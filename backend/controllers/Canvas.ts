@@ -3,8 +3,13 @@ import type PlacePixelPayload from "common/requests/PlacePixel";
 import type express from "express";
 import type SocketIO from "socket.io";
 
+import getRedisClient from "../database/redis";
+
 class CanvasController {
     private static canvas: Canvas;
+    
+    private static _canvasWidth: number = 100;
+    private static _canvasHeight: number = 100;
 
     public static async init() {
         // TODO: Initialize the canvas from the database or create a new one if it doesn't exist
@@ -94,23 +99,48 @@ class CanvasController {
      * @param res The Express response object
      */
     public static async changeCanvasSize(req: express.Request, res: express.Response) {
-        // TODO: Change the canvas size and log the action
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         * * Validate the new canvas size
-         *
-         * PROCESS
-         * * Change the canvas size in the database
-         * * Log the canvas size change
-         *
-         * RESPONSE
-         * * Send a success response
-         * * Broadcast the canvas size change to all clients
-         * * Send the updated leaderboard to all clients
-         * * Send the updated user data to all clients
-         * * Send the updated canvas to all clients
-         */
+        const { user } = req.body;
+        const { width, height } = req.body;
+        const canvasBuffer = await getRedisClient.get("canvas");
+
+        if (!user.isAdmin) {
+            return res.status(403).send("Unauthorized");
+        }
+
+        if (width < 0 || height < 0) {
+            return res.status(400).send("Invalid canvas size");
+        } else if (width > 1024 || height > 1024) {
+            return res.status(400).send("Canvas size too large");
+        }
+
+        this._canvasWidth = width;
+        this._canvasHeight = height;
+
+        if (!canvasBuffer) {
+            this.canvas = {
+                pixels: Buffer.alloc(this._canvasHeight * this._canvasWidth),
+                changes: 0,
+            };
+
+        this.canvas = {
+            pixels: Buffer.alloc(this._canvasHeight * this._canvasWidth),
+            changes: 0,
+        };
+
+        await getRedisClient.set("canvas", this.canvas);
+
+        // TODO: Log the canvas size change
+        console.log(`Canvas size changed to ${this._canvasWidth}x${this._canvasHeight}`);
+
+        res.status(200).send("Canvas size changed");
+        
+        /** 
+        * TODO(awaiting further development): 
+        * * Broadcast the canvas size change to all clients
+        * * Send the updated leaderboard to all clients
+        * * Send the updated user data to all clients
+        * * Send the updated canvas to all clients
+        **/
     }
 
     /**
