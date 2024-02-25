@@ -9,15 +9,15 @@ class CanvasController {
     private static canvas: Canvas;
 
     // TODO: Add the canvas size to the environment variables
-    private static _canvasHeight: 100;
-    private static _canvasWidth: 100;
+    private static _canvasHeight: number = 100;
+    private static _canvasWidth: number = 100;
 
     public static async init() {
         const canvasBuffer = await getRedisClient.get("canvas");
 
         if (!canvasBuffer) {
             this.canvas = {
-                pixels: Buffer.alloc(this.canvasHeight * this.canvasWidth),
+                pixels: Buffer.alloc(this._canvasHeight * this._canvasWidth),
                 changes: 0,
             };
 
