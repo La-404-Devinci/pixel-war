@@ -121,7 +121,8 @@ class CanvasController {
                 pixels: Buffer.alloc(this._canvasHeight * this._canvasWidth),
                 changes: 0,
             };
-
+        }
+        
         this.canvas = {
             pixels: Buffer.alloc(this._canvasHeight * this._canvasWidth),
             changes: 0,
@@ -132,8 +133,8 @@ class CanvasController {
         // TODO: Log the canvas size change
         console.log(`Canvas size changed to ${this._canvasWidth}x${this._canvasHeight}`);
 
+
         res.status(200).send("Canvas size changed");
-        
         /** 
         * TODO(awaiting further development): 
         * * Broadcast the canvas size change to all clients
