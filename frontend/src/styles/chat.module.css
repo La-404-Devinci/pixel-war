@@ -10,16 +10,21 @@ body {
     width: 90%;
     max-width: 300px;
     background-color: rgba(255, 255, 255, 0.75);
-    border-radius: 16px;
+    border-radius: 16px 16px 0 0;
     padding-top: 1em;
     position: fixed;
     bottom: 0;
-    margin: 0 0 1em 1em;
+    margin: 0 0 2.5em 1em;
+}
+
+.btnCloseChat {
+    display: none;
 }
 
 .messages {
     overflow: auto;
     padding-inline: 1em;
+    margin-bottom: 2em;
 }
 
 span {
@@ -27,13 +32,18 @@ span {
 }
 
 .input {
+    width: 100%;
+    max-width: 300px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 1em;
+    margin: 1em;
     padding-right: 1em;
     background-color: #ffffff;
     border-radius: 16px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
 }
 
 .input input {
@@ -72,3 +82,38 @@ span {
     background: #555;
 }
 
+@media screen and (max-width: 768px) {
+    .chat {
+        display: flex;
+        flex-direction: column-reverse;
+        overflow-y: auto;
+        max-width: 100%;
+        min-height: 95%;
+        margin: 0 0 1em 0;
+        left: 50%;
+        transform: translate(-50%, 0);
+        border-radius: 16px;
+    }
+
+    .btnCloseChat {
+        display: block;
+        top: 0;
+        right: 0;
+    }
+
+    .messages {
+        margin-bottom: 4em;
+    }
+
+    .input {
+        max-width: 100%;
+        margin: 0;
+        position: fixed;
+        bottom: 0;    
+    }
+
+    .input input {
+        font-size: 1.2em;
+    }
+
+}

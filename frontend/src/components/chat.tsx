@@ -1,18 +1,29 @@
 import styles from '../styles/chat.module.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 const ChatComponent = () => {
     const [chat, setchat] = useState<string[]>([]);
     const [message, setMessage] = useState<string>('');
-    
+    const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+
     const sendMessage = () => {
         setchat([...chat, message]);
         setMessage('');
     }
+
+    useEffect(() => {
+        // Scroll to the bottom when chat is updated
+        if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+    }, [chat]);
+
     
     return (
         <div className={styles.chat}>
-            <div className={styles.messages}>
+            <button className={styles.btnCloseChat}><img src="../assets/paper-plane.svg" alt="croix-fermeture" /></button>
+            <div className={styles.messages} ref={messagesContainerRef}>
                 {chat.map((message, index) => (
                 <div key={index}> <span>pseudo:</span> {message}</div>))}
             </div>
