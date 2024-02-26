@@ -39,7 +39,7 @@
 }
 
 .login p {
-  margin: 1em;
+  margin: 1em 1em 1em 0;
 }
 
 .login button {
@@ -52,3 +52,16 @@
   color: white;
 }
 
+.validMessage {
+  color: green;
+  text-align: center;
+  font-weight: bold;
+  margin-block: 1em;
+}
+
+.invalidMessage {
+  color: red;
+  font-weight: bold;
+  margin-block: 1em;
+  text-align: center;
+}

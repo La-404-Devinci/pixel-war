@@ -1,5 +1,4 @@
-// import { useState } from 'react'
-import { useEffect, useState } from 'react';
+import React,{ useEffect, useState, useRef } from 'react';
 import styles from './App.module.css'
 import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
@@ -12,8 +11,10 @@ function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnected, setIsConnected] = useState(socket.connected);
 
-  const [display, setDisplay] = useState(false);
+  const [displayProfile, setDisplayProfile] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [ShowLogin, setShowLogin] = useState(false);
+  const loginComponentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onConnect() {
@@ -39,37 +40,32 @@ function App() {
     };
   }, []);
 
-  const handleShow = () => {
-    const loginComponent = document.getElementById('loginComponent');
-    if (loginComponent) {
-      loginComponent.style.display = 'block';
-    }
+  const handleShowLogin = () => {
+    setShowLogin(!ShowLogin);
   }
 
   const handleLogin = (email: string) => {
-    const loginComponent = document.getElementById('loginComponent');
-    if (loginComponent) {
+    if (loginComponentRef.current) {
       setUserEmail(email);
     }
-    console.log(`Email valide: ${email}`);
   }
 
   const handledisplayProfile = () => {
-    setDisplay(!display);
+    setDisplayProfile(!displayProfile);
   }
 
   // affichage (render)
   return (
     <div className={styles.homepage}>
       <div id="test-login">
-        <button onClick={handleShow} className={styles.btnLogin}>Login to draw !</button>
-        <div id="loginComponent" className={styles.loginComponent}>
-          <LoginComponent onLogin={handleLogin}/>
+        <button onClick={handleShowLogin} className={styles.btnLogin}>Login to draw !</button>
+        <div>
+          {ShowLogin && <LoginComponent onLogin={handleLogin} />}
         </div>
       </div>
 
-      {!display && <button onClick={handledisplayProfile} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
-      {display && <ProfilComponent userEmail={userEmail} onHideProfil={handledisplayProfile} />}
+      {!displayProfile && <button onClick={handledisplayProfile} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
+      {displayProfile && <ProfilComponent userEmail={userEmail} onHideProfil={handledisplayProfile} />}
 
     </div>
   );

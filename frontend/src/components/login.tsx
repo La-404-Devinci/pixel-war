@@ -8,28 +8,21 @@ interface LoginComponentProps {
 const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
     
     const [email, setEmail] = useState("");
-    const [isValidEmail, setIsValidEmail] = useState(false);
     const [message, setMessage] = useState("");
+	const [isEmailValid, setIsEmailValid] = useState(false);
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const newEmail = event.target.value;
 		setEmail(newEmail);
-	
-		if (newEmail.endsWith("@edu.devinci.fr")) {
-			setIsValidEmail(true);
-			setMessage(""); // Effacez le message d'erreur lorsque l'e-mail est valide
-		} else {
-			setIsValidEmail(false);
-			setMessage("Email non valide"); // Affichez le message d'erreur lorsque l'e-mail n'est pas valide
-		}
+		setMessage(""); 
     };
-  
     
     const handleLoginClick = () => {
       
-		if (isValidEmail == true) {
+		if (email.endsWith("@edu.devinci.fr")) {
 			onLogin(email);
 			setMessage("Email valide, envoi du lien...");
+			setIsEmailValid(true);
 		} else {
 			setMessage("Email non valide");
 		}
@@ -42,10 +35,10 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
 		</div>
 		<label>Enter your devinci email</label>
 		<input type="email" placeholder="email@edu.devinci.fr" value={email} onChange={handleEmailChange} />
-		<button onClick={handleLoginClick} disabled={!isValidEmail}> 
+		<button onClick={handleLoginClick} disabled={!!message}>
 			Send magic link		
 		</button>
-		<p>{message}</p>
+		{message && <p className={isEmailValid ?  styles.validMessage : styles.invalidMessage}>{message}</p>}
 	</div>
     );
   };
