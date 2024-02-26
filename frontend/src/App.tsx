@@ -1,7 +1,8 @@
 // import { useState } from 'react'
 import { useEffect, useState } from 'react';
-import './App.css'
-import LoginComponent from './pages/login'
+import styles from './App.module.css'
+import LoginComponent from './components/login'
+import ProfilComponent from './components/profil'
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
 
@@ -10,6 +11,9 @@ function App() {
   const [classement, setClassement] = useState<classementItem[]>([])
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnected, setIsConnected] = useState(socket.connected);
+
+  const [display, setDisplay] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     function onConnect() {
@@ -34,6 +38,26 @@ function App() {
       socket.off('classementUpdate', onclassementUpdate);
     };
   }, []);
+
+  const handleShow = () => {
+    const loginComponent = document.getElementById('loginComponent');
+    if (loginComponent) {
+      loginComponent.style.display = 'block';
+    }
+  }
+
+  const handleLogin = (email: string) => {
+    const loginComponent = document.getElementById('loginComponent');
+    if (loginComponent) {
+      loginComponent.style.display = 'none';
+      setUserEmail(email);
+    }
+    console.log(`Email valide: ${email}`);
+  }
+
+  const handledisplayProfile = () => {
+    setDisplay(!display);
+  }
 
   // affichage (render)
   return (
