@@ -21,7 +21,7 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({userEmail, onHideProfi
     return (
         <div className={styles.containerProfil}>
             <div className={styles.profilTitle}>
-                <h4>{userEmail}</h4>
+                <p>{userEmail}</p>
                 <button className={styles.btnClose} onClick={handleClose}><img src="/src/assets/x.svg" alt="cross-icon" /></button>
             </div>
             <div className={styles.containerStats}>

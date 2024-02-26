@@ -49,7 +49,6 @@ function App() {
   const handleLogin = (email: string) => {
     const loginComponent = document.getElementById('loginComponent');
     if (loginComponent) {
-      loginComponent.style.display = 'none';
       setUserEmail(email);
     }
     console.log(`Email valide: ${email}`);

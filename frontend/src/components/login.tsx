@@ -9,21 +9,29 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
     
     const [email, setEmail] = useState("");
     const [isValidEmail, setIsValidEmail] = useState(false);
-    
+    const [message, setMessage] = useState("");
+
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newEmail = event.target.value;
-      setEmail(newEmail);
-      setIsValidEmail(newEmail.endsWith("@edu.devinci.fr"));
+		const newEmail = event.target.value;
+		setEmail(newEmail);
+	
+		if (newEmail.endsWith("@edu.devinci.fr")) {
+			setIsValidEmail(true);
+			setMessage(""); // Effacez le message d'erreur lorsque l'e-mail est valide
+		} else {
+			setIsValidEmail(false);
+			setMessage("Email non valide"); // Affichez le message d'erreur lorsque l'e-mail n'est pas valide
+		}
     };
   
     
     const handleLoginClick = () => {
       
-		if (isValidEmail) {
-			console.log(`Email valide: ${email}`);
+		if (isValidEmail == true) {
 			onLogin(email);
+			setMessage("Email valide, envoi du lien...");
 		} else {
-			console.log("Email non valide");
+			setMessage("Email non valide");
 		}
     };
   
@@ -37,6 +45,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
 		<button onClick={handleLoginClick} disabled={!isValidEmail}> 
 			Send magic link		
 		</button>
+		<p>{message}</p>
 	</div>
     );
   };

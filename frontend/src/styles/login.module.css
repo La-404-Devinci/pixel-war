@@ -1,9 +1,3 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-}
 
 .test-login {
   display: flex;
@@ -18,7 +12,8 @@
   flex-direction: column;
   justify-content: center;
   background-color: #ffffff;
-  width: 20%;
+  width: 90%;
+  max-width: 400px;
   padding: 2em;
   border-radius: 16px;
   box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
@@ -43,6 +38,10 @@
   border: 2px solid rgba(0, 0, 0, 0.25);
 }
 
+.login p {
+  margin: 1em;
+}
+
 .login button {
   cursor: pointer;
   padding: 1em;
@@ -53,15 +52,3 @@
   color: white;
 }
 
-
-@media screen and (max-width: 768px){
-  
-  .login {
-    width: 90%;
-    padding: 3em;
-  }
-
-  .login button {
-    font-size: 1.2em;
-  }
-}
