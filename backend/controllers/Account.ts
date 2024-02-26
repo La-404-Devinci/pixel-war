@@ -44,28 +44,26 @@ class AccountController {
                 secure: true,
                 auth: {
                     user: "your_email_address",
-                    pass: "your_email_password"
-                }
+                    pass: "your_email_password",
+                },
             });
-        
+
             const message = {
-                from: "your_email", 
+                from: "your_email",
                 to: email,
                 subject: "Lien pour se connecter",
-                html: `Clique pour te connecter: <a href="${link}">${link}</a>`
+                html: `Clique pour te connecter: <a href="${link}">${link}</a>`,
             };
-            
+
             try {
                 await transporter.sendMail(message);
                 res.status(200).send("Lien envoyé. Regarder vos mails.");
             } catch (error) {
                 res.status(500).send("Une erreur s'est produite.");
             }
-
         } else {
             res.send("Email non valide");
         }
-
     }
 
     /**
@@ -145,9 +143,7 @@ class AccountController {
      * @param socket The client socket
      * @param data The payload
      */
-    public static async authSocket(socket: SocketIO.Socket, ...data: unknown[]) {
-        const token = (data[0] as string) ?? "";
-        const email = (data[1] as string) ?? "";
+    public static async authSocket(socket: SocketIO.Socket, [token, email]: [string, string]) {
         if (verifyAuthenticationToken(token, email)) {
             socket.data.token = token;
             socket.data.email = email;
