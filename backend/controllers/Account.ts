@@ -1,3 +1,4 @@
+import type SocketIO from "socket.io";
 import express from "express";
 import nodemailer from "nodemailer";
 import {
@@ -34,7 +35,7 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the email is invalid
          */
-        const { email } = req;
+        const { email } = req.body;
 
         const isDevinciEmail = (email: string): boolean => {
             const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci.fr$/;
@@ -153,6 +154,24 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the user ID is invalid
          */
+    }
+
+    /**
+     * Auth a websocket client
+     * @server WebSocket
+     *
+     * @param socket The client socket
+     * @param data The payload
+     */
+    public static async authSocket(socket: SocketIO.Socket, [token, email]: [string, string]) {
+        if (verifyAuthenticationToken(token, email)) {
+            socket.data.token = token;
+            socket.data.email = email;
+
+            socket.emit("auth-callback", true);
+        } else {
+            socket.emit("auth-callback", false);
+        }
     }
 }
 
