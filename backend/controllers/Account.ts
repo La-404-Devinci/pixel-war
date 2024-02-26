@@ -1,7 +1,13 @@
 import type SocketIO from "socket.io";
 import express from "express";
-import { generateAuthorizationToken, verifyAuthenticationToken } from "../auth/tokenUtils";
 import nodemailer from "nodemailer";
+import {
+    generateAuthenticationToken,
+    generateAuthorizationToken,
+    verifyAuthorizationToken,
+} from "../auth/tokenUtils";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 class AccountController {
     /**
@@ -11,7 +17,10 @@ class AccountController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async sendMagicLink(req: express.Request, res: express.Response) {
+    public static async sendMagicLink(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Send a magic link containing the AUTHORIZATION token to the user's email
         /**
          * VALIDATION
@@ -74,19 +83,30 @@ class AccountController {
      * @param res The Express response object
      */
     public static async login(req: express.Request, res: express.Response) {
-        // TODO: Log the user
-        /**
-         * VALIDATION
-         * * Validate AUTHORIZATION token
-         *
-         * PROCESS
-         * * Generate an AUTHENTICATION token
-         *
-         * RESPONSE
-         * * Send the AUTHENTICATION token
-         * * Send an error message if the AUTHORIZATION token is invalid
-         * * Send an error message if the AUTHORIZATION token is expired
-         */
+        const { token, email } = req.body;
+        if (!verifyAuthorizationToken(token, email)) {
+            return res.status(401).send("Invalid token");
+        }
+
+        try {
+            const user = await prisma.account.findFirst({
+                where: {
+                    devinciEmail: email,
+                },
+            });
+
+            if (!user) {
+                await prisma.account.create({
+                    data: {
+                        devinciEmail: email,
+                    },
+                });
+            }
+        } catch (error) {
+            return res.status(500).send("Unable to connect to the database");
+        }
+
+        return res.status(200).send(generateAuthenticationToken(email));
     }
 
     // Admin routes
