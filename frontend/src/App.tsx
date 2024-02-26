@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import './App.css'
 import LoginComponent from './pages/login'
+import ChatComponent from './components/chat';
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
 
@@ -38,8 +39,11 @@ function App() {
   // affichage (render)
   return (
     <div>
-      <div id="test-login">
+      {/* <div id="test-login">
         <LoginComponent />
+      </div> */}
+      <div id="test-chat">
+        <ChatComponent />
       </div>
     </div>
   );
