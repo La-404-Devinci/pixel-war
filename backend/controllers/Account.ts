@@ -1,6 +1,7 @@
+import type SocketIO from "socket.io";
 import express from "express";
+import { generateAuthorizationToken, verifyAuthenticationToken } from "../auth/tokenUtils";
 import nodemailer from "nodemailer";
-import { generateAuthorizationToken } from "../auth/tokenUtils";
 
 class AccountController {
     /**
@@ -43,28 +44,26 @@ class AccountController {
                 secure: true,
                 auth: {
                     user: "your_email_address",
-                    pass: "your_email_password"
-                }
+                    pass: "your_email_password",
+                },
             });
-        
+
             const message = {
-                from: "your_email", 
+                from: "your_email",
                 to: email,
                 subject: "Lien pour se connecter",
-                html: `Clique pour te connecter: <a href="${link}">${link}</a>`
+                html: `Clique pour te connecter: <a href="${link}">${link}</a>`,
             };
-            
+
             try {
                 await transporter.sendMail(message);
                 res.status(200).send("Lien envoyé. Regarder vos mails.");
             } catch (error) {
                 res.status(500).send("Une erreur s'est produite.");
             }
-
         } else {
             res.send("Email non valide");
         }
-
     }
 
     /**
@@ -135,6 +134,24 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the user ID is invalid
          */
+    }
+
+    /**
+     * Auth a websocket client
+     * @server WebSocket
+     *
+     * @param socket The client socket
+     * @param data The payload
+     */
+    public static async authSocket(socket: SocketIO.Socket, [token, email]: [string, string]) {
+        if (verifyAuthenticationToken(token, email)) {
+            socket.data.token = token;
+            socket.data.email = email;
+
+            socket.emit("auth-callback", true);
+        } else {
+            socket.emit("auth-callback", false);
+        }
     }
 }
 
