@@ -1,7 +1,7 @@
-// import { useState } from 'react'
 import { useEffect, useState } from 'react';
-import './App.css'
-import LoginComponent from './pages/login'
+import styles from './App.module.css'
+import LoginComponent from './components/login'
+import ProfilComponent from './components/profil'
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
 
@@ -10,6 +10,10 @@ function App() {
   const [classement, setClassement] = useState<classementItem[]>([])
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnected, setIsConnected] = useState(socket.connected);
+
+  const [displayProfile, setDisplayProfile] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [displayLogin, setDisplayLogin] = useState(false);
 
   useEffect(() => {
     function onConnect() {
@@ -35,12 +39,31 @@ function App() {
     };
   }, []);
 
+  const handledisplayLogin = () => {
+    setDisplayLogin(!displayLogin);
+  }
+
+  const handleLogin = (email: string) => {
+    setUserEmail(email);
+  }
+
+  const handledisplayProfile = () => {
+    setDisplayProfile(!displayProfile);
+  }
+
   // affichage (render)
   return (
-    <div>
-      <div id="test-login">
-        <LoginComponent />
+    <div className={styles.homepage}>
+      <div>
+        <button onClick={handledisplayLogin} className={styles.btnLogin}>Login to draw !</button>
+        <div>
+          {displayLogin && <LoginComponent onLogin={handleLogin} />}
+        </div>
       </div>
+
+      {!displayProfile && <button onClick={handledisplayProfile} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
+      {displayProfile && <ProfilComponent userEmail={userEmail} onHideProfil={handledisplayProfile} />}
+
     </div>
   );
 }
