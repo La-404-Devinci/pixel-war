@@ -27,6 +27,7 @@ Place a pixel on the canvas
 
 Send a message to all players
 
-| index | type   | description |
-| :---: | :----- | :---------- |
-|   0   | string | The message |
+| index | type              | description  |
+| :---: | :---------------- | :----------- |
+|   0   | string            | The message  |
+|   1   | callback(boolean) | The callback |

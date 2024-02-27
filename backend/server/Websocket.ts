@@ -34,6 +34,11 @@ class WSS {
         if(!socket) this.io.emit("classementUpdate", classement);
         else socket.emit("classementUpdate", classement);
     }
+
+    static async broadcastMessage(senderEmail: string, message: string) {
+        this.io.emit("message", senderEmail, message);
+    }
+    
 }
 
 export default WSS;
