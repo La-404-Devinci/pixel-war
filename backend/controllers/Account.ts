@@ -5,6 +5,7 @@ import {
     generateAuthenticationToken,
     generateAuthorizationToken,
     verifyAuthorizationToken,
+    verifyAuthenticationToken,
 } from "../auth/tokenUtils";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
@@ -17,10 +18,7 @@ class AccountController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async sendMagicLink(
-        req: express.Request,
-        res: express.Response
-    ) {
+    public static async sendMagicLink(req: express.Request, res: express.Response) {
         // TODO: Send a magic link containing the AUTHORIZATION token to the user's email
         /**
          * VALIDATION
@@ -36,42 +34,37 @@ class AccountController {
          * * Send an error message if the email is invalid
          */
         const { email } = req.body;
+        const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci\.fr$/;
 
-        const isDevinciEmail = (email: string): boolean => {
-            const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci.fr$/;
+        if (!expression.test(email)) {
+            return res.status(400).send("Email non valide");
+        }
 
-            return expression.test(email);
+        const token: string = generateAuthorizationToken(email);
+        const link: string = `${process.env.API_URL}/auth/login?token=${token}&email=${email}`;
+
+        const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST,
+            port: parseInt(process.env.EMAIL_PORT ?? "587"),
+            secure: true,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const message = {
+            from: process.env.EMAIL_FROM,
+            to: email,
+            subject: "Lien pour se connecter",
+            html: `Clique pour te connecter: <a href="${link}">${link}</a>`,
         };
 
-        if (isDevinciEmail(email) == true) {
-            const token: string = generateAuthorizationToken(email);
-            const link: string = `url/login?token=${token}`;
-
-            const transporter = nodemailer.createTransport({
-                host: "your_host",
-                port: 587,
-                secure: true,
-                auth: {
-                    user: "your_email_address",
-                    pass: "your_email_password",
-                },
-            });
-
-            const message = {
-                from: "your_email",
-                to: email,
-                subject: "Lien pour se connecter",
-                html: `Clique pour te connecter: <a href="${link}">${link}</a>`,
-            };
-
-            try {
-                await transporter.sendMail(message);
-                res.status(200).send("Lien envoyé. Regarder vos mails.");
-            } catch (error) {
-                res.status(500).send("Une erreur s'est produite.");
-            }
-        } else {
-            res.send("Email non valide");
+        try {
+            await transporter.sendMail(message);
+            res.status(200).send("Lien envoyé. Regarder vos mails.");
+        } catch (error) {
+            res.status(500).send("Une erreur s'est produite.");
         }
     }
 
@@ -83,7 +76,12 @@ class AccountController {
      * @param res The Express response object
      */
     public static async login(req: express.Request, res: express.Response) {
-        const { token, email } = req.body;
+        const { token, email } = req.query;
+
+        if (typeof token !== "string" || typeof email !== "string") {
+            return res.status(400).send("Invalid query parameters");
+        }
+
         if (!verifyAuthorizationToken(token, email)) {
             return res.status(401).send("Invalid token");
         }
@@ -106,7 +104,21 @@ class AccountController {
             return res.status(500).send("Unable to connect to the database");
         }
 
-        return res.status(200).send(generateAuthenticationToken(email));
+        res.cookie("token", generateAuthenticationToken(email), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        });
+
+        res.cookie("email", email, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        });
+
+        return res.redirect(process.env.FRONTEND_URL ?? "/");
     }
 
     // Admin routes
