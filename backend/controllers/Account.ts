@@ -1,6 +1,9 @@
 import express from "express";
 import nodemailer from "nodemailer";
 import { generateAuthorizationToken } from "../auth/tokenUtils";
+import {PrismaClient} from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 class AccountController {
     /**
@@ -112,6 +115,40 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the user ID is invalid
          */
+
+
+        const { userId } = req.body;
+
+        prisma.account.update({
+            where: {
+                id: userId
+            },
+            data: {
+                isMuted: true
+            }
+        }).then(() => {
+            res.status(200).send("Utilisateur muté");
+        }).catch(() => {
+            res.status(500).send("Une erreur s'est produite.");
+        });
+        
+    }
+
+    public static async unmuteUser(req: express.Request, res: express.Response) {
+        const { userId } = req.body;
+
+        prisma.account.update({
+            where: {
+                id: userId
+            },
+            data: {
+                isMuted: false
+            }
+        }).then(() => {
+            res.status(200).send("Utilisateur démuté");
+        }).catch(() => {
+            res.status(500).send("Une erreur s'est produite.");
+        });
     }
 
     /**
