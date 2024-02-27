@@ -25,6 +25,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
 			setIsEmailValid(true);
 		} else {
 			setMessage("Email non valide");
+			setIsEmailValid(false);
 		}
     };
   
@@ -38,7 +39,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
 		<button onClick={handleLoginClick} disabled={!!message}>
 			Send magic link		
 		</button>
-		{message && <p className={isEmailValid ?  styles.validMessage : styles.invalidMessage}>{message}</p>}
+		{message && <p className={isEmailValid ? styles.validMessage : styles.invalidMessage}>{message}</p>}
 	</div>
     );
   };

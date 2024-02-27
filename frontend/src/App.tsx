@@ -1,4 +1,4 @@
-import React,{ useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './App.module.css'
 import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
@@ -13,8 +13,7 @@ function App() {
 
   const [displayProfile, setDisplayProfile] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [ShowLogin, setShowLogin] = useState(false);
-  const loginComponentRef = useRef<HTMLDivElement>(null);
+  const [displayLogin, setDisplayLogin] = useState(false);
 
   useEffect(() => {
     function onConnect() {
@@ -40,14 +39,12 @@ function App() {
     };
   }, []);
 
-  const handleShowLogin = () => {
-    setShowLogin(!ShowLogin);
+  const handledisplayLogin = () => {
+    setDisplayLogin(!displayLogin);
   }
 
   const handleLogin = (email: string) => {
-    if (loginComponentRef.current) {
-      setUserEmail(email);
-    }
+    setUserEmail(email);
   }
 
   const handledisplayProfile = () => {
@@ -57,10 +54,10 @@ function App() {
   // affichage (render)
   return (
     <div className={styles.homepage}>
-      <div id="test-login">
-        <button onClick={handleShowLogin} className={styles.btnLogin}>Login to draw !</button>
+      <div>
+        <button onClick={handledisplayLogin} className={styles.btnLogin}>Login to draw !</button>
         <div>
-          {ShowLogin && <LoginComponent onLogin={handleLogin} />}
+          {displayLogin && <LoginComponent onLogin={handleLogin} />}
         </div>
       </div>
 
