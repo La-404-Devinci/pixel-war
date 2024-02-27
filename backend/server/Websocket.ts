@@ -49,12 +49,20 @@ class WSS {
         this.io.emit("canvas-size-update", width, height );
     }
 
-
     /**
      * Sends a 'resetCanvas' event to all connected clients.
      */
     static async resetCanvas(){
         this.io.emit("canvas-reset");
+    }
+
+    /**
+     * Broadcast a message to everyone
+     * @param senderEmail The devinciEmail of the sender
+     * @param message The message
+     */
+    static async broadcastMessage(senderEmail: string, message: string) {
+        this.io.emit("message", senderEmail, message);
     }
 }
 
