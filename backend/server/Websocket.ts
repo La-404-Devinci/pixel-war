@@ -40,18 +40,30 @@ class WSS {
     }
 
     /**
-     * Sends an 'updateCanvas' event to all connected clients.
-     * @param canvas
+     * Sends an 'updateCanvasSize' event to all connected clients.
+     * @param width The new canvas width
+     * @param height The new canvas height
      */
 
     static async updateCanvasSize(width:number, height:number) {
         this.io.emit("canvas-size-update", width, height );
     }
 
+    /**
+     * Sends a 'resetCanvas' event to all connected clients.
+     */
+    static async resetCanvas(){
+        this.io.emit("canvas-reset");
+    }
+
+    /**
+     * Broadcast a message to everyone
+     * @param senderEmail The devinciEmail of the sender
+     * @param message The message
+     */
     static async broadcastMessage(senderEmail: string, message: string) {
         this.io.emit("message", senderEmail, message);
     }
-    
 }
 
 export default WSS;

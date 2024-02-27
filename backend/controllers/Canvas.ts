@@ -12,22 +12,6 @@ class CanvasController {
         height: 1024,
     };
 
-    public static async init() {
-        // TODO: Initialize the canvas from the database or create a new one if it doesn't exist
-        /**
-         * VALIDATION
-         * * Check if the canvas exists in the database
-         *
-         * PROCESS
-         * * Create a new canvas if it doesn't exist
-         * * Load the canvas from the database
-         *
-         * RESPONSE
-         * * Set the canvas property
-         * * Log the canvas initialization
-         */
-    }
-
     /**
      * Get the canvas image
      * @server HTTP
@@ -39,7 +23,11 @@ class CanvasController {
         req: express.Request,
         res: express.Response
     ) {
-        // TODO: Send the canvas image as a response
+        res.status(200).json({
+            pixels: this._canvas.pixels,
+            width: this._canvas.width,
+            height: this._canvas.height,
+        });
     }
 
     /**
@@ -49,7 +37,10 @@ class CanvasController {
      * @param socket The socket that sent the pixel data
      * @param data The payload
      */
-    public static async placePixel(socket: SocketIO.Socket, [x, y, palette]: [number, number, number]) {
+    public static async placePixel(
+        socket: SocketIO.Socket,
+        [x, y, palette]: [number, number, number]
+    ) {
         // TODO: Place the pixel on the canvas
         /**
          * VALIDATION
@@ -80,22 +71,15 @@ class CanvasController {
         req: express.Request,
         res: express.Response
     ) {
-        // TODO: Reset the canvas and log the action
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         *
-         * PROCESS
-         * * Reset the canvas in the database
-         * * Log the canvas reset
-         *
-         * RESPONSE
-         * * Send a success response
-         * * Broadcast the canvas reset to all clients
-         * * Send the updated leaderboard to all clients
-         * * Send the updated user data to all clients
-         * * Send the updated canvas to all clients
-         */
+        // TODO: Log the canvas reset
+        console.log("Canvas reset");
+
+        this._canvas.changes = 0;
+        this._canvas.pixels.fill(0);
+
+        WSS.resetCanvas();
+
+        res.status(200).send("Canvas reset");
     }
 
     /**
@@ -109,8 +93,8 @@ class CanvasController {
         req: express.Request,
         res: express.Response
     ) {
-        const { height, width }: {height: number, width: number} = req.body;
-                
+        const { height, width }: { height: number; width: number } = req.body;
+
         if (width < 0 || height < 0) {
             return res.status(400).send("Invalid canvas size");
         } else if (width > 1024 || height > 1024) {
@@ -125,7 +109,7 @@ class CanvasController {
         console.log(`Canvas size changed to ${width}x${height}`);
 
         WSS.updateCanvasSize(width, height);
-        
+
         res.status(200).send("Canvas size changed");
     }
 

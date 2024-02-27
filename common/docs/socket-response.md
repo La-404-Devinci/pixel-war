@@ -31,7 +31,7 @@ Sent to everyone when a message is received from `message` endpoint.
 
 ## classement-update
 
-Sent to everyone when a pixel changes from `place-pixel` endpoint.
+Sent to everyone when the leaderboard changes.
 
 | index | type  | description        |
 | :---: | :---- | :----------------- |
@@ -39,9 +39,15 @@ Sent to everyone when a pixel changes from `place-pixel` endpoint.
 
 ## canvas-size-update
 
-Sent to everyone when a pixel changes from `place-pixel` endpoint.
+Sent to everyone when the canvas sizes is changed.
 
 | index | type   | description   |
 | :---: | :----- | :------------ |
 |   0   | number | Canvas width  |
 |   1   | number | Canvas height |
+
+## canvas-reset
+
+Sent to everyone when the canvas is reset.
+
+> No parameter
