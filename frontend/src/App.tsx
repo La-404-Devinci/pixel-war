@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 import styles from './App.module.css'
 import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
-import { socket } from './socket';
+import ChatComponent from './components/chat'
+import { socket } from './socket'
 import classementItem from '../../common/interfaces/classementItem.interface'
 
 function App() {
@@ -51,10 +52,11 @@ function App() {
     setDisplayProfile(!displayProfile);
   }
 
+
   // affichage (render)
   return (
     <div className={styles.homepage}>
-      <div>
+      {/* <div>
         <button onClick={handledisplayLogin} className={styles.btnLogin}>Login to draw !</button>
         <div>
           {displayLogin && <LoginComponent onLogin={handleLogin} />}
@@ -63,7 +65,8 @@ function App() {
 
       {!displayProfile && <button onClick={handledisplayProfile} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
       {displayProfile && <ProfilComponent userEmail={userEmail} onHideProfil={handledisplayProfile} />}
-
+       */}
+      <ChatComponent />
     </div>
   );
 }

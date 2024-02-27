@@ -17,10 +17,6 @@ body {
     margin: 0 0 2.5em 1em;
 }
 
-.btnCloseChat {
-    display: none;
-}
-
 .messages {
     overflow: auto;
     padding-inline: 1em;
