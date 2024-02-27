@@ -1,15 +1,17 @@
-import Canvas from "../models/Canvas";
 import type PlacePixelPayload from "common/requests/PlacePixel";
 import type express from "express";
 import type SocketIO from "socket.io";
 
-import getRedisClient from "../database/redis";
+import WSS from "../server/Websocket";
+import Canvas from "../models/Canvas";
 
 class CanvasController {
-    private static canvas: Canvas;
-    
-    private static _canvasWidth: number = 100;
-    private static _canvasHeight: number = 100;
+    private static _canvas: Canvas = {
+        pixels: Buffer.alloc(1024 * 1024 * 4),
+        changes: 0,
+        width: 1024,
+        height: 1024,
+    };
 
     public static async init() {
         // TODO: Initialize the canvas from the database or create a new one if it doesn't exist
@@ -34,7 +36,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async getCanvasImage(req: express.Request, res: express.Response) {
+    public static async getCanvasImage(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Send the canvas image as a response
     }
 
@@ -45,7 +50,10 @@ class CanvasController {
      * @param data The pixel data
      * @param socket The socket that sent the pixel data
      */
-    public static async placePixel(data: PlacePixelPayload, socket: SocketIO.Socket) {
+    public static async placePixel(
+        data: PlacePixelPayload,
+        socket: SocketIO.Socket
+    ) {
         // TODO: Place the pixel on the canvas
         /**
          * VALIDATION
@@ -72,7 +80,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async resetCanvas(req: express.Request, res: express.Response) {
+    public static async resetCanvas(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Reset the canvas and log the action
         /**
          * VALIDATION
@@ -98,50 +109,28 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async changeCanvasSize(req: express.Request, res: express.Response) {
-        const { user } = req.body;
-        const { width, height } = req.body;
-        const canvasBuffer = await getRedisClient.get("canvas");
-
-        if (!user.isAdmin) {
-            return res.status(403).send("Unauthorized");
-        }
-
+    public static async changeCanvasSize(
+        req: express.Request,
+        res: express.Response
+    ) {
+        const { height, width }: {height: number, width: number} = req.body;
+                
         if (width < 0 || height < 0) {
             return res.status(400).send("Invalid canvas size");
         } else if (width > 1024 || height > 1024) {
             return res.status(400).send("Canvas size too large");
         }
 
-        this._canvasWidth = width;
-        this._canvasHeight = height;
-
-        if (!canvasBuffer) {
-            this.canvas = {
-                pixels: Buffer.alloc(this._canvasHeight * this._canvasWidth),
-                changes: 0,
-            };
-        }
-        
-        this.canvas = {
-            pixels: Buffer.alloc(this._canvasHeight * this._canvasWidth),
-            changes: 0,
-        };
-
-        await getRedisClient.set("canvas", this.canvas);
+        this._canvas.changes++;
+        this._canvas.width = width;
+        this._canvas.height = height;
 
         // TODO: Log the canvas size change
-        console.log(`Canvas size changed to ${this._canvasWidth}x${this._canvasHeight}`);
-
+        console.log(`Canvas size changed to ${width}x${height}`);
 
         res.status(200).send("Canvas size changed");
-        /** 
-        * TODO(awaiting further development): 
-        * * Broadcast the canvas size change to all clients
-        * * Send the updated leaderboard to all clients
-        * * Send the updated user data to all clients
-        * * Send the updated canvas to all clients
-        **/
+
+        WSS.updateCanvasSize(width, height);
     }
 
     /**
@@ -151,7 +140,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async changePixelPlacementCooldown(req: express.Request, res: express.Response) {
+    public static async changePixelPlacementCooldown(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Change the pixel placement cooldown and log the action
         /**
          * VALIDATION
@@ -178,7 +170,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async editCanvasColorPalette(req: express.Request, res: express.Response) {
+    public static async editCanvasColorPalette(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Edit the canvas color palette and log the action
         /**
          * VALIDATION

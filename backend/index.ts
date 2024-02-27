@@ -6,6 +6,8 @@ import WSS from "./server/Websocket";
 import AccountController from "./controllers/Account";
 import CanvasController from "./controllers/Canvas";
 import ChatController from "./controllers/Chat";
+import verifyUser from "./middlewares/verifyUser";
+import verifyAdmin from "./middlewares/verifyAdmin";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -18,14 +20,19 @@ const server = http.createServer(app);
 WSS.init(server);
 
 WSS.io.on("connection", (socket: Socket) => {
-    const ip = socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
+    const ip =
+        socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
     const userAgent = socket.handshake.headers["user-agent"];
     console.log(`Socket connected from ${ip} using ${userAgent}`);
 
     WSS.updateClassement(socket);
 
-    socket.on("place-pixel", (data) => CanvasController.placePixel(data, socket));
-    socket.on("message", (data) => ChatController.broadcastMessage(data, socket));
+    socket.on("place-pixel", (data) =>
+        CanvasController.placePixel(data, socket)
+    );
+    socket.on("message", (data) =>
+        ChatController.broadcastMessage(data, socket)
+    );
 
     socket.on("disconnect", () => {
         console.log("Socket disconnected");
@@ -37,12 +44,18 @@ app.post("/auth/send-magic-link", AccountController.sendMagicLink);
 app.post("/auth/login", AccountController.login);
 app.get("/canvas/image", CanvasController.getCanvasImage);
 
-app.post("/admin/auth/mute", AccountController.muteUser);
-app.post("/admin/auth/ban", AccountController.banUser);
-app.post("/admin/canvas/reset", CanvasController.resetCanvas);
-app.post("/admin/canvas/size", CanvasController.changeCanvasSize);
-app.post("/admin/canvas/countdown", CanvasController.changePixelPlacementCooldown);
-app.post("/admin/canvas/palette", CanvasController.editCanvasColorPalette);
+// Admin routes
+const router = express.Router();
+router.use(verifyUser);
+router.use(verifyAdmin);
+app.use("/admin", router);
+
+router.post("/auth/ban", AccountController.banUser);
+router.post("/auth/mute", AccountController.muteUser);
+router.post("/canvas/reset", CanvasController.resetCanvas);
+router.post("/canvas/size", CanvasController.changeCanvasSize);
+router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
+router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
 
 // Start the server
 const port = process.env.PORT || 3000;
