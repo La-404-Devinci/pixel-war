@@ -1,4 +1,3 @@
-import type PlacePixelPayload from "common/requests/PlacePixel";
 import type express from "express";
 import type SocketIO from "socket.io";
 
@@ -47,13 +46,10 @@ class CanvasController {
      * Place a pixel on the canvas
      * @server WebSocket
      *
-     * @param data The pixel data
      * @param socket The socket that sent the pixel data
+     * @param data The payload
      */
-    public static async placePixel(
-        data: PlacePixelPayload,
-        socket: SocketIO.Socket
-    ) {
+    public static async placePixel(socket: SocketIO.Socket, [x, y, palette]: [number, number, number]) {
         // TODO: Place the pixel on the canvas
         /**
          * VALIDATION

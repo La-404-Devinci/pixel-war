@@ -1,3 +1,4 @@
+import type SocketIO from "socket.io";
 import type { Socket } from "socket.io";
 import ChatMessagePayload from "../../common/requests/ChatMessagePayload";
 
@@ -6,10 +7,10 @@ class ChatController {
      * Broadcasts a message to all connected clients
      * @server WebSocket
      *
-     * @param data The message data
      * @param socket The client socket
+     * @param data The payload
      */
-    public static async broadcastMessage(data: ChatMessagePayload, socket: Socket) {
+    public static async broadcastMessage(socket: SocketIO.Socket, ...data: unknown[]) {
         // TODO: Broadcast the message to all clients
         /**
          * VALIDATION
