@@ -1,0 +1,40 @@
+
+@media screen and (max-width: 768px) {
+    .chat {
+        display: flex;
+        flex-direction: column-reverse;
+        overflow-y: auto;
+        max-width: 100%;
+        min-height: 95%;
+        margin: 0 0 1em 0;
+        left: 50%;
+        transform: translate(-50%, 0);
+        border-radius: 16px;
+    }
+
+    .btnCloseChat {
+        display: block;
+        top: 0;
+        right: 0;
+    }
+
+    .messages {
+        margin-bottom: 4em;
+    }
+
+    .input {
+        max-width: 100%;
+        margin: 0;
+        position: fixed;
+        bottom: 0;    
+    }
+
+    .input input {
+        font-size: 1.2em;
+    }
+
+    .input button img {
+        width: 25px;
+    }
+
+}

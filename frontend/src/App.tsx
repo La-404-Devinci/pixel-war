@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import './App.css'
 import LoginComponent from './pages/login'
-import ChatComponent from './components/chat';
+import ChatComponent from './components/chatDesktop';
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
 
@@ -42,7 +42,7 @@ function App() {
       {/* <div id="test-login">
         <LoginComponent />
       </div> */}
-      <div id="test-chat">
+      <div>
         <ChatComponent />
       </div>
     </div>

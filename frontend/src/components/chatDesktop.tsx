@@ -1,4 +1,4 @@
-import styles from '../styles/chat.module.css';
+import styles from '../styles/chatDesktop.module.css';
 import { useEffect, useState, useRef } from 'react';
 
 const ChatComponent = () => {
@@ -13,7 +13,6 @@ const ChatComponent = () => {
     }
 
     useEffect(() => {
-        // Scroll to the bottom when chat is updated
         if (messagesContainerRef.current) {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
