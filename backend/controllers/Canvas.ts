@@ -49,7 +49,7 @@ class CanvasController {
      * @param socket The socket that sent the pixel data
      * @param data The payload
      */
-    public static async placePixel(socket: SocketIO.Socket, [x, y, palette]: [number, number, number]) {
+    public static async placePixel(data: PlacePixelPayload, socket: SocketIO.Socket) {
         // TODO: Place the pixel on the canvas
         /**
          * VALIDATION
@@ -124,9 +124,9 @@ class CanvasController {
         // TODO: Log the canvas size change
         console.log(`Canvas size changed to ${width}x${height}`);
 
-        res.status(200).send("Canvas size changed");
-
         WSS.updateCanvasSize(width, height);
+        
+        res.status(200).send("Canvas size changed");
     }
 
     /**

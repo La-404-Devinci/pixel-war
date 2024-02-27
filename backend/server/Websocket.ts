@@ -45,7 +45,7 @@ class WSS {
      */
 
     static async updateCanvasSize(width:number, height:number) {
-        this.io.emit("canvas-size-update", { width, height });
+        this.io.emit("canvas-size-update", width, height );
     }
 }
 
