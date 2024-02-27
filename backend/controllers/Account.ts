@@ -1,6 +1,14 @@
+import type SocketIO from "socket.io";
 import express from "express";
 import nodemailer from "nodemailer";
-import { generateAuthorizationToken } from "../auth/tokenUtils";
+import {
+    generateAuthenticationToken,
+    generateAuthorizationToken,
+    verifyAuthorizationToken,
+    verifyAuthenticationToken,
+} from "../auth/tokenUtils";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 class AccountController {
     /**
@@ -26,45 +34,38 @@ class AccountController {
          * * Send an error message if the email is invalid
          */
         const { email } = req.body;
+        const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci\.fr$/;
 
-        const isDevinciEmail = (email: string): boolean => {
-            const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci.fr$/;
-
-            return expression.test(email);
-        };
-
-        if (isDevinciEmail(email) == true) {
-            const token: string = generateAuthorizationToken(email);
-            const link: string = `url/login?token=${token}`;
-
-            const transporter = nodemailer.createTransport({
-                host: "your_host",
-                port: 587,
-                secure: true,
-                auth: {
-                    user: "your_email_address",
-                    pass: "your_email_password"
-                }
-            });
-        
-            const message = {
-                from: "your_email", 
-                to: email,
-                subject: "Lien pour se connecter",
-                html: `Clique pour te connecter: <a href="${link}">${link}</a>`
-            };
-            
-            try {
-                await transporter.sendMail(message);
-                res.status(200).send("Lien envoyé. Regarder vos mails.");
-            } catch (error) {
-                res.status(500).send("Une erreur s'est produite.");
-            }
-
-        } else {
-            res.send("Email non valide");
+        if (!expression.test(email)) {
+            return res.status(400).send("Email non valide");
         }
 
+        const token: string = generateAuthorizationToken(email);
+        const link: string = `${process.env.API_URL}/auth/login?token=${token}&email=${email}`;
+
+        const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST,
+            port: parseInt(process.env.EMAIL_PORT ?? "587"),
+            secure: true,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const message = {
+            from: process.env.EMAIL_FROM,
+            to: email,
+            subject: "Lien pour se connecter",
+            html: `Clique pour te connecter: <a href="${link}">${link}</a>`,
+        };
+
+        try {
+            await transporter.sendMail(message);
+            res.status(200).send("Lien envoyé. Regarder vos mails.");
+        } catch (error) {
+            res.status(500).send("Une erreur s'est produite.");
+        }
     }
 
     /**
@@ -75,19 +76,49 @@ class AccountController {
      * @param res The Express response object
      */
     public static async login(req: express.Request, res: express.Response) {
-        // TODO: Log the user
-        /**
-         * VALIDATION
-         * * Validate AUTHORIZATION token
-         *
-         * PROCESS
-         * * Generate an AUTHENTICATION token
-         *
-         * RESPONSE
-         * * Send the AUTHENTICATION token
-         * * Send an error message if the AUTHORIZATION token is invalid
-         * * Send an error message if the AUTHORIZATION token is expired
-         */
+        const { token, email } = req.query;
+
+        if (typeof token !== "string" || typeof email !== "string") {
+            return res.status(400).send("Invalid query parameters");
+        }
+
+        if (!verifyAuthorizationToken(token, email)) {
+            return res.status(401).send("Invalid token");
+        }
+
+        try {
+            const user = await prisma.account.findFirst({
+                where: {
+                    devinciEmail: email,
+                },
+            });
+
+            if (!user) {
+                await prisma.account.create({
+                    data: {
+                        devinciEmail: email,
+                    },
+                });
+            }
+        } catch (error) {
+            return res.status(500).send("Unable to connect to the database");
+        }
+
+        res.cookie("token", generateAuthenticationToken(email), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        });
+
+        res.cookie("email", email, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        });
+
+        return res.redirect(process.env.FRONTEND_URL ?? "/");
     }
 
     // Admin routes
@@ -135,6 +166,24 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the user ID is invalid
          */
+    }
+
+    /**
+     * Auth a websocket client
+     * @server WebSocket
+     *
+     * @param socket The client socket
+     * @param data The payload
+     */
+    public static async authSocket(socket: SocketIO.Socket, [token, email]: [string, string]) {
+        if (verifyAuthenticationToken(token, email)) {
+            socket.data.token = token;
+            socket.data.email = email;
+
+            socket.emit("auth-callback", true);
+        } else {
+            socket.emit("auth-callback", false);
+        }
     }
 }
 
