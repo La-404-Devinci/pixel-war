@@ -1,9 +1,16 @@
-import Canvas from "../models/Canvas";
 import type express from "express";
 import type SocketIO from "socket.io";
 
+import WSS from "../server/Websocket";
+import Canvas from "../models/Canvas";
+
 class CanvasController {
-    private static canvas: Canvas;
+    private static _canvas: Canvas = {
+        pixels: Buffer.alloc(1024 * 1024 * 4),
+        changes: 0,
+        width: 1024,
+        height: 1024,
+    };
 
     public static async init() {
         // TODO: Initialize the canvas from the database or create a new one if it doesn't exist
@@ -28,7 +35,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async getCanvasImage(req: express.Request, res: express.Response) {
+    public static async getCanvasImage(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Send the canvas image as a response
     }
 
@@ -66,7 +76,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async resetCanvas(req: express.Request, res: express.Response) {
+    public static async resetCanvas(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Reset the canvas and log the action
         /**
          * VALIDATION
@@ -92,24 +105,28 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async changeCanvasSize(req: express.Request, res: express.Response) {
-        // TODO: Change the canvas size and log the action
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         * * Validate the new canvas size
-         *
-         * PROCESS
-         * * Change the canvas size in the database
-         * * Log the canvas size change
-         *
-         * RESPONSE
-         * * Send a success response
-         * * Broadcast the canvas size change to all clients
-         * * Send the updated leaderboard to all clients
-         * * Send the updated user data to all clients
-         * * Send the updated canvas to all clients
-         */
+    public static async changeCanvasSize(
+        req: express.Request,
+        res: express.Response
+    ) {
+        const { height, width }: {height: number, width: number} = req.body;
+                
+        if (width < 0 || height < 0) {
+            return res.status(400).send("Invalid canvas size");
+        } else if (width > 1024 || height > 1024) {
+            return res.status(400).send("Canvas size too large");
+        }
+
+        this._canvas.changes++;
+        this._canvas.width = width;
+        this._canvas.height = height;
+
+        // TODO: Log the canvas size change
+        console.log(`Canvas size changed to ${width}x${height}`);
+
+        WSS.updateCanvasSize(width, height);
+        
+        res.status(200).send("Canvas size changed");
     }
 
     /**
@@ -119,7 +136,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async changePixelPlacementCooldown(req: express.Request, res: express.Response) {
+    public static async changePixelPlacementCooldown(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Change the pixel placement cooldown and log the action
         /**
          * VALIDATION
@@ -146,7 +166,10 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async editCanvasColorPalette(req: express.Request, res: express.Response) {
+    public static async editCanvasColorPalette(
+        req: express.Request,
+        res: express.Response
+    ) {
         // TODO: Edit the canvas color palette and log the action
         /**
          * VALIDATION

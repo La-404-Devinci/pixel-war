@@ -28,3 +28,20 @@ Sent to everyone when a message is received from `message` endpoint.
 | :---: | :----- | :---------------------- |
 |   0   | string | The email of the sender |
 |   1   | string | The message             |
+
+## classement-update
+
+Sent to everyone when a pixel changes from `place-pixel` endpoint.
+
+| index | type  | description        |
+| :---: | :---- | :----------------- |
+|   0   | array | Top 10 leaderboard |
+
+## canvas-size-update
+
+Sent to everyone when a pixel changes from `place-pixel` endpoint.
+
+| index | type   | description   |
+| :---: | :----- | :------------ |
+|   0   | number | Canvas width  |
+|   1   | number | Canvas height |
