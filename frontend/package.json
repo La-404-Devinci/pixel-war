@@ -6,12 +6,21 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
+<<<<<<< HEAD
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+=======
+        "lint": "eslint . --ext ts,tsx",
+>>>>>>> 926e6b100cac117e69372d97fbd55ef49d927d12
         "preview": "vite preview"
     },
     "dependencies": {
         "react": "^18.2.0",
+<<<<<<< HEAD
         "react-dom": "^18.2.0"
+=======
+        "react-dom": "^18.2.0",
+        "socket.io-client": "^4.7.4"
+>>>>>>> 926e6b100cac117e69372d97fbd55ef49d927d12
     },
     "devDependencies": {
         "@types/react": "^18.2.43",

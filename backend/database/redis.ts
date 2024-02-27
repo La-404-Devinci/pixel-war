@@ -11,8 +11,6 @@ const redisUrl = `redis://${credentials}${process.env.REDIS_HOST}:${process.env.
 
 const getRedisClient = createClient({
     url: redisUrl,
-})
-    .on("error", (err) => console.log("Redis Client Error", err))
-    .connect();
+}).on("error", (err) => console.log("Redis Client Error", err)).connect;
 
 export default getRedisClient;

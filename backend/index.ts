@@ -3,19 +3,14 @@ import http from "http";
 import { Socket } from "socket.io";
 import dotenv from "dotenv";
 import WSS from "./server/Websocket";
+import AccountController from "./controllers/Account";
+import CanvasController from "./controllers/Canvas";
+import ChatController from "./controllers/Chat";
+import verifyUser from "./middlewares/verifyUser";
+import verifyAdmin from "./middlewares/verifyAdmin";
 
 // Load environment variables from .env file
 dotenv.config();
-
-// Import route controllers
-// TODO: Import the GetCanvas function from the CanvasController file
-// import { GetCanvas } from "./controllers/CanvasController";
-// TODO: Create others controllers for the user and auth routes
-
-// Import websocket endpoints
-// TODO: Import the PlacePixel function from the CanvasController file
-// import { PlacePixel } from "./routes/canvas/CanvasController";
-// TODO: Create others websocket endpoints for the user and auth routes
 
 // Create Express app
 const app = express();
@@ -25,20 +20,39 @@ const server = http.createServer(app);
 WSS.init(server);
 
 WSS.io.on("connection", (socket: Socket) => {
-    const ip = socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
+    const ip =
+        socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
     const userAgent = socket.handshake.headers["user-agent"];
     console.log(`Socket connected from ${ip} using ${userAgent}`);
 
-    // // Socket.io events
-    // socket.on("placePixel", PlacePixel);
+    socket.on("auth", (...data) => AccountController.authSocket(socket, ...data));
+    socket.on("place-pixel", (...data) => CanvasController.placePixel(socket, ...data));
+    socket.on("message", (...data) => ChatController.broadcastMessage(socket, ...data));
+
+    WSS.updateClassement(socket);
 
     socket.on("disconnect", () => {
         console.log("Socket disconnected");
     });
 });
 
-// // Express routes
-// app.get("/canvas", GetCanvas);
+// Express routes
+app.post("/auth/send-magic-link", AccountController.sendMagicLink);
+app.get("/auth/login", AccountController.login);
+app.get("/canvas/image", CanvasController.getCanvasImage);
+
+// Admin routes
+const router = express.Router();
+router.use(verifyUser);
+router.use(verifyAdmin);
+app.use("/admin", router);
+
+router.post("/auth/ban", AccountController.banUser);
+router.post("/auth/mute", AccountController.muteUser);
+router.post("/canvas/reset", CanvasController.resetCanvas);
+router.post("/canvas/size", CanvasController.changeCanvasSize);
+router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
+router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
 
 // Start the server
 const port = process.env.PORT || 3000;

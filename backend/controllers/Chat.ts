@@ -1,40 +1,92 @@
+import type SocketIO from "socket.io";
+import { PrismaClient } from "@prisma/client";
+
+import leoProfanity from "leo-profanity";
+import frenchBadwordsList from "french-badwords-list";
+import WSS from "../server/Websocket";
+
+leoProfanity.clearList();
+leoProfanity.add(frenchBadwordsList.array);
+
+const prisma = new PrismaClient();
+
 class ChatController {
     /**
      * Broadcasts a message to all connected clients
      * @server WebSocket
      *
-     * @param data The message data
      * @param socket The client socket
+     * @param data The payload
      */
-    public static async broadcastMessage(data: ChatMessagePayload, socket: SocketIO.Socket) {
-        // TODO: Broadcast the message to all clients
-        /**
-         * VALIDATION
-         * * Validate the message data
-         * * Check if the user is logged in
-         * * Check if the user is not muted
-         * * Check if the user has sent more that 3 messages in the last 5 seconds
-         * * - Mute the user for 3 secondes (1st time)
-         * * - Mute the user for 10 secondes (2nd time)
-         * * - Mute the user for 1 minute (3rd time)
-         * * - Mute the user for 5 minutes (4th time)
-         * * - Mute the user for 30 minutes (5th time)
-         * * - Mute the user for 1 hour (6th time)
-         * * - Mute the user for 2 hours (7th time)
-         * * - Mute the user for 12 hours (8th time)
-         * * - Mute the user for 24 hours (9th time)
-         * * - Mute the user definitively (10th time)
-         * * Check if the message is not longer than 200 characters
-         * * Check if the message is not empty
-         * * Check if the message does not contain any bad words
-         * * Check if the message does not contain any links
-         *
-         * PROCESS
-         * * Log the message
-         *
-         * RESPONSE
-         * * Broadcast the message to all clients
-         */
+    public static async broadcastMessage(socket: SocketIO.Socket, [message, callback]: [string, (success: boolean) => void]) {
+        if (!message || message.length < 1 || message.length > 200) {
+            callback(false);
+            return;
+        }
+
+        // Check if the message contains bad words
+        const cleanMessage = leoProfanity.clean(message);
+
+        if (!socket.data.email) {
+            callback(false);
+            return;
+        }
+
+        const user = await prisma.account.findFirst({
+            where: {
+                devinciEmail: socket.data.email,
+            },
+        });
+
+        if (!user) {
+            callback(false);
+            return;
+        }
+
+        if (user.isMuted) {
+            callback(false);
+            return;
+        }
+
+        const now = new Date();
+
+        const lastTimestamps = ((user.lastSentMessageTimes as number[]) ?? []).filter((timestamp) => timestamp > now.getTime() - 5000);
+        if (lastTimestamps.length > 3) {
+            user.isMuted = true;
+            // Save the user
+            await prisma.account.update({
+                where: { id: user.id },
+                data: { isMuted: true },
+            });
+
+            callback(false);
+            return;
+        }
+
+        user.lastSentMessageTimes = [...lastTimestamps, now.getTime()];
+
+        // Save the user
+        await prisma.account.update({
+            where: { id: user.id },
+            data: { lastSentMessageTimes: user.lastSentMessageTimes },
+        });
+
+        prisma.logEntry.create({
+            data: {
+                devinciEmail: user.devinciEmail,
+                time: new Date().getTime(),
+                ip: socket.handshake.address,
+                action: {
+                    type: "message",
+                    originalContent: message,
+                    content: cleanMessage,
+                },
+            },
+        });
+
+        WSS.broadcastMessage(user.devinciEmail, cleanMessage);
+
+        callback(true);
     }
 }
 
