@@ -3,6 +3,7 @@ import styles from './App.module.css'
 import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
 import ChatComponent from './components/chat'
+import isMobile from './utiles/isMobile'
 import { socket } from './socket'
 import classementItem from '../../common/interfaces/classementItem.interface'
 
@@ -15,6 +16,7 @@ function App() {
   const [userEmail, setUserEmail] = useState("");
   const [displayBtnLogin, setDisplayBtnLogin] = useState(true);
   const [displayComponent, setDisplayComponent] = useState("none");
+  const [isMobileView, setIsMobileView] = useState(isMobile.any())
 
 
   useEffect(() => {
@@ -41,6 +43,18 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(isMobile.any())
+    };
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+        window.removeEventListener('resize', handleResize)
+    };
+  }, [])
+
 
   const handleLogin = (email: string) => {
     setUserEmail(email);
@@ -48,19 +62,22 @@ function App() {
   }
 
   const handleDisplayComponent = (componentName: string) => {
-    if (displayComponent === componentName) {
-      setDisplayComponent("none");
-    } else {
-      setDisplayComponent(componentName);
-    }  
+    if (isMobileView == true) {
+      if (displayComponent === componentName) {
+        setDisplayComponent("none");
+      } else {
+        setDisplayComponent(componentName);
+      }  
+    }    
   }
+
 
   // affichage (render)
   return (
     <div className={styles.homepage}>
       <div className={styles.containerTop}>
-        <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}><img src="/src/assets/message.svg" alt="" /></button>
-        {displayComponent !== "chat" && <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
+        {isMobile.any() && <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}><img src="/src/assets/message.svg" alt="icone-chat" /></button>}
+        {displayComponent !== "profil" && <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
       </div>
 
       {displayBtnLogin && <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>Login to draw !</button>}
@@ -68,6 +85,7 @@ function App() {
       {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
       {displayComponent === "profil" && <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />}
       {displayComponent === "chat" && <ChatComponent />}
+      {!isMobile.any() && <ChatComponent />}
     </div>
   );
 }
