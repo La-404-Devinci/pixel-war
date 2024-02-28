@@ -117,14 +117,14 @@ class AccountController {
          */
 
 
-        const { userId } = req.body;
+        const { userId, isMuted } = req.body;
 
         prisma.account.update({
             where: {
                 id: userId
             },
             data: {
-                isMuted: true
+                isMuted: !isMuted
             }
         }).then(() => {
             res.status(200).send("Utilisateur muté");
@@ -134,22 +134,6 @@ class AccountController {
         
     }
 
-    public static async unmuteUser(req: express.Request, res: express.Response) {
-        const { userId } = req.body;
-
-        prisma.account.update({
-            where: {
-                id: userId
-            },
-            data: {
-                isMuted: false
-            }
-        }).then(() => {
-            res.status(200).send("Utilisateur démuté");
-        }).catch(() => {
-            res.status(500).send("Une erreur s'est produite.");
-        });
-    }
 
     /**
      * Ban/unban a user
