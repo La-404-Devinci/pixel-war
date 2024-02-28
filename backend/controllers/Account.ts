@@ -19,20 +19,6 @@ class AccountController {
      * @param res The Express response object
      */
     public static async sendMagicLink(req: express.Request, res: express.Response) {
-        // TODO: Send a magic link containing the AUTHORIZATION token to the user's email
-        /**
-         * VALIDATION
-         * * Validate the user email (must be a Devinci email)
-         *
-         
-         * PROCESS
-         * * Generate an AUTHORIZATION token
-         * * Send the magic link to the user's email
-         *
-         * RESPONSE
-         * * Send a success message
-         * * Send an error message if the email is invalid
-         */
         const { email } = req.body;
         const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci\.fr$/;
 
@@ -62,7 +48,7 @@ class AccountController {
 
         try {
             await transporter.sendMail(message);
-            res.status(200).send("Lien envoyé. Regarder vos mails.");
+            res.status(200).send("Lien envoyé. Regardez vos mails.");
         } catch (error) {
             res.status(500).send("Une erreur s'est produite.");
         }

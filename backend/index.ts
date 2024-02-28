@@ -8,6 +8,7 @@ import CanvasController from "./controllers/Canvas";
 import ChatController from "./controllers/Chat";
 import verifyUser from "./middlewares/verifyUser";
 import verifyAdmin from "./middlewares/verifyAdmin";
+import GoofyController from "./controllers/Goofy";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -20,8 +21,7 @@ const server = http.createServer(app);
 WSS.init(server);
 
 WSS.io.on("connection", (socket: Socket) => {
-    const ip =
-        socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
+    const ip = socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
     const userAgent = socket.handshake.headers["user-agent"];
     console.log(`Socket connected from ${ip} using ${userAgent}`);
 
@@ -53,6 +53,8 @@ router.post("/canvas/reset", CanvasController.resetCanvas);
 router.post("/canvas/size", CanvasController.changeCanvasSize);
 router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
 router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
+
+app.get("/admin", GoofyController.getAdminPage);
 
 // Start the server
 const port = process.env.PORT || 3000;

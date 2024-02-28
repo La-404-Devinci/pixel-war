@@ -1,16 +1,32 @@
 import type express from "express";
 import type SocketIO from "socket.io";
+import { PrismaClient } from "@prisma/client";
 
 import WSS from "../server/Websocket";
 import Canvas from "../models/Canvas";
 
+const prisma = new PrismaClient();
+
 class CanvasController {
     private static _canvas: Canvas = {
-        pixels: Buffer.alloc(1024 * 1024 * 4),
+        pixels: Buffer.alloc(1024 * 1024 * 3), // 3 bytes per pixel (RGB)
         changes: 0,
-        width: 1024,
-        height: 1024,
+        width: 1024, // Soft-width limit
+        height: 1024, // Soft-height limit
+        cooldown: 60, // Pixel placement cooldown in seconds
     };
+
+    private static _palette: [number, number, number][] = [
+        [255, 255, 255], // #FFFFFF
+        [192, 192, 192], // #C0C0C0
+        [0, 0, 0], // #000000
+        [255, 0, 0], // #FF0000
+        [0, 255, 0], // #00FF00
+        [0, 0, 255], // #0000FF
+        [255, 255, 0], // #FFFF00
+        [0, 255, 255], // #00FFFF
+        [255, 0, 255], // #FF00FF
+    ];
 
     /**
      * Get the canvas image
@@ -19,10 +35,7 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async getCanvasImage(
-        req: express.Request,
-        res: express.Response
-    ) {
+    public static async getCanvasImage(req: express.Request, res: express.Response) {
         res.status(200).json({
             pixels: this._canvas.pixels,
             width: this._canvas.width,
@@ -37,26 +50,66 @@ class CanvasController {
      * @param socket The socket that sent the pixel data
      * @param data The payload
      */
-    public static async placePixel(
-        socket: SocketIO.Socket,
-        [x, y, palette]: [number, number, number]
-    ) {
-        // TODO: Place the pixel on the canvas
-        /**
-         * VALIDATION
-         * * Validate the pixel data
-         * * Check if the user timer is elapsed
-         *
-         * PROCESS
-         * * Log the pixel placement
-         * * Update the pixel on the canvas
-         * * Update the user timer (if the user is not an admin)
-         *
-         * RESPONSE
-         * * Broadcast the modification to all clients
-         * * Send the updated user data to the client
-         * * Send the updated leaderboard to the client
-         */
+    public static async placePixel(socket: SocketIO.Socket, [x, y, palette, callback]: [number, number, number, (timer: number) => void]) {
+        // Get the user
+        const user = await prisma.account.findFirst({
+            where: {
+                devinciEmail: socket.data.email,
+            },
+        });
+
+        if (!user) return callback(0);
+        if (user.isBanned) return callback(0);
+
+        // Check if the user timer is elapsed
+        if (user.lastPixelTime && new Date(user.lastPixelTime).getTime() > new Date().getTime() - this._canvas.cooldown * 1000) {
+            return callback(new Date(user.lastPixelTime).getTime() - new Date().getTime() + this._canvas.cooldown * 1000);
+        }
+
+        if (x < 0 || y < 0 || x >= this._canvas.width || y >= this._canvas.height) return callback(0);
+
+        // Get pixel index (from the canvas buffer)
+        const pixelIndex = (y * this._canvas.width + x) * 3;
+
+        // Get palette item
+        const color = this._palette[palette];
+        if (!color) return callback(0);
+
+        // Log the pixel placement
+        prisma.logEntry.create({
+            data: {
+                devinciEmail: user.devinciEmail,
+                time: new Date().getTime(),
+                ip: socket.handshake.address,
+                action: {
+                    type: "pixel_placement",
+                    x,
+                    y,
+                    color,
+                },
+            },
+        });
+
+        // Set the pixel
+        this._canvas.pixels.writeUInt8(color[0], pixelIndex);
+        this._canvas.pixels.writeUInt8(color[1], pixelIndex + 1);
+        this._canvas.pixels.writeUInt8(color[2], pixelIndex + 2);
+
+        // Update the user timer
+        if (!user.isAdmin) {
+            user.lastPixelTime = new Date();
+            user.placedPixels++;
+
+            await prisma.account.update({
+                where: { id: user.id },
+                data: { lastPixelTime: new Date(), placedPixels: user.placedPixels },
+            });
+        }
+
+        // Broadcast the modification to all clients
+        WSS.updateCanvasPixel(x, y, color);
+        WSS.updateUserData(socket, user);
+        WSS.updateClassement(socket);
     }
 
     // Admin routes
@@ -67,12 +120,17 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async resetCanvas(
-        req: express.Request,
-        res: express.Response
-    ) {
-        // TODO: Log the canvas reset
-        console.log("Canvas reset");
+    public static async resetCanvas(req: express.Request, res: express.Response) {
+        prisma.logEntry.create({
+            data: {
+                devinciEmail: "null",
+                time: new Date().getTime(),
+                ip: req.ip || "Unknown",
+                action: {
+                    type: "canvas_reset",
+                },
+            },
+        });
 
         this._canvas.changes = 0;
         this._canvas.pixels.fill(0);
@@ -89,10 +147,7 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async changeCanvasSize(
-        req: express.Request,
-        res: express.Response
-    ) {
+    public static async changeCanvasSize(req: express.Request, res: express.Response) {
         const { height, width }: { height: number; width: number } = req.body;
 
         if (width < 0 || height < 0) {
@@ -105,8 +160,18 @@ class CanvasController {
         this._canvas.width = width;
         this._canvas.height = height;
 
-        // TODO: Log the canvas size change
-        console.log(`Canvas size changed to ${width}x${height}`);
+        prisma.logEntry.create({
+            data: {
+                devinciEmail: "null",
+                time: new Date().getTime(),
+                ip: req.ip || "Unknown",
+                action: {
+                    type: "canvas_resize",
+                    width,
+                    height,
+                },
+            },
+        });
 
         WSS.updateCanvasSize(width, height);
 
@@ -120,10 +185,7 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async changePixelPlacementCooldown(
-        req: express.Request,
-        res: express.Response
-    ) {
+    public static async changePixelPlacementCooldown(req: express.Request, res: express.Response) {
         // TODO: Change the pixel placement cooldown and log the action
         /**
          * VALIDATION
@@ -150,10 +212,7 @@ class CanvasController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async editCanvasColorPalette(
-        req: express.Request,
-        res: express.Response
-    ) {
+    public static async editCanvasColorPalette(req: express.Request, res: express.Response) {
         // TODO: Edit the canvas color palette and log the action
         /**
          * VALIDATION
