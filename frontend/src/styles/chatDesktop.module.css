@@ -6,21 +6,25 @@ body {
 .chat {
     display: flex;
     flex-direction: column;
-    max-height: 150px ;
     width: 90%;
     max-width: 300px;
     background-color: rgba(255, 255, 255, 0.75);
-    border-radius: 16px 16px 0 0;
-    padding-top: 1em;
+    border-radius: 16px;
     position: fixed;
-    bottom: 0;
-    margin: 0 0 2.5em 1em;
+    bottom: 1em;
+    left: 1em;
 }
 
 .messages {
     overflow: auto;
+    max-height: 0px;
     padding-inline: 1em;
-    margin-bottom: 2em;
+    transition: all 0.3s ease-in-out;
+}
+
+.expanded {
+    max-height: 270px;
+    padding-block: 1em;
 }
 
 span {
@@ -33,13 +37,10 @@ span {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 1em;
+    gap: 1em;
     padding-right: 1em;
     background-color: #ffffff;
     border-radius: 16px;
-    position: fixed;
-    bottom: 0;
-    left: 0;
 }
 
 .input input {
@@ -57,11 +58,17 @@ span {
 .input button {
     border: none;
     background-color: #ffffff;
+    height: 16px;
+    width: 16px;
 }
 
+.reversed {
+    transform: rotate(180deg);
+}
 
 ::-webkit-scrollbar {
     width: 10px;
+    height: 10px;
 }
   
 ::-webkit-scrollbar-track {

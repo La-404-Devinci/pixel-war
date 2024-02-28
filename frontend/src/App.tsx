@@ -90,7 +90,7 @@ function App() {
       
       {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
       {displayComponent === "profil" && <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />}
-      {displayComponent === "chat" && <ChatComponent userEmail={userEmail}/>}
+      {displayComponent === "chat" && <ChatComponent />}
       {!isMobile.any() && <ChatComponent userEmail={userEmail} />}
     </div>
   );
