@@ -68,7 +68,13 @@ function App() {
       } else {
         setDisplayComponent(componentName);
       }  
-    }    
+    }  else {
+      if (displayComponent === componentName) {
+        setDisplayComponent("none");
+      } else {
+        setDisplayComponent(componentName);
+      }  
+    } 
   }
 
 
@@ -84,8 +90,8 @@ function App() {
       
       {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
       {displayComponent === "profil" && <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />}
-      {displayComponent === "chat" && <ChatComponent />}
-      {!isMobile.any() && <ChatComponent />}
+      {displayComponent === "chat" && <ChatComponent userEmail={userEmail}/>}
+      {!isMobile.any() && <ChatComponent userEmail={userEmail} />}
     </div>
   );
 }

@@ -3,7 +3,11 @@ import chatStylesMobile from '../styles/chatMobile.module.css'
 import { useEffect, useState, useRef } from 'react'
 import isMobile from '../utiles/isMobile'
 
-const ChatComponent = () => {
+interface ChatComponentProps {
+    userEmail: string;
+}
+
+const ChatComponent: React.FC<ChatComponentProps> = ({userEmail}) => {
     const [chat, setchat] = useState<string[]>([])
     const [message, setMessage] = useState<string>('')
     const [isMobileView, setIsMobileView] = useState(isMobile.any())
@@ -39,7 +43,7 @@ const ChatComponent = () => {
         <div className={chatStyles.chat}>
             <div className={chatStyles.messages} ref={messagesContainerRef}>
                 {chat.map((message, index) => (
-                <div key={index}> <span>pseudo:</span> {message}</div>))}
+                <div key={index}> <span>{userEmail}:</span> {message}</div>))}
             </div>
             <div className={chatStyles.input}>
                 <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder='Ecris un message...' />
