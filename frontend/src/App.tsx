@@ -57,7 +57,7 @@ function App() {
 
 
   const handleLogin = (email: string) => {
-    setUserEmail(email);
+    setUserEmail(email.split('@')[0]);
     setDisplayBtnLogin(false);
   }
 
