@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import styles from './App.module.css'
 import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
+import LeaderboardComponent from './components/leaderboard'
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
 
@@ -64,6 +65,7 @@ function App() {
       {!displayProfile && <button onClick={handledisplayProfile} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
       {displayProfile && <ProfilComponent userEmail={userEmail} onHideProfil={handledisplayProfile} />}
 
+      <LeaderboardComponent />
     </div>
   );
 }
