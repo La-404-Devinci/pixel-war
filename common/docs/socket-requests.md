@@ -17,11 +17,12 @@ Result callback: `auth-callback`
 
 Place a pixel on the canvas
 
-| index | type   | description       |
-| :---: | :----- | :---------------- |
-|   0   | number | The x position    |
-|   1   | number | The y position    |
-|   2   | number | The palette index |
+| index | type             | description                 |
+| :---: | :--------------- | :-------------------------- |
+|   0   | number           | The x position              |
+|   1   | number           | The y position              |
+|   2   | number           | The palette index           |
+|   3   | callback(number) | Callback with the new timer |
 
 ## message
 
