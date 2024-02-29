@@ -10,15 +10,14 @@ const LeaderboardComponent = () => {
     const [isExpanded, setIsExpanded] = useState(false)
 
     useEffect(() => {
-    
         function onclassementUpdate(data: classementItem[]) {
           setClassement(data)
         }
 
-        socket.on('classementUpdate', onclassementUpdate);
+        socket.on('classement-update', onclassementUpdate);
     
         return () => {
-          socket.off('classementUpdate', onclassementUpdate);
+          socket.off('classement-update', onclassementUpdate);
         };
     }, []);
 
@@ -31,13 +30,17 @@ const LeaderboardComponent = () => {
     return (
         <div className={styles.leaderboard}>
             <div className={styles.header}>
-                <button onClick={handleExpand} className={styles.btnExpand}><img src={img} alt="arrow-down" />LeaderBoard</button>
+                <button onClick={handleExpand} className={styles.btnExpand}><img src={img} alt="arrow-down" />Leaderboard</button>
             </div>
             {isExpanded && (
                 <div className={styles.expanded}>
-                    <p>1st - {classement} </p>
-                    <p>2nd - {classement} </p>
-                    <p>3rd - {classement}</p>
+                    {classement.length === 0 && (<p>Le classement est vide</p>)}
+
+                    {classement.slice(0, 5).map((item, index) => (
+                        <p key={index}>
+                            <b>{index + 1}{index === 0 ? "er" : "ème"}</b> - {item.devinciEmail.split("@")[0]} ({item.placedPixels})
+                        </p>
+                    ))}
                 </div>
             )}
         </div>
