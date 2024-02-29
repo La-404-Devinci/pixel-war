@@ -3,6 +3,7 @@ interface Canvas {
     changes: number;
     width: number;
     height: number;
+    cooldown: number;
 }
 
 export default Canvas;
