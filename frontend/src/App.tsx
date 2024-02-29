@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import styles from './App.module.css'
 import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
+import LeaderboardComponent from './components/leaderboard'
+import { socket } from './socket';
 import ChatComponent from './components/chat'
 import isMobile from './utiles/isMobile'
-import { socket } from './socket'
 import classementItem from '../../common/interfaces/classementItem.interface'
 
 function App() {
@@ -85,7 +86,9 @@ function App() {
         {isMobile.any() && <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}><img src="/src/assets/message.svg" alt="icone-chat" /></button>}
         {displayComponent !== "profil" && <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
       </div>
-
+      
+      <LeaderboardComponent />
+      
       {displayBtnLogin && <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>Login to draw !</button>}
       
       {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
