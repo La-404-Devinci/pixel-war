@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PaletteColor from './PaletteColor'
+import styles from '../App.module.css'
 
 export default function Palette({onColorClick}: {onColorClick(color: string): unknown}){
 // useState (array of colors | null)
@@ -35,7 +36,7 @@ function handleRenderColors() {
 
 
   return (
-    <div className='colorPalette'>
+    <div className={styles.colorPalette}>
       {handleRenderColors()}
     </div>
   )

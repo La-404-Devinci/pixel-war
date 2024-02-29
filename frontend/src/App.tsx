@@ -1,6 +1,6 @@
 // import { useState } from 'react'
 import { SetStateAction, useEffect, useState } from 'react';
-import './App.css'
+import styles from './App.module.css'
 import LoginComponent from './pages/login'
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
@@ -77,7 +77,7 @@ function App() {
   // affichage (render)
   return (
     <div>
-      <div className='test-canvas'>
+      <div className={styles.testCanvas}>
         <Canvas actualColor={selectedColor} zoom={zoom} />
         <Palette onColorClick={handleColorSelect} />
         <Timer />

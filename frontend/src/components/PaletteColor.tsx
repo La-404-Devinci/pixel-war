@@ -1,4 +1,5 @@
 import React from 'react'
+import styles from '../App.module.css'
 
 export default function PalletteColor(props: {onClick(color: string): unknown;color: string}) {
 
@@ -7,7 +8,7 @@ export default function PalletteColor(props: {onClick(color: string): unknown;co
   };
 
   return (
-    <button className='color' style={{background: props.color}} onClick={handleClick}>
+    <button className={styles.color} style={{background: props.color}} onClick={handleClick}>
       
     </button>
   )
