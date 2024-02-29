@@ -154,7 +154,7 @@ class CanvasController {
     ) {
         prisma.logEntry.create({
             data: {
-                devinciEmail: "null",
+                devinciEmail: "anon",
                 time: new Date().getTime(),
                 ip: req.ip || "Unknown",
                 action: {
@@ -231,7 +231,7 @@ class CanvasController {
 
         prisma.logEntry.create({
             data: {
-                devinciEmail: "null",
+                devinciEmail: "anon",
                 time: new Date().getTime(),
                 ip: req.ip || "Unknown",
                 action: {
