@@ -116,20 +116,23 @@ class AccountController {
      * @param res The Express response object
      */
     public static async muteUser(req: express.Request, res: express.Response) {
-        // TODO: Mute/unmute a user
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         * * Validate the user ID
-         *
-         * PROCESS
-         * * Mute/unmute the user
-         *
-         * RESPONSE
-         * * Send a success message
-         * * Send an error message if the user ID is invalid
-         */
+        const { userId, isMuted } = req.body;
+
+        prisma.account.update({
+            where: {
+                id: userId
+            },
+            data: {
+                isMuted: isMuted
+            }
+        }).then(() => {
+            res.status(200).send("Utilisateur muté");
+        }).catch(() => {
+            res.status(500).send("Une erreur s'est produite.");
+        });
+        
     }
+
 
     /**
      * Ban/unban a user
