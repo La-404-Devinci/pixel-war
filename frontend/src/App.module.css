@@ -5,14 +5,6 @@
     font-family: 'Inter', sans-serif;
 }
 
-#test-login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #898989;
-}
-
 .homepage {
     display: flex;
     flex-direction: column;
