@@ -139,19 +139,19 @@ class AccountController {
      * @param res The Express response object
      */
     public static async banUser(req: express.Request, res: express.Response) {
-        // TODO: Ban/unban a user
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         * * Validate the user ID
-         *
-         * PROCESS
-         * * Ban/unban the user
-         *
-         * RESPONSE
-         * * Send a success message
-         * * Send an error message if the user ID is invalid
-         */
+        const { userId, isBanned } = req.body;
+
+        try {
+            await prisma.account.update({
+                where: { id: userId },
+                data: { isBanned: isBanned }
+            });
+      
+            res.status(200).send("Successful");
+        } catch (error) {
+            res.status(500).send("Not successful");
+            return; 
+        }
     }
 
     /**
