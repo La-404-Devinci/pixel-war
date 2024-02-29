@@ -51,3 +51,11 @@ Sent to everyone when the canvas sizes is changed.
 Sent to everyone when the canvas is reset.
 
 > No parameter
+
+## pixel-placement-cooldown-update
+
+Sent to everyone when the pixel placement cooldown changes.
+
+| index | type  | description               |
+| :---: | :---- | :------------------------ |
+|   0   | number | Pixel placement cooldown |
