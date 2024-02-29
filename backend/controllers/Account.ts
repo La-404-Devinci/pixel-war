@@ -169,51 +169,18 @@ class AccountController {
          * * Send a success message
          * * Send an error message if the user ID is invalid
          */
-        const { userId, command } = req.body;
-
-
-        try {
-            await prisma.account.findUnique({
-                where: { 
-                    id: userId,
-                    isAdmin: false 
-                }
-            });
-
-            res.status(200).send("User is not admin");
-        } catch (error) {
-            res.status(500).send("User is admin");
-            return; 
-        }
+        const { userId, isBanned } = req.body;
 
         try {
             await prisma.account.update({
                 where: { id: userId },
-                data: { isBanned: command }
+                data: { isBanned: isBanned }
             });
       
             res.status(200).send("Successful");
         } catch (error) {
             res.status(500).send("Not successful");
             return; 
-        }
-    }
-
-    /**
-     * Auth a websocket client
-     * @server WebSocket
-     *
-     * @param socket The client socket
-     * @param data The payload
-     */
-    public static async authSocket(socket: SocketIO.Socket, [token, email]: [string, string]) {
-        if (verifyAuthenticationToken(token, email)) {
-            socket.data.token = token;
-            socket.data.email = email;
-
-            socket.emit("auth-callback", true);
-        } else {
-            socket.emit("auth-callback", false);
         }
     }
 
