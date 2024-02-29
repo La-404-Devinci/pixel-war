@@ -80,6 +80,15 @@ class WSS {
     static async updateUserData(socket: Socket, user: unknown) {
         socket.emit("user-data-update", user);
     }
+
+
+    /**
+     * Sends an 'updatePixelPlacementCooldown' event to all connected clients.
+     * @param time The time in seconds
+     */
+    static async updatePixelPlacementCooldown (time: number) {
+        this.io.emit("pixel-placement-cooldown-update", time);
+    }
 }
 
 export default WSS;

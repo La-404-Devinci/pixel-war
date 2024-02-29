@@ -223,25 +223,27 @@ class CanvasController {
         req: express.Request,
         res: express.Response
     ) {
-        // TODO: Change the pixel placement cooldown and log the action
-        /**
-         * VALIDATION
-         * * Validate the new cooldown
-         *
-         * PROCESS
-         * * Change the pixel placement cooldown in the database
-         * * Log the pixel placement cooldown change
-         *
-         * RESPONSE
-         * * Send a success response
-         * * Broadcast the pixel placement cooldown change to all clients
-         * * Send the updated leaderboard to all clients
-         * * Send the updated user data to all clients
-         * * Send the updated canvas to all clients
-         */
         const { cooldown }: { cooldown: number } = req.body;
 
         if (cooldown < 0) return res.status(400).send("Invalid cooldown");
+
+        this._canvas.cooldown = cooldown;
+
+        prisma.logEntry.create({
+            data: {
+                devinciEmail: "null",
+                time: new Date().getTime(),
+                ip: req.ip || "Unknown",
+                action: {
+                    type: "cooldown_change",
+                    cooldown,
+                },
+            },
+        });
+
+        WSS.updatePixelPlacementCooldown(cooldown);
+
+        res.status(200).send("Cooldown changed");
     }
 
     /**
