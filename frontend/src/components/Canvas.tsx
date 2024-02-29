@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react';
 
-export default function Canva(props: {actualColor: string, zoom: number}) {
+export default function Canvas(props: {actualColor: string, zoom: number}) {
 
     const [width, setWidth] = useState(500);
     const [height, setHeight] = useState(500);

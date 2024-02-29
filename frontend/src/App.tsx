@@ -4,7 +4,7 @@ import './App.css'
 import LoginComponent from './pages/login'
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
-import Canva from './components/Canvas'
+import Canvas from './components/Canvas'
 import Palette from './components/Palette';
 import Timer from './components/Timer';
 
@@ -77,8 +77,8 @@ function App() {
   // affichage (render)
   return (
     <div>
-      <div className='test-canva'>
-        <Canva actualColor={selectedColor} zoom={zoom} />
+      <div className='test-canvas'>
+        <Canvas actualColor={selectedColor} zoom={zoom} />
         <Palette onColorClick={handleColorSelect} />
         <Timer />
       </div>
