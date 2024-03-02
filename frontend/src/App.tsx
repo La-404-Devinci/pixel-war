@@ -4,6 +4,7 @@ import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
 import { socket } from './socket';
 import classementItem from '../../common/interfaces/classementItem.interface'
+import AssoModal from './components/AssoModal';
 
 function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -54,6 +55,9 @@ function App() {
   // affichage (render)
   return (
     <div className={styles.homepage}>
+      <div className={styles.modalAssoContener}>
+        <AssoModal />
+      </div>
       <div>
         <button onClick={handledisplayLogin} className={styles.btnLogin}>Login to draw !</button>
         <div>
