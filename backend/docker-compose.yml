@@ -1,14 +1,14 @@
 version: "3"
 
 services:
-    mysql:
-        image: mysql:8.3.0
-        container_name: mysql-pixelwar
-        restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: pixelwar
-        ports:
-            - "0.0.0.0:3336:3306"
-        volumes:
-            - ./data/mysql:/var/lib/mysql
+  mysql:
+    image: mysql:8.3.0
+    container_name: mysql-pixelwar
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pixelwar
+    ports:
+      - "0.0.0.0:3336:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql

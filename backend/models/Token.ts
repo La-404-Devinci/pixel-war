@@ -1,6 +1,6 @@
 interface Token {
-    devinciEmail: string;
-    type: "authentication" | "authorization";
+  devinciEmail: string;
+  type: "authentication" | "authorization";
 }
 
 export default Token;

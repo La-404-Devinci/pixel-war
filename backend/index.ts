@@ -21,19 +21,24 @@ const server = http.createServer(app);
 WSS.init(server);
 
 WSS.io.on("connection", (socket: Socket) => {
-    const ip = socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
-    const userAgent = socket.handshake.headers["user-agent"];
-    console.log(`Socket connected from ${ip} using ${userAgent}`);
+  const ip =
+    socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
+  const userAgent = socket.handshake.headers["user-agent"];
+  console.log(`Socket connected from ${ip} using ${userAgent}`);
 
-    socket.on("auth", (...data) => AccountController.authSocket(socket, ...data));
-    socket.on("place-pixel", (...data) => CanvasController.placePixel(socket, ...data));
-    socket.on("message", (...data) => ChatController.broadcastMessage(socket, ...data));
+  socket.on("auth", (...data) => AccountController.authSocket(socket, ...data));
+  socket.on("place-pixel", (...data) =>
+    CanvasController.placePixel(socket, ...data),
+  );
+  socket.on("message", (...data) =>
+    ChatController.broadcastMessage(socket, ...data),
+  );
 
-    WSS.updateClassement(socket);
+  WSS.updateClassement(socket);
 
-    socket.on("disconnect", () => {
-        console.log("Socket disconnected");
-    });
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected");
+  });
 });
 
 // Express routes
@@ -59,5 +64,5 @@ app.get("/admin", GoofyController.getAdminPage);
 // Start the server
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
