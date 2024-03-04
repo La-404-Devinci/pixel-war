@@ -1,4 +1,4 @@
 declare module "french-badwords-list" {
-  const array: string[];
-  export { array };
+    const array: string[];
+    export { array };
 }

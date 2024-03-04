@@ -1,5 +1,5 @@
 declare namespace Express {
-  export interface Request {
-    account: Account;
-  }
+    export interface Request {
+        account: Account;
+    }
 }
