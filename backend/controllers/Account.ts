@@ -18,7 +18,10 @@ class AccountController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async sendMagicLink(req: express.Request, res: express.Response) {
+    public static async sendMagicLink(
+        req: express.Request,
+        res: express.Response
+    ) {
         const { email } = req.body;
         const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci\.fr$/;
 
@@ -118,21 +121,22 @@ class AccountController {
     public static async muteUser(req: express.Request, res: express.Response) {
         const { userId, isMuted } = req.body;
 
-        prisma.account.update({
-            where: {
-                id: userId
-            },
-            data: {
-                isMuted: isMuted
-            }
-        }).then(() => {
-            res.status(200).send("Utilisateur muté");
-        }).catch(() => {
-            res.status(500).send("Une erreur s'est produite.");
-        });
-        
+        prisma.account
+            .update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    isMuted: isMuted,
+                },
+            })
+            .then(() => {
+                res.status(200).send("Utilisateur muté");
+            })
+            .catch(() => {
+                res.status(500).send("Une erreur s'est produite.");
+            });
     }
-
 
     /**
      * Ban/unban a user
@@ -147,13 +151,13 @@ class AccountController {
         try {
             await prisma.account.update({
                 where: { id: userId },
-                data: { isBanned: isBanned }
+                data: { isBanned: isBanned },
             });
-      
+
             res.status(200).send("Successful");
         } catch (error) {
             res.status(500).send("Not successful");
-            return; 
+            return;
         }
     }
 
@@ -164,7 +168,10 @@ class AccountController {
      * @param socket The client socket
      * @param data The payload
      */
-    public static async authSocket(socket: SocketIO.Socket, [token, email]: [string, string]) {
+    public static async authSocket(
+        socket: SocketIO.Socket,
+        [token, email]: [string, string]
+    ) {
         if (verifyAuthenticationToken(token, email)) {
             socket.data.token = token;
             socket.data.email = email;
@@ -172,6 +179,43 @@ class AccountController {
             socket.emit("auth-callback", true);
         } else {
             socket.emit("auth-callback", false);
+        }
+    }
+
+    public static async setAssociation(
+        req: express.Request,
+        res: express.Response
+    ) {
+        const { association } = req.body;
+
+        if (!association)
+            return res.status(400).send("Association is required");
+
+        try {
+            await prisma.account.update({
+                where: {
+                    devinciEmail: req.account.devinciEmail,
+                },
+                data: {
+                    association,
+                },
+            });
+
+            // Log the action
+            prisma.logEntry.create({
+                data: {
+                    devinciEmail: req.account.devinciEmail,
+                    time: new Date().getTime(),
+                    ip: req.ip || "Unknown",
+                    action: {
+                        type: "set_association",
+                    },
+                },
+            });
+
+            res.status(200).send("Association updated");
+        } catch (error) {
+            res.status(500).send("Unable to connect to the database");
         }
     }
 }
