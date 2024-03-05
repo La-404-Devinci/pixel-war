@@ -18,7 +18,10 @@ class ChatController {
      * @param socket The client socket
      * @param data The payload
      */
-    public static async broadcastMessage(socket: SocketIO.Socket, [message, callback]: [string, (success: boolean) => void]) {
+    public static async broadcastMessage(
+        socket: SocketIO.Socket,
+        [message, callback]: [string, (success: boolean) => void]
+    ) {
         if (!message || message.length < 1 || message.length > 200) {
             callback(false);
             return;
@@ -50,7 +53,9 @@ class ChatController {
 
         const now = new Date();
 
-        const lastTimestamps = ((user.lastSentMessageTimes as number[]) ?? []).filter((timestamp) => timestamp > now.getTime() - 5000);
+        const lastTimestamps = (
+            (user.lastSentMessageTimes as number[]) ?? []
+        ).filter((timestamp) => timestamp > now.getTime() - 5000);
         if (lastTimestamps.length > 3) {
             user.isMuted = true;
             // Save the user

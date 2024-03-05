@@ -7,6 +7,7 @@ interface Account {
     timeAlive: number;
     lastPixelTime: number;
     lastSentMessageTimes: number[];
+    association: string;
 }
 
 export default Account;

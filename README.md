@@ -23,7 +23,7 @@ Il s'agit d'une reproduction à échelle réduite et réservé au élèves du P�
     </tr>
     <tr>
       <td>Base de données</td>
-      <td>Mysql + Redis</td>
+      <td>Mysql</td>
     </tr>
     <tr>
       <td>Websocket API</td>
@@ -84,8 +84,14 @@ Exécutez les migrations de bases de données :
 
 > **Info :** Ne pas oublier de créer un fichier .env, coller le contenu de .env.example et modifier les variables d'environnement liées à la base de données
 
+
 ```
-npx migrate dev
+npx prisma migrate dev
+```
+
+```
+npm i --save-dev prisma@latest
+npm i @prisma/client@latest
 ```
 
 Exécuter l'application :

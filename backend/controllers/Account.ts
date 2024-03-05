@@ -18,21 +18,10 @@ class AccountController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async sendMagicLink(req: express.Request, res: express.Response) {
-        // TODO: Send a magic link containing the AUTHORIZATION token to the user's email
-        /**
-         * VALIDATION
-         * * Validate the user email (must be a Devinci email)
-         *
-         
-         * PROCESS
-         * * Generate an AUTHORIZATION token
-         * * Send the magic link to the user's email
-         *
-         * RESPONSE
-         * * Send a success message
-         * * Send an error message if the email is invalid
-         */
+    public static async sendMagicLink(
+        req: express.Request,
+        res: express.Response
+    ) {
         const { email } = req.body;
         const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci\.fr$/;
 
@@ -62,7 +51,7 @@ class AccountController {
 
         try {
             await transporter.sendMail(message);
-            res.status(200).send("Lien envoyé. Regarder vos mails.");
+            res.status(200).send("Lien envoyé. Regardez vos mails.");
         } catch (error) {
             res.status(500).send("Une erreur s'est produite.");
         }
@@ -130,19 +119,23 @@ class AccountController {
      * @param res The Express response object
      */
     public static async muteUser(req: express.Request, res: express.Response) {
-        // TODO: Mute/unmute a user
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         * * Validate the user ID
-         *
-         * PROCESS
-         * * Mute/unmute the user
-         *
-         * RESPONSE
-         * * Send a success message
-         * * Send an error message if the user ID is invalid
-         */
+        const { userId, isMuted } = req.body;
+
+        prisma.account
+            .update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    isMuted: isMuted,
+                },
+            })
+            .then(() => {
+                res.status(200).send("Utilisateur muté");
+            })
+            .catch(() => {
+                res.status(500).send("Une erreur s'est produite.");
+            });
     }
 
     /**
@@ -153,19 +146,19 @@ class AccountController {
      * @param res The Express response object
      */
     public static async banUser(req: express.Request, res: express.Response) {
-        // TODO: Ban/unban a user
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         * * Validate the user ID
-         *
-         * PROCESS
-         * * Ban/unban the user
-         *
-         * RESPONSE
-         * * Send a success message
-         * * Send an error message if the user ID is invalid
-         */
+        const { userId, isBanned } = req.body;
+
+        try {
+            await prisma.account.update({
+                where: { id: userId },
+                data: { isBanned: isBanned },
+            });
+
+            res.status(200).send("Successful");
+        } catch (error) {
+            res.status(500).send("Not successful");
+            return;
+        }
     }
 
     /**
@@ -175,7 +168,10 @@ class AccountController {
      * @param socket The client socket
      * @param data The payload
      */
-    public static async authSocket(socket: SocketIO.Socket, [token, email]: [string, string]) {
+    public static async authSocket(
+        socket: SocketIO.Socket,
+        [token, email]: [string, string]
+    ) {
         if (verifyAuthenticationToken(token, email)) {
             socket.data.token = token;
             socket.data.email = email;
@@ -183,6 +179,43 @@ class AccountController {
             socket.emit("auth-callback", true);
         } else {
             socket.emit("auth-callback", false);
+        }
+    }
+
+    public static async setAssociation(
+        req: express.Request,
+        res: express.Response
+    ) {
+        const { association } = req.body;
+
+        if (!association)
+            return res.status(400).send("Association is required");
+
+        try {
+            await prisma.account.update({
+                where: {
+                    devinciEmail: req.account.devinciEmail,
+                },
+                data: {
+                    association,
+                },
+            });
+
+            // Log the action
+            prisma.logEntry.create({
+                data: {
+                    devinciEmail: req.account.devinciEmail,
+                    time: new Date().getTime(),
+                    ip: req.ip || "Unknown",
+                    action: {
+                        type: "set_association",
+                    },
+                },
+            });
+
+            res.status(200).send("Association updated");
+        } catch (error) {
+            res.status(500).send("Unable to connect to the database");
         }
     }
 }

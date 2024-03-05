@@ -45,14 +45,14 @@ class WSS {
      * @param height The new canvas height
      */
 
-    static async updateCanvasSize(width:number, height:number) {
-        this.io.emit("canvas-size-update", width, height );
+    static async updateCanvasSize(width: number, height: number) {
+        this.io.emit("canvas-size-update", width, height);
     }
 
     /**
      * Sends a 'resetCanvas' event to all connected clients.
      */
-    static async resetCanvas(){
+    static async resetCanvas() {
         this.io.emit("canvas-reset");
     }
 
@@ -63,6 +63,37 @@ class WSS {
      */
     static async broadcastMessage(senderEmail: string, message: string) {
         this.io.emit("message", senderEmail, message);
+    }
+
+    /**
+     * Sends an 'updateCanvasPixel' event to all connected clients.
+     * @param x The x coordinate of the pixel
+     * @param y The y coordinate of the pixel
+     * @param color The color of the pixel
+     */
+    static async updateCanvasPixel(x: number, y: number, color: number[]) {
+        this.io.emit("canvas-pixel-update", x, y, color);
+    }
+
+    static async updateColorPalette(palette: number[][]) {
+        this.io.emit("canvas-palette-update", palette);
+    }
+
+    /**
+     * Sends an 'updateUserData' event to all connected clients.
+     * @param socket The socket of the user
+     * @param user The user data
+     */
+    static async updateUserData(socket: Socket, user: unknown) {
+        socket.emit("user-data-update", user);
+    }
+
+    /**
+     * Sends an 'updatePixelPlacementCooldown' event to all connected clients.
+     * @param time The time in seconds
+     */
+    static async updatePixelPlacementCooldown(time: number) {
+        this.io.emit("pixel-placement-cooldown-update", time);
     }
 }
 

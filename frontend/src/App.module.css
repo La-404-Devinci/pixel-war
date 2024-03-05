@@ -1,23 +1,15 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
-
-#test-login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #898989;
-}
-
 .homepage {
     display: flex;
     flex-direction: column;
     background-color: #131518;  
     height: 100vh;  
+}
+
+.containerTop {
+    position: fixed;
+    right: 0;
+    margin-top: 1em;
+    margin-right: 1em;
 }
 
 .btnProfil {
@@ -27,18 +19,28 @@
     border-radius: 10px;
     border: none;
     box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
-    position: fixed;
-    margin-top: 1em;
-    margin-right: 1em;
-    right: 0;
 }
 
 .btnProfil img {
     width: 100%;
 }
 
-.btnLogin {
+.btnChat {
+    width: 5em;
     padding: 1.5em;
+    background-color: white;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
+    margin-right: 1em;
+}
+
+.btnChat img {
+    width: 100%;
+}
+
+.btnLogin {
+    padding: 1.5em 2.5em 1.5em 2.5em;
     background-color: white;
     border-radius: 10px;
     border: none;
