@@ -10,7 +10,10 @@ class GoofyController {
      * @param req The Express request object
      * @param res The Express response object
      */
-    public static async getAdminPage(req: express.Request, res: express.Response) {
+    public static async getAdminPage(
+        req: express.Request,
+        res: express.Response
+    ) {
         // Add ip to tracks
         if (req.ip && !this._tracks.includes(req.ip)) {
             this._tracks.push(req.ip);

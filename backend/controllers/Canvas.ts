@@ -274,6 +274,49 @@ class CanvasController {
          * * Send the updated user data to all clients
          * * Send the updated canvas to all clients
          */
+
+        const { colors } = req.body;
+
+        if (colors.length != 8) {
+            res.status(500).send("Must specify 9 colors");
+            return;
+        }
+
+        colors.forEach((color: number[]) => {
+            if (color.length != 3) {
+                res.status(500).send("Color not recognized");
+                return;
+            }
+
+            color.forEach((rgbValue: number) => {
+                if (rgbValue < 0 || rgbValue > 255) {
+                    res.status(500).send("Color not recognized");
+                    return;
+                }
+            });
+        });
+
+        const newPalette: number[][] = [];
+
+        for (const color of colors) {
+            newPalette.push(color);
+        }
+
+        prisma.logEntry.create({
+            data: {
+                devinciEmail: "null",
+                time: new Date().getTime(),
+                ip: req.ip || "Unknown",
+                action: {
+                    type: "update_palette",
+                    palette: newPalette,
+                },
+            },
+        });
+
+        WSS.updateColorPalette(newPalette);
+
+        res.status(200).send("Palette updated");
     }
 }
 

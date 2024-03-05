@@ -11,7 +11,10 @@ class WSS {
     public static init(server: http.Server) {
         WSS.io = new SocketIO.Server(server, {
             cors: {
-                origin: process.env.NODE_ENV === "production" ? undefined : "http://localhost:5173",
+                origin:
+                    process.env.NODE_ENV === "production"
+                        ? undefined
+                        : "http://localhost:5173",
             },
         });
     }
@@ -72,6 +75,10 @@ class WSS {
         this.io.emit("canvas-pixel-update", x, y, color);
     }
 
+    static async updateColorPalette(palette: number[][]) {
+        this.io.emit("canvas-palette-update", palette);
+    }
+
     /**
      * Sends an 'updateUserData' event to all connected clients.
      * @param socket The socket of the user
@@ -81,12 +88,11 @@ class WSS {
         socket.emit("user-data-update", user);
     }
 
-
     /**
      * Sends an 'updatePixelPlacementCooldown' event to all connected clients.
      * @param time The time in seconds
      */
-    static async updatePixelPlacementCooldown (time: number) {
+    static async updatePixelPlacementCooldown(time: number) {
         this.io.emit("pixel-placement-cooldown-update", time);
     }
 }

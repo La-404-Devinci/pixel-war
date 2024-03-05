@@ -5,13 +5,18 @@ import { verifyAuthenticationToken } from "../auth/tokenUtils";
 
 const prisma = new PrismaClient();
 
-const verifyUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const verifyUser = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+) => {
     try {
         const token = req.cookies.token;
         const devinciEmail = req.cookies.devinciEmail;
 
         if (!token) return res.status(401).send("Authorization token required");
-        if (!devinciEmail) return res.status(401).send("Devinci email required");
+        if (!devinciEmail)
+            return res.status(401).send("Devinci email required");
 
         if (!verifyAuthenticationToken(token, devinciEmail)) {
             return res.status(403).send("Invalid token");
