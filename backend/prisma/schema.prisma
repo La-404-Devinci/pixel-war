@@ -20,6 +20,7 @@ model Account {
     timeAlive            Int?
     lastPixelTime        DateTime?
     lastSentMessageTimes Json?
+    association          String?
 }
 
 model LogEntry {
