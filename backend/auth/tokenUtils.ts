@@ -42,7 +42,10 @@ const verifyJwtToken = (token: string, targetEmail: string): Token | null => {
  */
 const generateAuthorizationToken = (devinciEmail: string): string => {
     const authorizationExpiration = 60 * 15; // 15 minutes
-    return generateJwtToken({ devinciEmail, type: "authorization" }, authorizationExpiration);
+    return generateJwtToken(
+        { devinciEmail, type: "authorization" },
+        authorizationExpiration
+    );
 };
 
 /**
@@ -53,7 +56,10 @@ const generateAuthorizationToken = (devinciEmail: string): string => {
  */
 const generateAuthenticationToken = (devinciEmail: string): string => {
     const authenticationExpiration = 60 * 60 * 24 * 14; // 14 days
-    return generateJwtToken({ devinciEmail, type: "authentication" }, authenticationExpiration);
+    return generateJwtToken(
+        { devinciEmail, type: "authentication" },
+        authenticationExpiration
+    );
 };
 
 /**
@@ -63,7 +69,10 @@ const generateAuthenticationToken = (devinciEmail: string): string => {
  * @param targetEmail The email to be verified
  * @returns Whether the token is valid
  */
-const verifyAuthorizationToken = (token: string, targetEmail: string): boolean => {
+const verifyAuthorizationToken = (
+    token: string,
+    targetEmail: string
+): boolean => {
     const decodedToken = verifyJwtToken(token, targetEmail);
     if (decodedToken === null) return false;
     return decodedToken.type === "authorization";
@@ -76,10 +85,18 @@ const verifyAuthorizationToken = (token: string, targetEmail: string): boolean =
  * @param targetEmail The email to be verified
  * @returns Whether the token is valid
  */
-const verifyAuthenticationToken = (token: string, targetEmail: string): boolean => {
+const verifyAuthenticationToken = (
+    token: string,
+    targetEmail: string
+): boolean => {
     const decodedToken = verifyJwtToken(token, targetEmail);
     if (decodedToken === null) return false;
     return decodedToken.type === "authentication";
 };
 
-export { generateAuthorizationToken, generateAuthenticationToken, verifyAuthorizationToken, verifyAuthenticationToken };
+export {
+    generateAuthorizationToken,
+    generateAuthenticationToken,
+    verifyAuthorizationToken,
+    verifyAuthenticationToken,
+};

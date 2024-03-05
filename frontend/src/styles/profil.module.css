@@ -1,0 +1,74 @@
+.containerProfil {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    padding: 2em;
+    background-color: white;
+    position: fixed;
+    right: 0;
+}
+
+.btnLogOut {
+    width: 100%;
+    padding: 1em;
+    border-radius: 8px;
+    border: none;
+    background-color: #333333;
+    cursor: pointer;
+    color: white;
+    margin-top: 1em;
+}
+
+.profilTitle {
+    height: 100px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+    font-weight: bold;
+}
+
+.profilTitle p {
+    overflow: auto;
+    margin-right: 1em;
+}
+
+.btnClose {
+    background-color: white;
+    border: none;
+}
+
+.containerStats {
+    width: 100%;
+}
+
+.blockStats {
+    display: flex;
+    justify-content: space-between;
+    margin-block: 1em;
+}
+
+.blockStats p:nth-child(1) {
+    font-weight: bold;
+}
+
+@media screen and (max-width: 768px) {
+    .containerProfil {
+        max-width: 100%;
+        padding: 3em;
+    }
+
+    .containerProfil button {
+        font-size: 1.2em;
+    }
+
+   p {
+    font-size: 1.2em;
+   }
+}

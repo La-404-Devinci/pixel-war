@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model Account {
+    id                   Int      @id @default(autoincrement())
+    devinciEmail         String @unique()
+    isMuted              Boolean @default(false)
+    isBanned             Boolean @default(false)
+    isAdmin              Boolean @default(false)
+    placedPixels         Int @default(0)
+    timeAlive            Int?
+    lastPixelTime        DateTime?
+    lastSentMessageTimes Json?
+    association          String?
+}
+
+model LogEntry {
+    id           Int      @id @default(autoincrement())
+    devinciEmail String
+    time         Int
+    ip           String
+    action       Json
+}
+
