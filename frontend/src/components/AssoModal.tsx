@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+// import React, { useEffect } from 'react'
 import { useState } from 'react'
 import styles from '../styles/assoModal.module.css'
 import Select from 'react-select';
 import { Input } from 'react-select/animated';
-import { JSX } from 'react/jsx-runtime';
+// import { JSX } from 'react/jsx-runtime';
 
 
 
@@ -18,12 +18,12 @@ export default function AssoModal() {
   ]);
 
 
-  const [selectedAsso, setSelectedAsso] = useState(null)
+  const [selectedAsso, setSelectedAsso] = useState({id: '', name: '', image: ''});
 
   const [displayAssoModal, setDisplayAssoModal] = useState(true)
 
   
-  const handleSelectChange = (selectedOption: any) => {
+  const handleSelectChange = (selectedOption) => {
     setSelectedAsso(selectedOption);
   };
 
@@ -55,12 +55,6 @@ export default function AssoModal() {
             onChange={handleSelectChange}
             value={selectedAsso}
           />
-          {/* {selectedAsso && (
-            <div>
-              <p>Asso sélectionnée : {selectedAsso.label}</p>
-              <img src={selectedAsso.image} alt="icone-asso" />
-            </div>
-          )} */}
 
           <button>C'est parti !</button>
 
