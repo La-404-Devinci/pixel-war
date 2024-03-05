@@ -3,12 +3,15 @@ import http from "http";
 import { Socket } from "socket.io";
 import dotenv from "dotenv";
 import WSS from "./server/Websocket";
+
+import verifyUser from "./middlewares/verifyUser";
+import verifyAdmin from "./middlewares/verifyAdmin";
+
 import AccountController from "./controllers/Account";
 import CanvasController from "./controllers/Canvas";
 import ChatController from "./controllers/Chat";
-import verifyUser from "./middlewares/verifyUser";
-import verifyAdmin from "./middlewares/verifyAdmin";
 import GoofyController from "./controllers/Goofy";
+import AssosController from "./controllers/Assos";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -48,6 +51,9 @@ app.post("/auth/send-magic-link", AccountController.sendMagicLink);
 app.get("/auth/login", AccountController.login);
 app.get("/canvas/image", CanvasController.getCanvasImage);
 
+// Asso routes
+app.post("/api/asso", AccountController.setAssociation);
+
 // Admin routes
 const router = express.Router();
 router.use(verifyUser);
@@ -62,6 +68,7 @@ router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
 router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
 
 app.get("/admin", GoofyController.getAdminPage);
+app.get("/assos", AssosController.getAssos);
 
 // Start the server
 const port = process.env.PORT || 3000;

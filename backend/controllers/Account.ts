@@ -181,6 +181,43 @@ class AccountController {
             socket.emit("auth-callback", false);
         }
     }
+
+    public static async setAssociation(
+        req: express.Request,
+        res: express.Response
+    ) {
+        const { association } = req.body;
+
+        if (!association)
+            return res.status(400).send("Association is required");
+
+        try {
+            await prisma.account.update({
+                where: {
+                    devinciEmail: req.account.devinciEmail,
+                },
+                data: {
+                    association,
+                },
+            });
+
+            // Log the action
+            prisma.logEntry.create({
+                data: {
+                    devinciEmail: req.account.devinciEmail,
+                    time: new Date().getTime(),
+                    ip: req.ip || "Unknown",
+                    action: {
+                        type: "set_association",
+                    },
+                },
+            });
+
+            res.status(200).send("Association updated");
+        } catch (error) {
+            res.status(500).send("Unable to connect to the database");
+        }
+    }
 }
 
 export default AccountController;

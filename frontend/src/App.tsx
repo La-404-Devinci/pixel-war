@@ -1,12 +1,16 @@
-import { useEffect, useState } from 'react'
+// import { useState } from 'react'
+import { SetStateAction, useEffect, useState } from 'react';
 import styles from './App.module.css'
+import { socket } from './socket';
+import classementItem from '../../common/interfaces/classementItem.interface'
+import ChatComponent from './components/chat'
+import LeaderboardComponent from './components/leaderboard'
 import LoginComponent from './components/login'
 import ProfilComponent from './components/profil'
-import LeaderboardComponent from './components/leaderboard'
-import { socket } from './socket';
-import ChatComponent from './components/chat'
 import isMobile from './utiles/isMobile'
-import classementItem from '../../common/interfaces/classementItem.interface'
+import Canvas from './components/Canvas'
+import Palette from './components/Palette';
+import Timer from './components/Timer';
 
 function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -14,11 +18,15 @@ function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnected, setIsConnected] = useState(socket.connected);
 
+
+  const [selectedColor, setSelectedColor] = useState("white");
+
+  const [zoom, setZoom] = useState(1);
+
   const [userEmail, setUserEmail] = useState("");
   const [displayBtnLogin, setDisplayBtnLogin] = useState(true);
   const [displayComponent, setDisplayComponent] = useState("none");
   const [isMobileView, setIsMobileView] = useState(isMobile.any())
-
 
   useEffect(() => {
     function onConnect() {
@@ -44,6 +52,32 @@ function App() {
     };
   }, []);
 
+
+
+  const handleColorSelect = (color: SetStateAction<string>) => {
+    setSelectedColor(color);
+    console.log('Couleur sélectionnée dans App.tsx:', color);
+  };
+
+
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      // Multiplicateur de zoom arbitraire
+      const zoomFactor = 0.1;
+      // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
+      const newZoom = event.deltaY > 0 ? zoom - zoomFactor : zoom + zoomFactor;
+      // Limiter le zoom à un minimum de 0.1 pour éviter les valeurs non valides
+      setZoom(Math.max(0.1, newZoom));
+    };
+
+    window.addEventListener('wheel', handleWheel);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, [zoom]);
+  
   useEffect(() => {
     const handleResize = () => {
       setIsMobileView(isMobile.any())
@@ -55,7 +89,6 @@ function App() {
         window.removeEventListener('resize', handleResize)
     };
   }, [])
-
 
   const handleLogin = (email: string) => {
     setUserEmail(email.split('@')[0]);
@@ -79,24 +112,38 @@ function App() {
   }
 
 
+
   // affichage (render)
   return (
-    <div className={styles.homepage}>
-      <div className={styles.containerTop}>
-        {isMobile.any() && <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}><img src="/src/assets/message.svg" alt="icone-chat" /></button>}
-        {displayComponent !== "profil" && <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
+    <div>
+      <div className={styles.testCanvas}>
+        <Canvas actualColor={selectedColor} zoom={zoom} />
+        <Palette onColorClick={handleColorSelect} />
+        <Timer />
       </div>
+
+      {/* <div id="test-login">
+        <LoginComponent />
+      </div> */}
       
-      <LeaderboardComponent />
-      
-      {displayBtnLogin && <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>Login to draw !</button>}
-      
-      {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
-      {displayComponent === "profil" && <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />}
-      {displayComponent === "chat" && <ChatComponent />}
-      {!isMobile.any() && <ChatComponent userEmail={userEmail} />}
+      <div className={styles.homepage}>
+        <div className={styles.containerTop}>
+          {isMobile.any() && <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}><img src="/src/assets/message.svg" alt="icone-chat" /></button>}
+          {displayComponent !== "profil" && <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
+        </div>
+
+        <LeaderboardComponent />
+
+        {displayBtnLogin && <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>Login to draw !</button>}
+
+        {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
+        {displayComponent === "profil" && <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />}
+        {displayComponent === "chat" && <ChatComponent />}
+        {!isMobile.any() && <ChatComponent userEmail={userEmail} />}
+      </div>
     </div>
   );
 }
 
 export default App
+

@@ -4,7 +4,7 @@ class GoofyController {
     private static _tracks: string[] = [];
 
     /**
-     * Get the canvas image
+     * Get the admin page
      * @server HTTP
      *
      * @param req The Express request object
