@@ -53,6 +53,10 @@ app.get("/canvas/image", CanvasController.getCanvasImage);
 
 // Asso routes
 app.post("/api/asso", AccountController.setAssociation);
+app.get("/assos", AssosController.getAssos);
+
+// Messages routes
+app.get("/messages", ChatController.getMessages);
 
 // Admin routes
 const router = express.Router();
@@ -68,7 +72,6 @@ router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
 router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
 
 app.get("/admin", GoofyController.getAdminPage);
-app.get("/assos", AssosController.getAssos);
 
 // Start the server
 const port = process.env.PORT || 3000;
