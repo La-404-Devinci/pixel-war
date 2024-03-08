@@ -2,12 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import styles from '../styles/canvas.module.css';
 
-export default function Canvas(props: {actualColor: string, zoom: number}) {
+export default function Canvas(props: {actualColor: string, zoom: number, readOnly: boolean}) {
     const canvasRef = useRef<HTMLCanvasElement>(null); // Référence pour le canvas
     const cursorRef = useRef<HTMLDivElement>(null); // Référence pour le curseur
 
     const [pixelSize, setPixelWidth] = useState(20);
 
+    const readOnly = props.readOnly;
     const zoom = props.zoom;
 
     useEffect(() => {
@@ -74,8 +75,8 @@ export default function Canvas(props: {actualColor: string, zoom: number}) {
                 className={styles.game}
                 width={500}
                 height={500}
-                onMouseMove={handleMove}
-                onMouseDown={handleClick}
+                onMouseMove={readOnly ? handleMove : undefined}
+                onMouseDown={readOnly ? handleClick : undefined}
             ></canvas>
         </div>
     );

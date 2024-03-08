@@ -1,16 +1,16 @@
-  .game{
+.game {
     cursor: none;
     background-color: white;
-  }
-  
-  .cursor{
+}
+
+.cursor {
     background-color: none;
     border: 2px solid black;
     box-sizing: border-box;
     position: absolute;
     cursor: none;
-  }
-  
-  .canvas {
+}
+
+.canvas {
     position: relative;
-  }
+}

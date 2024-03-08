@@ -18,11 +18,9 @@ const [colors, setColors] = useState(["red", "blue", "green", "yellow", "purple"
 
 
 function handleRenderColors() {
-  console.log(colors)
 
 // conditional rendering (if colors === null, return loading)
   if (colors.length <= 0) {
-    console.log("pas de couleurs dans la liste")
     return <div>Loading...</div>
   }
 
