@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PaletteColor from './PaletteColor'
-import styles from '../App.module.css'
+import styles from '../styles/palette.module.css'
 
 export default function Palette({onColorClick}: {onColorClick(color: string): unknown}){
 // useState (array of colors | null)

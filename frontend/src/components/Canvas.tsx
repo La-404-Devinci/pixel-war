@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useState } from 'react';
-import styles from '../App.module.css';
+import styles from '../styles/canvas.module.css';
 
 export default function Canvas(props: {actualColor: string, zoom: number}) {
     const canvasRef = useRef<HTMLCanvasElement>(null); // Référence pour le canvas
