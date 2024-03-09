@@ -1,5 +1,4 @@
-import React from 'react'
-import styles from '../App.module.css'
+import styles from '../styles/palette.module.css'
 
 export default function Timer() {
   return (
