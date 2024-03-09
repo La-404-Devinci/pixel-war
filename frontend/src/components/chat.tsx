@@ -3,13 +3,20 @@ import chatStylesMobile from "../styles/chatMobile.module.css";
 import { useEffect, useState, useRef } from "react";
 import isMobile from "../utils/isMobile";
 
-const ChatComponent: React.FC = () => {
+interface ChatComponentProps {
+    userEmail: string;
+    active: boolean;
+}
+
+const ChatComponent: React.FC<ChatComponentProps> = ({ userEmail, active }) => {
     const [chat, setChat] = useState<[string, string][]>([]);
     const [message, setMessage] = useState<string>("");
     const [isMobileView, setIsMobileView] = useState(isMobile.any());
     const [isExpanded, setIsExpanded] = useState(false);
     const [lastMessageTimes, setLastMessageTimes] = useState<number[]>([]);
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+    const user = userEmail;
 
     const sendMessage = () => {
         if (message.trim().length === 0) return;
@@ -25,7 +32,8 @@ const ChatComponent: React.FC = () => {
         setLastMessageTimes(lastMessageTimes);
 
         // Send message to websocket
-        setChat([...chat, ["test.user", message]]);
+        // TODO: Send message to websocket
+        // setChat([...chat, [user, message]]);
         setMessage("");
         setIsExpanded(true);
     };
@@ -69,8 +77,9 @@ const ChatComponent: React.FC = () => {
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Ecris un message..."
+                    placeholder={active ? "Entrez votre message..." : "Connectez-vous"}
                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                    readOnly={!active}
                 />
                 <button onClick={sendMessage}>
                     <img src="/src/assets/paper-plane.svg" alt="logo-avion-papier" />

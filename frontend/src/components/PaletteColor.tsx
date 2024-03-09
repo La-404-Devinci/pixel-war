@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from '../App.module.css'
+import styles from '../styles/palette.module.css'
 
 export default function PalletteColor(props: {onClick(color: string): unknown;color: string}) {
 

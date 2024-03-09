@@ -81,6 +81,9 @@ app.get("/canvas/image", CanvasController.getCanvasImage);
 // Asso routes
 app.post("/api/asso", verifyUser, AccountController.setAssociation);
 
+// Messages routes
+app.get("/messages", ChatController.getMessages);
+
 // Admin routes
 const router = express.Router();
 

@@ -53,7 +53,6 @@ function App() {
 
     const handleColorSelect = (color: SetStateAction<string>) => {
         setSelectedColor(color);
-        console.log("Couleur sélectionnée dans App.tsx:", color);
     };
 
     useEffect(() => {
@@ -74,7 +73,8 @@ function App() {
     }, [zoom]);
 
     useEffect(() => {
-        const handleResize = () => {
+        const handleResize = (e: Event) => {
+            e.preventDefault();
             setIsMobileView(isMobile.any());
         };
 
@@ -109,9 +109,9 @@ function App() {
     // affichage (render)
     return (
         <div>
-            <div className={styles.testCanvas}>
-                <Canvas actualColor={selectedColor} zoom={zoom} />
-                <Palette onColorClick={handleColorSelect} />
+            <div className={styles.canvasContainer}>
+                <Canvas actualColor={selectedColor} zoom={zoom} readOnly={isConnected} />
+                {isConnected && <Palette onColorClick={handleColorSelect} />}
                 <Timer />
             </div>
 
@@ -120,18 +120,20 @@ function App() {
       </div> */}
 
             <div className={styles.homepage}>
-                <div className={styles.containerTop}>
-                    {isMobile.any() && (
-                        <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
-                            <img src="/src/assets/message.svg" alt="icone-chat" />
-                        </button>
-                    )}
-                    {displayComponent !== "profil" && (
-                        <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
-                            <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
-                        </button>
-                    )}
-                </div>
+                {isConnected && (
+                    <div className={styles.containerTop}>
+                        {isMobile.any() && (
+                            <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
+                                <img src="/src/assets/message.svg" alt="icone-chat" />
+                            </button>
+                        )}
+                        {displayComponent !== "profil" && (
+                            <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
+                                <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 <LeaderboardComponent />
 
@@ -145,8 +147,8 @@ function App() {
                 {displayComponent === "profil" && (
                     <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />
                 )}
-                {displayComponent === "chat" && <ChatComponent />}
-                {!isMobile.any() && <ChatComponent userEmail={userEmail} />}
+                {displayComponent === "chat" && <ChatComponent userEmail={userEmail} active={isConnected} />}
+                {!isMobile.any() && <ChatComponent userEmail={userEmail} active={isConnected} />}
             </div>
         </div>
     );

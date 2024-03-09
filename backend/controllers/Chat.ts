@@ -1,5 +1,6 @@
 import type SocketIO from "socket.io";
 import { PrismaClient } from "@prisma/client";
+import express from "express";
 
 import leoProfanity from "leo-profanity";
 import frenchBadwordsList from "french-badwords-list";
@@ -11,6 +12,8 @@ leoProfanity.add(frenchBadwordsList.array);
 const prisma = new PrismaClient();
 
 class ChatController {
+    private static _messageHistory: string[] = [];
+
     /**
      * Broadcasts a message to all connected clients
      * @server WebSocket
@@ -56,7 +59,7 @@ class ChatController {
         const lastTimestamps = (
             (user.lastSentMessageTimes as number[]) ?? []
         ).filter((timestamp) => timestamp > now.getTime() - 5000);
-        if (lastTimestamps.length > 3) {
+        if (lastTimestamps.length > 4) {
             user.isMuted = true;
             // Save the user
             await prisma.account.update({
@@ -89,9 +92,24 @@ class ChatController {
             },
         });
 
+        // Add the message to the history
+        ChatController._messageHistory.push(cleanMessage);
+        if (ChatController._messageHistory.length > 30) ChatController._messageHistory.shift();
+
         WSS.broadcastMessage(user.devinciEmail, cleanMessage);
 
         callback(true);
+    }
+
+    /**
+     * Returns the last 30 messages
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     */
+    public static async getMessages(req: express.Request, res: express.Response) {
+        res.json(ChatController._messageHistory);
     }
 }
 
