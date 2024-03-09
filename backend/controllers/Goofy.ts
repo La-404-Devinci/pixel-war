@@ -9,17 +9,16 @@ class GoofyController {
      *
      * @param req The Express request object
      * @param res The Express response object
+     * @param next The Express next function
      */
-    public static async getAdminPage(
-        req: express.Request,
-        res: express.Response
-    ) {
-        // Add ip to tracks
-        if (req.ip && !this._tracks.includes(req.ip)) {
-            this._tracks.push(req.ip);
-        }
+    public static async getAdminPage(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            // Add ip to tracks
+            if (req.ip && !this._tracks.includes(req.ip)) {
+                this._tracks.push(req.ip);
+            }
 
-        res.send(`
+            res.send(`
             <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <img src="https://media1.tenor.com/m/yNMGjXsoYGUAAAAd/cat-cats.gif" alt="Goofy" style="width: 300px; height: 300px; margin-bottom: 20px;">
                 <h1>Goofy</h1>
@@ -28,6 +27,9 @@ class GoofyController {
                 <p>Good luck!</p>
             </div>
         `);
+        } catch (error) {
+            next(error);
+        }
     }
 }
 

@@ -1,76 +1,88 @@
-import chatStylesDesktop from '../styles/chatDesktop.module.css'
-import chatStylesMobile from '../styles/chatMobile.module.css'
-import { useEffect, useState, useRef } from 'react'
-import isMobile from '../utiles/isMobile'
+import chatStylesDesktop from "../styles/chatDesktop.module.css";
+import chatStylesMobile from "../styles/chatMobile.module.css";
+import { useEffect, useState, useRef } from "react";
+import isMobile from "../utils/isMobile";
 
 const ChatComponent: React.FC = () => {
-    const [chat, setChat] = useState<[string, string][]>([])
-    const [message, setMessage] = useState<string>('')
-    const [isMobileView, setIsMobileView] = useState(isMobile.any())
+    const [chat, setChat] = useState<[string, string][]>([]);
+    const [message, setMessage] = useState<string>("");
+    const [isMobileView, setIsMobileView] = useState(isMobile.any());
     const [isExpanded, setIsExpanded] = useState(false);
-    const [lastMessageTimes, setLastMessageTimes] = useState<number[]>([])
-    const messagesContainerRef = useRef<HTMLDivElement | null>(null)
+    const [lastMessageTimes, setLastMessageTimes] = useState<number[]>([]);
+    const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
     const sendMessage = () => {
         if (message.trim().length === 0) return;
 
-        if (lastMessageTimes.filter(time => Date.now() - time < 5000).length >= 3)
-        {
+        if (lastMessageTimes.filter((time) => Date.now() - time < 5000).length >= 3) {
             setChat([...chat, ["SYSTEM", "Vous envoyez trop de messages, veuillez patienter quelques secondes..."]]);
             return;
         }
 
-        lastMessageTimes.push(Date.now())
-        if (lastMessageTimes.length > 3)
-            lastMessageTimes.shift()
+        lastMessageTimes.push(Date.now());
+        if (lastMessageTimes.length > 3) lastMessageTimes.shift();
 
-        setLastMessageTimes(lastMessageTimes)
-
+        setLastMessageTimes(lastMessageTimes);
 
         // Send message to websocket
         setChat([...chat, ["test.user", message]]);
-        setMessage('')
-        setIsExpanded(true)
-    }
+        setMessage("");
+        setIsExpanded(true);
+    };
 
     const toggleShow = () => {
         setIsExpanded(!isExpanded);
-    }
+    };
 
     useEffect(() => {
         if (messagesContainerRef.current) {
-            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
-    }, [chat])
+    }, [chat]);
 
     useEffect(() => {
         const handleResize = () => {
-            setIsMobileView(isMobile.any())
+            setIsMobileView(isMobile.any());
         };
 
-        window.addEventListener('resize', handleResize)
+        window.addEventListener("resize", handleResize);
 
         return () => {
-            window.removeEventListener('resize', handleResize)
+            window.removeEventListener("resize", handleResize);
         };
-    }, [])
+    }, []);
 
-    const chatStyles = isMobileView ? chatStylesMobile : chatStylesDesktop
-    
+    const chatStyles = isMobileView ? chatStylesMobile : chatStylesDesktop;
+
     return (
         <div className={chatStyles.chat}>
             <div className={`${chatStyles.messages} ${isExpanded && chatStyles.expanded}`} ref={messagesContainerRef}>
                 {chat.map((chatMessage, index) => (
-                    <div key={index}> <span>{chatMessage[0]}:</span> {chatMessage[1]}</div>)
-                )}
+                    <div key={index}>
+                        {" "}
+                        <span>{chatMessage[0]}:</span> {chatMessage[1]}
+                    </div>
+                ))}
             </div>
             <div className={chatStyles.input}>
-                <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder='Ecris un message...' onKeyDown={(e) => e.key === 'Enter' && sendMessage()} />
-                <button onClick={sendMessage}><img src="/src/assets/paper-plane.svg" alt="logo-avion-papier" /></button>
-                {!isMobileView && <button onClick={toggleShow} className={isExpanded ? chatStyles.reversed : undefined}><img src="/src/assets/chevron-down.svg" alt="chevron-down" /></button>}
+                <input
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Ecris un message..."
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                />
+                <button onClick={sendMessage}>
+                    <img src="/src/assets/paper-plane.svg" alt="logo-avion-papier" />
+                </button>
+                {!isMobileView && (
+                    <button onClick={toggleShow} className={isExpanded ? chatStyles.reversed : undefined}>
+                        <img src="/src/assets/chevron-down.svg" alt="chevron-down" />
+                    </button>
+                )}
             </div>
         </div>
     );
-}
+};
 
-export default ChatComponent
+export default ChatComponent;

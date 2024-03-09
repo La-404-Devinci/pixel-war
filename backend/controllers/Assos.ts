@@ -1,5 +1,5 @@
 import express from "express";
-import assos from "../data/assos.json";
+import assos from "../database/assos.json";
 
 class AssosController {
     /**
@@ -8,9 +8,14 @@ class AssosController {
      *
      * @param req The Express request object
      * @param res The Express response object
+     * @param next The Express next function
      */
-    public static async getAssos(req: express.Request, res: express.Response) {
-        res.json(assos);
+    public static async getAssos(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            res.status(200).json(assos);
+        } catch (error) {
+            next(error);
+        }
     }
 }
 
