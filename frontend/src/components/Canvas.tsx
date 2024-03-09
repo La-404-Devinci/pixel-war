@@ -76,7 +76,7 @@ export default function Canvas(props: {actualColor: string, zoom: number, readOn
                 width={500}
                 height={500}
                 onMouseMove={readOnly ? handleMove : undefined}
-                onMouseDown={readOnly ? handleClick : undefined}
+                onMouseUp={readOnly ? handleClick : undefined}
             ></canvas>
         </div>
     );

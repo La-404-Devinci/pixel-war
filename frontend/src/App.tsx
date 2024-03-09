@@ -19,8 +19,8 @@ function App() {
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     const [selectedColor, setSelectedColor] = useState("white");
-
     const [zoom, setZoom] = useState(1);
+    const [isDraggable, setIsDraggable] = useState(false);
 
     const [userEmail, setUserEmail] = useState("");
     const [displayBtnLogin, setDisplayBtnLogin] = useState(true);
@@ -72,6 +72,13 @@ function App() {
             window.removeEventListener("wheel", handleWheel);
         };
     }, [zoom]);
+
+    useEffect(() => {
+      const handleMouseDown = (event: MouseEvent) => {
+        if (event.button === 0) setIsDraggable(true);
+        
+      };
+    }, [isDraggable])
 
     useEffect(() => {
         const handleResize = (e: Event) => {
