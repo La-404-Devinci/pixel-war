@@ -11,16 +11,16 @@
     max-width: 1000px;
 }
 
-.color{
+.color {
     width: 30px;
     height: 30px;
     border-radius: 10px;
     margin: 0 5px;
-    cursor: pointer;    
+    cursor: pointer;
     border: none;
 }
 
-.timer{
+.timer {
     position: absolute;
     display: flex;
     justify-content: center;
@@ -32,21 +32,18 @@
     font-size: 150%;
 }
 
-
-@media screen and (max-width: 991px){
-    
-    .colorPalette{
+@media screen and (max-width: 991px) {
+    .colorPalette {
         max-width: 300px;
     }
 
-    .color{
+    .color {
         width: 20px;
         height: 20px;
         border-radius: 5px;
     }
 
-    .timer{
+    .timer {
         height: 40px;
     }
-
 }

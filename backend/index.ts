@@ -23,6 +23,9 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Fix proxy ip
+app.set("trust proxy", true);
+
 // Enable CORS
 if (process.env.NODE_ENV !== "production") {
     app.use((req, res, next) => {
@@ -77,6 +80,7 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 app.post("/auth/send-magic-link", AccountController.sendMagicLink);
 app.get("/auth/login", AccountController.login);
 app.get("/canvas/image", CanvasController.getCanvasImage);
+app.get("/canvas/palette", CanvasController.getCanvasPalette);
 
 // Asso routes
 app.post("/api/asso", verifyUser, AccountController.setAssociation);
@@ -90,14 +94,14 @@ const router = express.Router();
 router.use(verifyUser);
 router.use(verifyAdmin);
 
-router.post("/auth/ban", AccountController.banUser);
-router.post("/auth/mute", AccountController.muteUser);
-router.post("/canvas/reset", CanvasController.resetCanvas);
-router.post("/canvas/size", CanvasController.changeCanvasSize);
-router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
-router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
+router.post("auth/ban", AccountController.banUser);
+router.post("auth/mute", AccountController.muteUser);
+router.post("canvas/reset", CanvasController.resetCanvas);
+router.post("canvas/size", CanvasController.changeCanvasSize);
+router.post("canvas/countdown", CanvasController.changePixelPlacementCooldown);
+router.post("canvas/palette", CanvasController.editCanvasColorPalette);
 
-app.use("/admin", router);
+app.use("/a/", router);
 
 // Goofy routes
 app.get("/admin", GoofyController.getAdminPage);
@@ -108,7 +112,12 @@ app.get("/assos", AssosController.getAssos);
 // Error handling
 app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (err) {
-        console.error(err);
+        console.log("--- ERROR ---");
+        console.log("Method:", req.method);
+        console.log("URL:", req.url);
+        console.log("Body:", req.body);
+        console.log("Error:", err);
+        console.log("--- ERROR ---");
         res.status(500).send("Internal server error");
     } else {
         next();

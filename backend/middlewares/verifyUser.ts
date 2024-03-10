@@ -27,7 +27,7 @@ const verifyUser = async (req: express.Request, res: express.Response, next: exp
 
         next();
     } catch (error) {
-        res.status(500).json("Internal server error");
+        res.status(500).json("Internal server error (unable to verify user)");
     }
 };
 

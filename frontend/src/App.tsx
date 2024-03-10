@@ -1,8 +1,7 @@
 // import { useState } from 'react'
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./App.module.css";
 import { socket } from "./socket";
-import classementItem from "../../common/interfaces/classementItem.interface";
 import ChatComponent from "./components/chat";
 import LeaderboardComponent from "./components/leaderboard";
 import LoginComponent from "./components/login";
@@ -11,47 +10,58 @@ import isMobile from "./utils/isMobile";
 import Canvas from "./components/Canvas";
 import Palette from "./components/Palette";
 import Timer from "./components/Timer";
+import API from "./utils/api";
 
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [classement, setClassement] = useState<classementItem[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [isConnected, setIsConnected] = useState(socket.connected);
+    const cookies = document.cookie.split(";");
+    let email = undefined;
+    let isConnected = false;
 
-    const [selectedColor, setSelectedColor] = useState("white");
+    for (let i = 0; i < cookies.length; i++) {
+        if (cookies[i].includes("email")) {
+            email = decodeURIComponent(cookies[i].split("=")[1]);
+            isConnected = true;
+        }
+    }
+
+    const [selectedColor, setSelectedColor] = useState(0);
 
     const [zoom, setZoom] = useState(1);
-
-    const [userEmail, setUserEmail] = useState("");
-    const [displayBtnLogin, setDisplayBtnLogin] = useState(true);
     const [displayComponent, setDisplayComponent] = useState("none");
     const [isMobileView, setIsMobileView] = useState(isMobile.any());
+    const [time, setTime] = useState(0);
+    const [colors, setColors] = useState<string[]>([]);
+
+    const setColorsFromAPI = (colors: number[][]) => {
+        setColors(colors.map((color) => `rgb(${color.join(",")})`));
+    };
 
     useEffect(() => {
-        function onConnect() {
-            setIsConnected(true);
+        if (colors.length === 0) {
+            API.GET("/canvas/palette").then((res) => {
+                setColorsFromAPI(res);
+            });
         }
 
-        function onDisconnect() {
-            setIsConnected(false);
-        }
+        socket.on("connect", () => {
+            console.log("Connected to server");
+        });
 
-        function onclassementUpdate(data: classementItem[]) {
-            setClassement(data);
-        }
+        socket.on("disconnect", () => {
+            console.log("Disconnected from server");
+        });
 
-        socket.on("connect", onConnect);
-        socket.on("disconnect", onDisconnect);
-        socket.on("classementUpdate", onclassementUpdate);
+        socket.on("canvas-palette-update", setColorsFromAPI);
 
         return () => {
-            socket.off("connect", onConnect);
-            socket.off("disconnect", onDisconnect);
-            socket.off("classementUpdate", onclassementUpdate);
+            socket.off("connect");
+            socket.off("disconnect");
+            socket.off("canvas-palette-update");
         };
-    }, []);
+    }, [colors]);
 
-    const handleColorSelect = (color: SetStateAction<string>) => {
+    const handleColorSelect = (color: number) => {
         setSelectedColor(color);
     };
 
@@ -85,11 +95,6 @@ function App() {
         };
     }, []);
 
-    const handleLogin = (email: string) => {
-        setUserEmail(email.split("@")[0]);
-        setDisplayBtnLogin(false);
-    };
-
     const handleDisplayComponent = (componentName: string) => {
         if (isMobileView == true) {
             if (displayComponent === componentName) {
@@ -106,49 +111,46 @@ function App() {
         }
     };
 
+    const handlePlacePixel = (x: number, y: number) => {
+        socket.emit("placePixel", x, y, selectedColor, (timer: number) => {
+            setTime(timer);
+        });
+    };
+
     // affichage (render)
     return (
         <div>
             <div className={styles.canvasContainer}>
-                <Canvas actualColor={selectedColor} zoom={zoom} readOnly={isConnected} />
-                {isConnected && <Palette onColorClick={handleColorSelect} />}
-                <Timer />
+                <Canvas actualColor={selectedColor} zoom={zoom} readOnly={isConnected} onPlacePixel={handlePlacePixel} palette={colors} />
+                {isConnected && <Palette onColorClick={handleColorSelect} colors={colors} />}
+                {time > 0 && <Timer time={time} setTime={setTime} />}
             </div>
 
-            {/* <div id="test-login">
-        <LoginComponent />
-      </div> */}
-
             <div className={styles.homepage}>
-                {isConnected && (
-                    <div className={styles.containerTop}>
-                        {isMobile.any() && (
-                            <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
-                                <img src="/src/assets/message.svg" alt="icone-chat" />
-                            </button>
-                        )}
-                        {displayComponent !== "profil" && (
-                            <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
-                                <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
-                            </button>
-                        )}
-                    </div>
-                )}
-
                 <LeaderboardComponent />
 
-                {displayBtnLogin && (
+                {!isConnected && (
                     <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>
                         Login to draw !
                     </button>
                 )}
 
-                {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
-                {displayComponent === "profil" && (
-                    <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />
-                )}
-                {displayComponent === "chat" && <ChatComponent userEmail={userEmail} active={isConnected} />}
-                {!isMobile.any() && <ChatComponent userEmail={userEmail} active={isConnected} />}
+                {displayComponent === "login" && <LoginComponent onLogin={() => {}} />}
+                {displayComponent === "profil" && <ProfilComponent userEmail={email} onHideProfil={() => handleDisplayComponent("none")} />}
+                {(displayComponent === "chat" || !isMobile.any()) && <ChatComponent active={isConnected} />}
+
+                <div className={styles.containerTop}>
+                    {isMobile.any() && (
+                        <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
+                            <img src="/src/assets/message.svg" alt="icone-chat" />
+                        </button>
+                    )}
+                    {isConnected && displayComponent !== "profil" && (
+                        <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
+                            <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

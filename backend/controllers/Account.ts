@@ -94,7 +94,7 @@ class AccountController {
             }
 
             res.cookie("token", generateAuthenticationToken(email), {
-                httpOnly: true,
+                httpOnly: false,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),

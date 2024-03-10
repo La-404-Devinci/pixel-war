@@ -39,10 +39,26 @@ class CanvasController {
     public static async getCanvasImage(req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
             res.status(200).json({
-                pixels: this._canvas.pixels,
-                width: this._canvas.width,
-                height: this._canvas.height,
+                pixels: CanvasController._canvas.pixels,
+                width: CanvasController._canvas.width,
+                height: CanvasController._canvas.height,
             });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Get the canvas color palette
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async getCanvasPalette(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            res.status(200).json(CanvasController._palette);
         } catch (error) {
             next(error);
         }
@@ -67,17 +83,20 @@ class CanvasController {
         if (user.isBanned) return callback(0);
 
         // Check if the user timer is elapsed
-        if (user.lastPixelTime && new Date(user.lastPixelTime).getTime() > new Date().getTime() - this._canvas.cooldown * 1000) {
-            return callback(new Date(user.lastPixelTime).getTime() - new Date().getTime() + this._canvas.cooldown * 1000);
+        if (
+            user.lastPixelTime &&
+            new Date(user.lastPixelTime).getTime() > new Date().getTime() - CanvasController._canvas.cooldown * 1000
+        ) {
+            return callback(new Date(user.lastPixelTime).getTime() - new Date().getTime() + CanvasController._canvas.cooldown * 1000);
         }
 
-        if (x < 0 || y < 0 || x >= this._canvas.width || y >= this._canvas.height) return callback(0);
+        if (x < 0 || y < 0 || x >= CanvasController._canvas.width || y >= CanvasController._canvas.height) return callback(0);
 
         // Get pixel index (from the canvas buffer)
-        const pixelIndex = (y * this._canvas.width + x) * 3;
+        const pixelIndex = (y * CanvasController._canvas.width + x) * 3;
 
         // Get palette item
-        const color = this._palette[palette];
+        const color = CanvasController._palette[palette];
         if (!color) return callback(0);
 
         // Log the pixel placement
@@ -96,9 +115,9 @@ class CanvasController {
         });
 
         // Set the pixel
-        this._canvas.pixels.writeUInt8(color[0], pixelIndex);
-        this._canvas.pixels.writeUInt8(color[1], pixelIndex + 1);
-        this._canvas.pixels.writeUInt8(color[2], pixelIndex + 2);
+        CanvasController._canvas.pixels.writeUInt8(color[0], pixelIndex);
+        CanvasController._canvas.pixels.writeUInt8(color[1], pixelIndex + 1);
+        CanvasController._canvas.pixels.writeUInt8(color[2], pixelIndex + 2);
 
         // Update the user timer
         if (!user.isAdmin) {
@@ -142,8 +161,8 @@ class CanvasController {
                 },
             });
 
-            this._canvas.changes = 0;
-            this._canvas.pixels.fill(0);
+            CanvasController._canvas.changes = 0;
+            CanvasController._canvas.pixels.fill(0);
 
             WSS.resetCanvas();
 
@@ -171,9 +190,9 @@ class CanvasController {
                 return res.status(400).send("Canvas size too large");
             }
 
-            this._canvas.changes++;
-            this._canvas.width = width;
-            this._canvas.height = height;
+            CanvasController._canvas.changes++;
+            CanvasController._canvas.width = width;
+            CanvasController._canvas.height = height;
 
             prisma.logEntry.create({
                 data: {
@@ -210,7 +229,7 @@ class CanvasController {
 
             if (cooldown < 0) return res.status(400).send("Invalid cooldown");
 
-            this._canvas.cooldown = cooldown;
+            CanvasController._canvas.cooldown = cooldown;
 
             prisma.logEntry.create({
                 data: {

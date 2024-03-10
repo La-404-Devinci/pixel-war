@@ -2,21 +2,19 @@ import chatStylesDesktop from "../styles/chatDesktop.module.css";
 import chatStylesMobile from "../styles/chatMobile.module.css";
 import { useEffect, useState, useRef } from "react";
 import isMobile from "../utils/isMobile";
+import { socket } from "../socket";
 
 interface ChatComponentProps {
-    userEmail: string;
     active: boolean;
 }
 
-const ChatComponent: React.FC<ChatComponentProps> = ({ userEmail, active }) => {
+const ChatComponent: React.FC<ChatComponentProps> = ({ active }) => {
     const [chat, setChat] = useState<[string, string][]>([]);
     const [message, setMessage] = useState<string>("");
     const [isMobileView, setIsMobileView] = useState(isMobile.any());
     const [isExpanded, setIsExpanded] = useState(false);
     const [lastMessageTimes, setLastMessageTimes] = useState<number[]>([]);
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
-
-    const user = userEmail;
 
     const sendMessage = () => {
         if (message.trim().length === 0) return;
@@ -32,8 +30,14 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userEmail, active }) => {
         setLastMessageTimes(lastMessageTimes);
 
         // Send message to websocket
-        // TODO: Send message to websocket
-        // setChat([...chat, [user, message]]);
+        socket.emit("message", message, (success: boolean) => {
+            if (success) {
+                setChat([...chat, ["MOI", message]]);
+            } else {
+                setChat([...chat, ["SYSTEM", "Le message n'a pas pu être envoyé..."]]);
+            }
+        });
+
         setMessage("");
         setIsExpanded(true);
     };
@@ -49,6 +53,12 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userEmail, active }) => {
     }, [chat]);
 
     useEffect(() => {
+        // Listen for messages from websocket
+        socket.on("message", (email: string, message: string) => {
+            setChat([...chat, [email, message]]);
+        });
+
+        // Handle window resize
         const handleResize = () => {
             setIsMobileView(isMobile.any());
         };
@@ -58,7 +68,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userEmail, active }) => {
         return () => {
             window.removeEventListener("resize", handleResize);
         };
-    }, []);
+    }, [chat]);
 
     const chatStyles = isMobileView ? chatStylesMobile : chatStylesDesktop;
 
@@ -81,9 +91,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userEmail, active }) => {
                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                     readOnly={!active}
                 />
-                <button onClick={sendMessage}>
-                    <img src="/src/assets/paper-plane.svg" alt="logo-avion-papier" />
-                </button>
+                {active && (
+                    <button onClick={sendMessage}>
+                        <img src="/src/assets/paper-plane.svg" alt="logo-avion-papier" />
+                    </button>
+                )}
                 {!isMobileView && (
                     <button onClick={toggleShow} className={isExpanded ? chatStyles.reversed : undefined}>
                         <img src="/src/assets/chevron-down.svg" alt="chevron-down" />

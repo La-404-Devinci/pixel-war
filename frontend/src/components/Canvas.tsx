@@ -1,8 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import { useState } from 'react';
-import styles from '../styles/canvas.module.css';
+import React, { useEffect, useRef } from "react";
+import { useState } from "react";
+import styles from "../styles/canvas.module.css";
+import { socket } from "../socket";
 
-export default function Canvas(props: {actualColor: string, zoom: number, readOnly: boolean}) {
+export default function Canvas(props: {
+    actualColor: number;
+    zoom: number;
+    readOnly: boolean;
+    onPlacePixel: (x: number, y: number) => void;
+    palette: string[];
+}) {
     const canvasRef = useRef<HTMLCanvasElement>(null); // Référence pour le canvas
     const cursorRef = useRef<HTMLDivElement>(null); // Référence pour le curseur
 
@@ -15,9 +22,31 @@ export default function Canvas(props: {actualColor: string, zoom: number, readOn
         // Accéder aux éléments DOM à travers les refs
         const cursor = cursorRef.current;
         if (cursor) {
-            cursor.style.background = props.actualColor;
+            // cursor.style.background = props.actualColor;
         }
     }, [props.actualColor]);
+
+    useEffect(() => {
+        socket.on("pixel-update", (x: number, y: number, color: number) => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            ctx.beginPath();
+            ctx.fillStyle = props.palette[color];
+
+            const xCoord = x * pixelSize;
+            const yCoord = y * pixelSize;
+
+            ctx.fillRect(xCoord, yCoord, pixelSize, pixelSize);
+        });
+
+        return () => {
+            socket.off("pixel-update");
+        };
+    }, [props.palette, pixelSize]);
 
     function getCursorPosition(event: React.MouseEvent<HTMLElement>) {
         const canvas = canvasRef.current;
@@ -36,20 +65,8 @@ export default function Canvas(props: {actualColor: string, zoom: number, readOn
     }
 
     function handleClick(event: React.MouseEvent<HTMLElement>) {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        ctx.beginPath();
-        ctx.fillStyle = props.actualColor;
-
         const [pixelX, pixelY] = getCursorPosition(event);
-        const x = pixelX * pixelSize;
-        const y = pixelY * pixelSize;
-
-        ctx.fillRect(x, y, pixelSize, pixelSize);
+        props.onPlacePixel(pixelX, pixelY);
     }
 
     function handleMove(event: React.MouseEvent<HTMLCanvasElement>) {
@@ -57,17 +74,17 @@ export default function Canvas(props: {actualColor: string, zoom: number, readOn
         const cursor = cursorRef.current;
 
         if (cursor) {
-            cursor.style.left = pixelX * pixelSize + 'px';
-            cursor.style.top = pixelY * pixelSize + 'px';
+            cursor.style.left = pixelX * pixelSize + "px";
+            cursor.style.top = pixelY * pixelSize + "px";
         }
     }
 
     return (
-        <div className={styles.canvas} style={{transform: `scale(${zoom})`}}>
+        <div className={styles.canvas} style={{ transform: `scale(${zoom})` }}>
             <div
                 ref={cursorRef}
                 className={styles.cursor}
-                style={{width: pixelSize, height: pixelSize}}
+                style={{ width: pixelSize, height: pixelSize }}
                 onMouseDown={handleClick as React.MouseEventHandler<HTMLDivElement>}
             ></div>
             <canvas

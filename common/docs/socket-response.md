@@ -56,6 +56,14 @@ Sent to everyone when the canvas is reset.
 
 Sent to everyone when the pixel placement cooldown changes.
 
-| index | type  | description               |
-| :---: | :---- | :------------------------ |
+| index | type   | description              |
+| :---: | :----- | :----------------------- |
 |   0   | number | Pixel placement cooldown |
+
+## canvas-palette-update
+
+Sent to everyone when the palette is updated.
+
+| index | type       | description     |
+| :---: | :--------- | :-------------- |
+|   0   | number[][] | The new palette |
