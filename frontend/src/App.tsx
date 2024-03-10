@@ -84,50 +84,78 @@ function App() {
         let drag = false;
         let canvasX = 0;
         let canvasY = 0;
-        let mouseX = 0;
-        let mouseY = 0;
+        let moveX = 0;
+        let moveY = 0;
 
         const handleMouseDown = (event: MouseEvent) => {
             if (event.button !== 0) return;
+            handleDown(event.clientX, event.clientY);
+        };
+
+        const handleTouchStart = (event: TouchEvent) => {
+            if (event.touches.length !== 1) return;
+            handleDown(event.touches[0].clientX, event.touches[0].clientY);
+        }
+
+        const handleDown = (x: number, y: number) => {
             drag = true;
             setTimeout(() => {
                 setIsDragging(true);
-            } , 100);
-            mouseX = event.clientX;
-            mouseY = event.clientY;
+            }, 100);
+            moveX = x;
+            moveY = y;
         };
-        
+
         const handleMouseMove = (event: MouseEvent) => {
+            handleMove(event.clientX, event.clientY);
+        }
+
+        const handleTouchMove = (event: TouchEvent) => {
+            handleMove(event.touches[0].clientX, event.touches[0].clientY);
+        }
+        
+        const handleMove = (x: number, y: number) => {
             if (!drag) return;
-            // déplacement de la souris
-            const deltaX = event.clientX - mouseX;
-            const deltaY = event.clientY - mouseY;
-            
+            // déplacement de l'utilisateur
+            const deltaX = x - moveX;
+            const deltaY = y - moveY;
+
             canvasX += deltaX;
             canvasY += deltaY;
-            mouseX = event.clientX;
-            mouseY = event.clientY;
-            
+            moveX = x;
+            moveY = y;
 
             // déplacement du canvas
             canvas.style.left = `${canvasX}px`;
             canvas.style.top = `${canvasY}px`;
         };
 
-        const handleMouseUp = () => {
+        const handleUp = () => {
             drag = false;
             setTimeout(() => {
                 setIsDragging(false);
             }, 100);
         };
 
-        window.addEventListener("mouseup", handleMouseUp);
+        // Desktop events
+        window.addEventListener("mouseup", handleUp);
         window.addEventListener("mousemove", handleMouseMove);
         window.addEventListener("mousedown", handleMouseDown);
+
+        // Mobile events
+        window.addEventListener("touchend", handleUp);
+        window.addEventListener("touchmove", handleTouchMove);
+        window.addEventListener("touchstart", handleTouchStart);
         return () => {
+            // Desktop events
             window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("mouseup", handleUp);
             window.removeEventListener("mousedown", handleMouseDown);
+
+            // Mobile events
+            window.removeEventListener("touchmove", handleTouchMove);
+            window.removeEventListener("touchend", handleUp);
+            window.removeEventListener("touchstart", handleTouchStart);
         };
     }, []);
 
