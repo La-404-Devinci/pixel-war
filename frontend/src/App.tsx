@@ -1,5 +1,5 @@
 // import { useState } from 'react'
-import { SetStateAction, useEffect, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import styles from "./App.module.css";
 import { socket } from "./socket";
 import classementItem from "../../common/interfaces/classementItem.interface";
@@ -16,11 +16,12 @@ function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [classement, setClassement] = useState<classementItem[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+    // set state to true if testing
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     const [selectedColor, setSelectedColor] = useState("white");
     const [zoom, setZoom] = useState(1);
-    const [isDraggable, setIsDraggable] = useState(false);
 
     const [userEmail, setUserEmail] = useState("");
     const [displayBtnLogin, setDisplayBtnLogin] = useState(true);
@@ -73,12 +74,62 @@ function App() {
         };
     }, [zoom]);
 
+    const canvasRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+
     useEffect(() => {
-      const handleMouseDown = (event: MouseEvent) => {
-        if (event.button === 0) setIsDraggable(true);
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        let drag = false;
+        let canvasX = 0;
+        let canvasY = 0;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        const handleMouseDown = (event: MouseEvent) => {
+            if (event.button !== 0) return;
+            drag = true;
+            setTimeout(() => {
+                setIsDragging(true);
+            } , 100);
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        };
         
-      };
-    }, [isDraggable])
+        const handleMouseMove = (event: MouseEvent) => {
+            if (!drag) return;
+            // déplacement de la souris
+            const deltaX = event.clientX - mouseX;
+            const deltaY = event.clientY - mouseY;
+            
+            canvasX += deltaX;
+            canvasY += deltaY;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+            
+
+            // déplacement du canvas
+            canvas.style.left = `${canvasX}px`;
+            canvas.style.top = `${canvasY}px`;
+        };
+
+        const handleMouseUp = () => {
+            drag = false;
+            setTimeout(() => {
+                setIsDragging(false);
+            }, 100);
+        };
+
+        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mousedown", handleMouseDown);
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("mousedown", handleMouseDown);
+        };
+    }, []);
 
     useEffect(() => {
         const handleResize = (e: Event) => {
@@ -119,9 +170,11 @@ function App() {
         <div>
             <div className={styles.canvasContainer}>
                 <Canvas
+                    ref={canvasRef}
                     actualColor={selectedColor}
                     zoom={zoom}
                     readOnly={isConnected}
+                    stopClick={isDragging}
                 />
                 {isConnected && <Palette onColorClick={handleColorSelect} />}
                 <Timer />
