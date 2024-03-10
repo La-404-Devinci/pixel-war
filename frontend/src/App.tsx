@@ -126,7 +126,7 @@ function App() {
       </div> */}
 
             <div className={styles.homepage}>
-                <div className={styles.modalAssoContener}>
+                <div className={styles.modalAssoContainer}>
                     <AssoModal />
                 </div>
                 {isConnected && (
