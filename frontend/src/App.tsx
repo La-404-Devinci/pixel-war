@@ -11,6 +11,7 @@ import isMobile from "./utiles/isMobile";
 import Canvas from "./components/Canvas";
 import Palette from "./components/Palette";
 import Timer from "./components/Timer";
+import AssoModal from './components/AssoModal';
 
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -125,6 +126,9 @@ function App() {
       </div> */}
 
             <div className={styles.homepage}>
+                <div className={styles.modalAssoContener}>
+                    <AssoModal />
+                </div>
                 {isConnected && (
                     <div className={styles.containerTop}>
                         {isMobile.any() && (
