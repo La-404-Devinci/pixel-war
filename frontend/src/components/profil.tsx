@@ -27,7 +27,7 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({userEmail, onHideProfi
             <div className={styles.containerStats}>
                 <div className={styles.blockStats}>
                     {/* <p>{posedPixel}</p> */}
-                    <p>Pixel posés</p>
+                    <p>Pixels posés</p>
                 </div>
                 <div className={styles.blockStats}>
                     {/* <p>{messageSent}</p> */}
@@ -39,10 +39,10 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({userEmail, onHideProfi
                 </div>
                 <div className={styles.blockStats}>
                     {/* <p>{pixelByHour}</p> */}
-                    <p>Pixes par heure (en moyenne)</p>
+                    <p>Pixels par heure (en moyenne)</p>
                 </div>
             </div>
-            <button className={styles.btnLogOut}>Log out</button>
+            <button className={styles.btnLogOut}>Déconnexion</button>
         </div>
     )
 }
