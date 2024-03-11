@@ -126,9 +126,7 @@ function App() {
       </div> */}
 
             <div className={styles.homepage}>
-                <div className={styles.modalAssoContainer}>
                     <AssoModal />
-                </div>
                 {isConnected && (
                     <div className={styles.containerTop}>
                         {isMobile.any() && (
