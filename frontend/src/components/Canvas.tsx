@@ -1,15 +1,17 @@
-import React, { useEffect, useRef } from "react";
-import { useState } from "react";
+import React, { forwardRef, useEffect, useState, useRef } from "react";
 import styles from "../styles/canvas.module.css";
 import { socket } from "../socket";
 import API from "../utils/api";
 
-export default function Canvas(props: {
+interface CanvasProps {
     actualColor: number;
     readOnly: boolean;
     onPlacePixel: (x: number, y: number) => void;
     palette: string[];
-}) {
+    stopClick: boolean;
+}
+
+const Canvas: React.FC<CanvasProps> = forwardRef((props, ref: React.Ref<HTMLDivElement>) => {
     const canvasRef = useRef<HTMLCanvasElement>(null); // Référence pour le canvas
     const cursorRef = useRef<HTMLDivElement>(null); // Référence pour le curseur
 
@@ -77,8 +79,7 @@ export default function Canvas(props: {
                     if (!ctx) return;
 
                     ctx.beginPath();
-                    // ctx.fillStyle = `rgb(${colorR},${colorG},${colorB})`;
-                    ctx.fillStyle = `white`;
+                    ctx.fillStyle = `rgb(${colorR},${colorG},${colorB})`;
                     ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
                 }
             }
@@ -132,6 +133,9 @@ export default function Canvas(props: {
     }
 
     function handleClick(event: React.MouseEvent<HTMLElement>) {
+        if (!props.readOnly) return;
+        if (props.stopClick) return;
+
         const [pixelX, pixelY] = getCursorPosition(event);
         props.onPlacePixel(pixelX, pixelY);
     }
@@ -147,7 +151,7 @@ export default function Canvas(props: {
     }
 
     return (
-        <div className={styles.canvas} style={{ transform: `scale(${zoom})` }}>
+        <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={ref}>
             {!props.readOnly && (
                 <div
                     ref={cursorRef}
@@ -166,4 +170,6 @@ export default function Canvas(props: {
             ></canvas>
         </div>
     );
-}
+});
+
+export default Canvas;

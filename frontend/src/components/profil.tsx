@@ -63,7 +63,7 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
                 <p>{pixelByHour}</p>
                 <p>Pixes par heure (en moyenne)</p>
             </div>
-            <button className={styles.btnLogOut}>Log out</button>
+            <button className={styles.btnLogOut}>Déconnexion</button>
         </div>
     );
 };

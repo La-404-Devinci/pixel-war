@@ -35,16 +35,18 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onClose }) => {
     };
 
     return (
-        <div className={styles.login}>
-            <div className={styles.loginTitle}>
-                <p>Login</p>
+        <div className={styles.loginContainer}>
+            <div className={styles.login}>
+                <div className={styles.loginTitle}>
+                    <p>Login</p>
+                </div>
+                <label>Enter your devinci email</label>
+                <input type="email" placeholder="email@edu.devinci.fr" value={email} onChange={handleEmailChange} />
+                <button onClick={handleLoginClick} disabled={!!message}>
+                    Send magic link
+                </button>
+                {message && <p className={isEmailValid ? styles.validMessage : styles.invalidMessage}>{message}</p>}
             </div>
-            <label>Enter your devinci email</label>
-            <input type="email" placeholder="email@edu.devinci.fr" value={email} onChange={handleEmailChange} />
-            <button onClick={handleLoginClick} disabled={!!message}>
-                Send magic link
-            </button>
-            {message && <p className={isEmailValid ? styles.validMessage : styles.invalidMessage}>{message}</p>}
         </div>
     );
 };

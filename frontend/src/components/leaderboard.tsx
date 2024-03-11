@@ -29,7 +29,7 @@ const LeaderboardComponent = () => {
             <div className={styles.header}>
                 <button onClick={handleExpand} className={styles.btnExpand}>
                     <img src={isExpanded ? "/src/assets/angle-up.svg" : "/src/assets/angle-down.svg"} alt="arrow-down" />
-                    Leaderboard
+                    Classement
                 </button>
             </div>
             {isExpanded && (
