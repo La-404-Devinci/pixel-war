@@ -28,35 +28,39 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
     };
 
     return (
-        <div className={styles.login}>
-            <div className={styles.loginTitle}>
-                <p>Login</p>
+        <>
+            <div className={styles.loginContainer}>
+                <div className={styles.login}>
+                    <div className={styles.loginTitle}>
+                        <p>Login</p>
+                    </div>
+                    <label>Entrez votre email Devinci</label>
+                    <input
+                        type='email'
+                        placeholder='email@edu.devinci.fr'
+                        value={email}
+                        onChange={handleEmailChange}
+                    />
+                    <button
+                        onClick={handleLoginClick}
+                        disabled={!!message}
+                    >
+                        Envoyez le lien de connexion
+                    </button>
+                    {message && (
+                        <p
+                            className={
+                                isEmailValid
+                                    ? styles.validMessage
+                                    : styles.invalidMessage
+                            }
+                        >
+                            {message}
+                        </p>
+                    )}
+                </div>
             </div>
-            <label>Entrez votre email Devinci</label>
-            <input
-                type='email'
-                placeholder='email@edu.devinci.fr'
-                value={email}
-                onChange={handleEmailChange}
-            />
-            <button
-                onClick={handleLoginClick}
-                disabled={!!message}
-            >
-                Envoyez le lien de connexion
-            </button>
-            {message && (
-                <p
-                    className={
-                        isEmailValid
-                            ? styles.validMessage
-                            : styles.invalidMessage
-                    }
-                >
-                    {message}
-                </p>
-            )}
-        </div>
+        </>
     );
 };
 
