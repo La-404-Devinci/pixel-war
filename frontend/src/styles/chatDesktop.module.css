@@ -1,8 +1,3 @@
-body {
-    background-color: #212121;
-    height: 100vh;
-}
-
 .chat {
     display: flex;
     flex-direction: column;
@@ -70,17 +65,17 @@ span {
     width: 10px;
     height: 10px;
 }
-  
+
 ::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.75);
     border-radius: 16px;
 }
-  
+
 ::-webkit-scrollbar-thumb {
     border-radius: 16px;
     background: #b5b5b5;
 }
-  
+
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }

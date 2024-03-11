@@ -1,80 +1,103 @@
-import { SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./App.module.css";
 import { socket } from "./socket";
-import classementItem from "../../common/interfaces/classementItem.interface";
 import ChatComponent from "./components/chat";
 import LeaderboardComponent from "./components/leaderboard";
 import ModalReward from "./components/modalReward";
 import LoginComponent from "./components/login";
 import ProfilComponent from "./components/profil";
-import isMobile from "./utiles/isMobile";
+import isMobile from "./utils/isMobile";
 import Canvas from "./components/Canvas";
 import Palette from "./components/Palette";
 import Timer from "./components/Timer";
-import AssoModal from './components/AssoModal';
+import API from "./utils/api";
+import AssoModal from "./components/AssoModal";
 
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [classement, setClassement] = useState<classementItem[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  
-    const [isConnected, setIsConnected] = useState(socket.connected);
+    const cookies = document.cookie.split(";");
+    let email = undefined;
+    let token = undefined;
 
-    const [selectedColor, setSelectedColor] = useState("white");
+    for (let i = 0; i < cookies.length; i++) {
+        if (cookies[i].includes("email")) {
+            email = decodeURIComponent(cookies[i].split("=")[1]);
+        } else if (cookies[i].includes("token")) {
+            token = decodeURIComponent(cookies[i].split("=")[1]);
+        }
+    }
 
-    const [zoom, setZoom] = useState(1);
+    const isConnected = email !== undefined && token !== undefined;
+    const [socketConnected, setSocketConnected] = useState(false);
 
-    const [userEmail, setUserEmail] = useState("");
-    const [displayBtnLogin, setDisplayBtnLogin] = useState(true);
+    const [selectedColor, setSelectedColor] = useState(0);
     const [displayComponent, setDisplayComponent] = useState("none");
     const [isMobileView, setIsMobileView] = useState(isMobile.any());
+    const [colors, setColors] = useState<string[] | undefined>(undefined);
+    const [time, setTime] = useState(0);
 
-    useEffect(() => {
-        function onConnect() {
-            setIsConnected(true);
-        }
-
-        function onDisconnect() {
-            setIsConnected(false);
-        }
-
-        function onclassementUpdate(data: classementItem[]) {
-            setClassement(data);
-        }
-
-        socket.on("connect", onConnect);
-        socket.on("disconnect", onDisconnect);
-        socket.on("classementUpdate", onclassementUpdate);
-
-        return () => {
-            socket.off("connect", onConnect);
-            socket.off("disconnect", onDisconnect);
-            socket.off("classementUpdate", onclassementUpdate);
-        };
-    }, []);
-
-    const handleColorSelect = (color: SetStateAction<string>) => {
-        setSelectedColor(color);
+    const setColorsFromAPI = (colors: number[][]) => {
+        setColors(colors.map((color) => `rgb(${color.join(",")})`));
     };
 
+    // Socket events
     useEffect(() => {
-        const handleWheel = (event: WheelEvent) => {
-            // Multiplicateur de zoom arbitraire
-            const zoomFactor = 0.1;
-            // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
-            const newZoom =
-                event.deltaY > 0 ? zoom - zoomFactor : zoom + zoomFactor;
-            // Limiter le zoom à un minimum de 0.1 pour éviter les valeurs non valides
-            setZoom(Math.max(0.1, newZoom));
-        };
+        socket.on("connect", () => {
+            console.log("Connected to server");
+            // Authentification
+            if (!token || !email) {
+                console.error("Missing token or email");
+                setSocketConnected(true);
+                return;
+            }
 
-        window.addEventListener("wheel", handleWheel);
+            socket.emit("auth", token, email);
+            socket.emit("get-classement");
+            socket.emit("get-stats");
+        });
+
+        socket.on("disconnect", () => {
+            console.log("Disconnected from server");
+        });
+
+        socket.on("auth-callback", (success: boolean) => {
+            if (!success) {
+                console.error("Authentification failed");
+                // Clear 'email' and 'token' cookies
+                document.cookie = "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                window.location.reload();
+                return;
+            } else {
+                setSocketConnected(true);
+            }
+        });
+
+        socket.on("canvas-palette-update", setColorsFromAPI);
+
+        const statsInterval = setInterval(() => {
+            socket.emit("get-stats");
+        }, 1000 * 60 * 5); // 5 minutes
 
         return () => {
-            window.removeEventListener("wheel", handleWheel);
+            socket.off("connect");
+            socket.off("disconnect");
+            socket.off("auth-callback");
+            socket.off("canvas-palette-update");
+            clearInterval(statsInterval);
         };
-    }, [zoom]);
+    }, [token, email]);
 
+    // Initial fetch of the palette
+    useEffect(() => {
+        if (!colors) {
+            API.GET("/canvas/palette").then((res) => {
+                setColorsFromAPI(res);
+            });
+        }
+    }, [colors]);
+
+    // Handle window resize
     const canvasRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -96,7 +119,7 @@ function App() {
         const handleTouchStart = (event: TouchEvent) => {
             if (event.touches.length !== 1) return;
             handleDown(event.touches[0].clientX, event.touches[0].clientY);
-        }
+        };
 
         const handleDown = (x: number, y: number) => {
             drag = true;
@@ -109,12 +132,12 @@ function App() {
 
         const handleMouseMove = (event: MouseEvent) => {
             handleMove(event.clientX, event.clientY);
-        }
+        };
 
         const handleTouchMove = (event: TouchEvent) => {
             handleMove(event.touches[0].clientX, event.touches[0].clientY);
-        }
-        
+        };
+
         const handleMove = (x: number, y: number) => {
             if (!drag) return;
             // déplacement de l'utilisateur
@@ -173,9 +196,12 @@ function App() {
         };
     }, []);
 
-    const handleLogin = (email: string) => {
-        setUserEmail(email.split("@")[0]);
-        setDisplayBtnLogin(false);
+    if (!colors || !socketConnected) {
+        return <div>Loading...</div>;
+    }
+
+    const handleColorSelect = (color: number) => {
+        setSelectedColor(color);
     };
 
     const handleDisplayComponent = (componentName: string) => {
@@ -194,92 +220,67 @@ function App() {
         }
     };
 
-    // affichage (render)
+    const handlePlacePixel = (x: number, y: number) => {
+        socket.emit("place-pixel", x, y, selectedColor, (expiresAt: number) => {
+            const timer = Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
+            setTime(timer);
+        });
+    };
+
     return (
-        <div>
+        <>
             <div className={styles.canvasContainer}>
                 <Canvas
                     ref={canvasRef}
                     actualColor={selectedColor}
-                    zoom={zoom}
-                    readOnly={isConnected}
+                    readOnly={!isConnected}
                     stopClick={isDragging}
+                    onPlacePixel={handlePlacePixel}
+                    palette={colors}
                 />
-                {isConnected && <Palette onColorClick={handleColorSelect} />}
-                <Timer />
+                {isConnected && (
+                    <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} isActive={time <= 0} />
+                )}
+                <Timer time={time} setTime={setTime} />
             </div>
-
-            {/* <div id="test-login">
-        <LoginComponent />
-      </div> */}
 
             <div className={styles.homepage}>
                 <div className={styles.modalAssoContainer}>
                     <AssoModal />
                 </div>
-                {isConnected && (
-                    <div className={styles.containerTop}>
-                        {isMobile.any() && (
-                            <button
-                                onClick={() => handleDisplayComponent("chat")}
-                                className={styles.btnChat}
-                            >
-                                <img
-                                    src='/src/assets/message.svg'
-                                    alt='icone-chat'
-                                />
-                            </button>
-                        )}
-                        {displayComponent !== "profil" && (
-                            <button
-                                onClick={() => handleDisplayComponent("profil")}
-                                className={styles.btnProfil}
-                            >
-                                <img
-                                    src='/src/assets/user-large.svg'
-                                    alt='icone-user-profil'
-                                />
-                            </button>
-                        )}
-                    </div>
-                )}
-              
-                {displayBtnLogin && (
-                    <button
-                        onClick={() => handleDisplayComponent("login")}
-                        className={styles.btnLogin}
-                    >
-                        Connectez-vous pour dessiner !
-                    </button>
-                )}
 
-                {displayComponent === "login" && (
-                    <LoginComponent onLogin={handleLogin} />
-                )}
-                {displayComponent === "profil" && (
-                    <ProfilComponent
-                        userEmail={userEmail}
-                        onHideProfil={() => handleDisplayComponent("none")}
-                    />
-                )}
-                {displayComponent === "chat" && (
-                    <ChatComponent
-                        userEmail={userEmail}
-                        active={isConnected}
-                    />
-                )}
-                {!isMobile.any() && (
-                    <ChatComponent
-                        userEmail={userEmail}
-                        active={isConnected}
-                    />
-                )}
                 <div className={styles.leaderboard}>
                     <LeaderboardComponent />
                     <ModalReward />
                 </div>
             </div>
-        </div>
+
+            {!isConnected && (
+                <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>
+                    Connectez-vous pour dessiner !
+                </button>
+            )}
+
+            {displayComponent === "login" && <LoginComponent onClose={() => handleDisplayComponent("none")} />}
+            {displayComponent === "profil" && <ProfilComponent userEmail={email} onHideProfil={() => handleDisplayComponent("none")} />}
+            {(displayComponent === "chat" || !isMobile.any()) && <ChatComponent active={isConnected} userEmail={email ?? "N/A"} />}
+
+            {displayComponent !== "profil" && (
+                <div className={styles.containerTop}>
+                    {isMobile.any() && (
+                        <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
+                            <img src="/src/assets/message.svg" alt="icone-chat" />
+                        </button>
+                    )}
+                    {isConnected && displayComponent !== "chat" && (
+                        <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
+                            <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
+                        </button>
+                    )}
+                </div>
+            )}
+        </>
     );
 }
+
 export default App;

@@ -1,41 +1,44 @@
-import React, { useEffect, useState } from 'react'
-import PaletteColor from './PaletteColor'
-import styles from '../styles/palette.module.css'
+import PaletteColor from "./PaletteColor";
+import styles from "../styles/palette.module.css";
 
-export default function Palette({onColorClick}: {onColorClick(color: string): unknown}){
-// useState (array of colors | null)
+export default function Palette({
+    onColorClick,
+    colors = [],
+    selectedColor,
+    isActive,
+}: {
+    onColorClick(color: number): unknown;
+    colors?: string[];
+    selectedColor: number;
+    isActive: boolean;
+}) {
+    // useState (array of colors | null)
 
-const [colors, setColors] = useState(["red", "blue", "green", "yellow", "purple", "orange", "pink", "brown", "black", "white"])
+    // useEffect (fetch colors from backend)
 
+    function handleRenderColors() {
+        // conditional rendering (if colors === null, return loading)
+        if (colors.length <= 0) {
+            return <div>Loading...</div>;
+        }
 
-// useEffect (fetch colors from backend)
+        // else map through colors and return a PaletteColor component for each color
+        else {
+            return colors.map((color, index) => (
+                <PaletteColor key={color} color={color} onClick={() => onColorClick(index)} selected={index === selectedColor} />
+            ));
+        }
+    }
 
-// useEffect(() => {
-//   fetch('/colors')
-//     .then(res => res.json())
-//     .then(data => setColors(data))
-// }, [])
-
-
-function handleRenderColors() {
-
-// conditional rendering (if colors === null, return loading)
-  if (colors.length <= 0) {
-    return <div>Loading...</div>
-  }
-
-// else map through colors and return a PaletteColor component for each color
-  else {
-    return colors.map(color => 
-      <PaletteColor key={color} color={color} onClick={onColorClick} />
-    )
-  }
-}
-
-
-  return (
-    <div className={styles.colorPalette}>
-      {handleRenderColors()}
-    </div>
-  )
+    return (
+        <div
+            className={styles.colorPalette}
+            style={{
+                opacity: isActive ? 1 : 0.7,
+                pointerEvents: isActive ? "auto" : "none",
+            }}
+        >
+            {handleRenderColors()}
+        </div>
+    );
 }

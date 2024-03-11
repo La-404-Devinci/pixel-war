@@ -1,11 +1,12 @@
 import { useState } from "react";
 import styles from "../styles/login.module.css";
+import API from "../utils/api";
 
 interface LoginComponentProps {
-    onLogin: (email: string) => void;
+    onClose: () => void;
 }
 
-const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
+const LoginComponent: React.FC<LoginComponentProps> = ({ onClose }) => {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [isEmailValid, setIsEmailValid] = useState(false);
@@ -18,9 +19,15 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
 
     const handleLoginClick = () => {
         if (email.endsWith("@edu.devinci.fr")) {
-            onLogin(email);
-            setMessage("Email valide, envoi du lien...");
-            setIsEmailValid(true);
+            setMessage("L'email a bien été envoyé, veuillez vérifier votre boîte de réception (et vos spams) pour le lien de connexion");
+
+            try {
+                API.POST("/auth/send-magic-link", { email });
+                setIsEmailValid(true);
+            } catch (error) {
+                setMessage("Erreur lors de l'envoi de l'email");
+                setIsEmailValid(false);
+            }
         } else {
             setMessage("Email non valide");
             setIsEmailValid(false);
@@ -28,39 +35,19 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
     };
 
     return (
-        <>
-            <div className={styles.loginContainer}>
-                <div className={styles.login}>
-                    <div className={styles.loginTitle}>
-                        <p>Login</p>
-                    </div>
-                    <label>Entrez votre email Devinci</label>
-                    <input
-                        type='email'
-                        placeholder='email@edu.devinci.fr'
-                        value={email}
-                        onChange={handleEmailChange}
-                    />
-                    <button
-                        onClick={handleLoginClick}
-                        disabled={!!message}
-                    >
-                        Envoyez le lien de connexion
-                    </button>
-                    {message && (
-                        <p
-                            className={
-                                isEmailValid
-                                    ? styles.validMessage
-                                    : styles.invalidMessage
-                            }
-                        >
-                            {message}
-                        </p>
-                    )}
+        <div className={styles.loginContainer}>
+            <div className={styles.login}>
+                <div className={styles.loginTitle}>
+                    <p>Login</p>
                 </div>
+                <label>Enter your devinci email</label>
+                <input type="email" placeholder="email@edu.devinci.fr" value={email} onChange={handleEmailChange} />
+                <button onClick={handleLoginClick} disabled={!!message}>
+                    Send magic link
+                </button>
+                {message && <p className={isEmailValid ? styles.validMessage : styles.invalidMessage}>{message}</p>}
             </div>
-        </>
+        </div>
     );
 };
 

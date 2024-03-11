@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styles from "../styles/leaderboard.module.css";
 import { socket } from "../socket";
-import classementItem from "../../common/interfaces/classementItem.interface";
+import classementItem from "../../../common/interfaces/classementItem.interface";
 
 const LeaderboardComponent = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -24,21 +24,11 @@ const LeaderboardComponent = () => {
         setIsExpanded(!isExpanded);
     };
 
-    const img = isExpanded
-        ? "/src/assets/angle-up.svg"
-        : "/src/assets/angle-down.svg";
-
     return (
         <div className={styles.leaderboard}>
             <div className={styles.header}>
-                <button
-                    onClick={handleExpand}
-                    className={styles.btnExpand}
-                >
-                    <img
-                        src={img}
-                        alt='arrow-down'
-                    />
+                <button onClick={handleExpand} className={styles.btnExpand}>
+                    <img src={isExpanded ? "/src/assets/angle-up.svg" : "/src/assets/angle-down.svg"} alt="arrow-down" />
                     Classement
                 </button>
             </div>
@@ -52,8 +42,7 @@ const LeaderboardComponent = () => {
                                 {index + 1}
                                 {index === 0 ? "er" : "ème"}
                             </b>{" "}
-                            - {item.devinciEmail.split("@")[0]} (
-                            {item.placedPixels})
+                            - {item.devinciEmail.split("@")[0]} ({item.placedPixels})
                         </p>
                     ))}
                 </div>

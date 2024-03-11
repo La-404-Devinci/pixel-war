@@ -9,14 +9,14 @@
 
 .containerTop {
     position: fixed;
-    right: 0;
-    margin-top: 1em;
-    margin-right: 1em;
+    right: 1em;
+    top: 1em;
 }
 
 .btnProfil {
-    width: 5em;
-    padding: 1.5em;
+    width: 4em;
+    height: 4em;
+    padding: 1.25em;
     background-color: white;
     border-radius: 10px;
     border: none;
@@ -28,13 +28,17 @@
 }
 
 .btnChat {
-    width: 5em;
-    padding: 1.5em;
+    width: 4em;
+    height: 4em;
+    padding: 1.25em;
     background-color: white;
     border-radius: 10px;
     border: none;
     box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
     margin-right: 1em;
+
+    position: relative;
+    z-index: 1;
 }
 
 .btnChat img {
@@ -62,6 +66,7 @@
     justify-content: center;
     align-items: center;
     position: absolute;
+    z-index: -1;
 }
 
 .leaderboard {
@@ -78,8 +83,7 @@
     }
 }
 
-
-.modalAssoContainer{
+.modalAssoContainer {
     display: flex;
     justify-content: center;
     align-items: center;
