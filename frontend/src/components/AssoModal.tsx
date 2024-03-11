@@ -23,8 +23,8 @@ export default function AssoModal() {
   const [displayAssoModal, setDisplayAssoModal] = useState(true)
 
   
-  const handleSelectChange = (selectedOption) => {
-    setSelectedAsso(selectedOption);
+  const handleSelectChange = (selectedOption: unknown) => {
+    setSelectedAsso(selectedOption as unknown as {id: string, name: string, image: string});
   };
 
   const handleHide = () => {
@@ -33,7 +33,7 @@ export default function AssoModal() {
 
 
   return (
-    <div>
+    <>
       {displayAssoModal && (
       
         <div className={styles.modalAsso}>
@@ -63,6 +63,6 @@ export default function AssoModal() {
           </a>
         </div>
       )}
-    </div>
+    </>
   )
 }
