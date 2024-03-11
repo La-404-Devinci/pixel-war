@@ -233,7 +233,6 @@ function App() {
                 <Canvas
                     ref={canvasRef}
                     actualColor={selectedColor}
-                    zoom={zoom}
                     readOnly={!isConnected}
                     stopClick={isDragging}
                     onPlacePixel={handlePlacePixel}
