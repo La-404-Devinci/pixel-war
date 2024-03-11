@@ -43,7 +43,7 @@ const SimpleSlider = () => {
                     index={0}
                     className={styles.slider}
                 >
-                    <p>1ère place - Classement association</p>
+                    <p>1ère place - Classement associatif</p>
                     <img
                         src='/src/assets/trophy_pixel_war.png'
                         alt='Trophy Pixel War'
