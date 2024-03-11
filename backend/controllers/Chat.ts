@@ -12,7 +12,7 @@ leoProfanity.add(frenchBadwordsList.array);
 const prisma = new PrismaClient();
 
 class ChatController {
-    private static _messageHistory: string[] = [];
+    private static _messageHistory: [string, string][] = [];
 
     /**
      * Broadcasts a message to all connected clients
@@ -75,7 +75,7 @@ class ChatController {
         // Save the user
         await prisma.account.update({
             where: { id: user.id },
-            data: { lastSentMessageTimes: user.lastSentMessageTimes },
+            data: { lastSentMessageTimes: user.lastSentMessageTimes, messagesSent: user.messagesSent + 1 },
         });
 
         prisma.logEntry.create({
@@ -92,10 +92,11 @@ class ChatController {
         });
 
         // Add the message to the history
-        ChatController._messageHistory.push(cleanMessage);
+        ChatController._messageHistory.push([user.devinciEmail, cleanMessage]);
         if (ChatController._messageHistory.length > 30) ChatController._messageHistory.shift();
 
         WSS.broadcastMessage(user.devinciEmail, cleanMessage);
+        WSS.updateUserData(socket, user);
 
         callback(true);
     }

@@ -7,6 +7,7 @@ import {
     verifyAuthorizationToken,
     verifyAuthenticationToken,
 } from "../auth/tokenUtils";
+import WSS from "../server/Websocket";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -233,6 +234,22 @@ class AccountController {
         } catch (error) {
             next(error);
         }
+    }
+
+    /**
+     * Get the user's stats
+     * @server WebSocket
+     *
+     * @param socket The client socket
+     */
+    public static async getStats(socket: SocketIO.Socket) {
+        const user = await prisma.account.findFirst({
+            where: {
+                devinciEmail: socket.data.email,
+            },
+        });
+
+        WSS.updateUserData(socket, user);
     }
 }
 

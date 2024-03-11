@@ -58,8 +58,13 @@ WSS.io.on("connection", (socket: Socket) => {
             ChatController.broadcastMessage(socket, [message, callback]);
         });
 
-        // TODO: Is this necessary?
-        WSS.updateClassement(socket);
+        socket.on("get-stats", () => {
+            AccountController.getStats(socket);
+        });
+
+        socket.on("get-classement", () => {
+            WSS.updateClassement(socket);
+        });
     } catch (e) {
         socket.emit("error", "An error occurred");
         console.error(e);

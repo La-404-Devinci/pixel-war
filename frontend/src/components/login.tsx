@@ -3,10 +3,10 @@ import styles from "../styles/login.module.css";
 import API from "../utils/api";
 
 interface LoginComponentProps {
-    onLogin: (email: string) => void;
+    onClose: () => void;
 }
 
-const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
+const LoginComponent: React.FC<LoginComponentProps> = ({ onClose }) => {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [isEmailValid, setIsEmailValid] = useState(false);
@@ -19,7 +19,6 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLogin }) => {
 
     const handleLoginClick = () => {
         if (email.endsWith("@edu.devinci.fr")) {
-            onLogin(email);
             setMessage("L'email a bien été envoyé, veuillez vérifier votre boîte de réception (et vos spams) pour le lien de connexion");
 
             try {

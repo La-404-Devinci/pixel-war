@@ -11,9 +11,9 @@ class CanvasController {
     private static _canvas: Canvas = {
         pixels: Buffer.alloc(1024 * 1024 * 3), // 3 bytes per pixel (RGB)
         changes: 0,
-        width: 1024, // Soft-width limit
-        height: 1024, // Soft-height limit
-        cooldown: 60, // Pixel placement cooldown in seconds
+        width: 128, // Soft-width limit
+        height: 128, // Soft-height limit
+        cooldown: 5, // Pixel placement cooldown in seconds
     };
 
     private static _palette: [number, number, number][] = [
@@ -87,13 +87,14 @@ class CanvasController {
             user.lastPixelTime &&
             new Date(user.lastPixelTime).getTime() > new Date().getTime() - CanvasController._canvas.cooldown * 1000
         ) {
-            return callback(new Date(user.lastPixelTime).getTime() - new Date().getTime() + CanvasController._canvas.cooldown * 1000);
+            // Return the "expires at" time
+            return callback(new Date(user.lastPixelTime).getTime() + CanvasController._canvas.cooldown * 1000);
         }
 
         if (x < 0 || y < 0 || x >= CanvasController._canvas.width || y >= CanvasController._canvas.height) return callback(0);
 
         // Get pixel index (from the canvas buffer)
-        const pixelIndex = (y * CanvasController._canvas.width + x) * 3;
+        const pixelIndex = (y * 1024 + x) * 3;
 
         // Get palette item
         const color = CanvasController._palette[palette];
@@ -136,7 +137,10 @@ class CanvasController {
         // Broadcast the modification to all clients
         WSS.updateCanvasPixel(x, y, color);
         WSS.updateUserData(socket, user);
-        WSS.updateClassement(socket);
+        WSS.updateClassement();
+
+        // Send the "expires at" time
+        callback(new Date().getTime() + CanvasController._canvas.cooldown * 1000);
     }
 
     // Admin routes

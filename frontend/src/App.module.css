@@ -6,14 +6,14 @@
 
 .containerTop {
     position: fixed;
-    right: 0;
-    margin-top: 1em;
-    margin-right: 1em;
+    right: 1em;
+    top: 1em;
 }
 
 .btnProfil {
-    width: 5em;
-    padding: 1.5em;
+    width: 4em;
+    height: 4em;
+    padding: 1.25em;
     background-color: white;
     border-radius: 10px;
     border: none;
@@ -25,8 +25,9 @@
 }
 
 .btnChat {
-    width: 5em;
-    padding: 1.5em;
+    width: 4em;
+    height: 4em;
+    padding: 1.25em;
     background-color: white;
     border-radius: 10px;
     border: none;

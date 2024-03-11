@@ -1,26 +1,55 @@
 import chatStylesDesktop from "../styles/chatDesktop.module.css";
 import chatStylesMobile from "../styles/chatMobile.module.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import isMobile from "../utils/isMobile";
 import { socket } from "../socket";
+import API from "../utils/api";
 
 interface ChatComponentProps {
     active: boolean;
+    userEmail: string;
 }
 
-const ChatComponent: React.FC<ChatComponentProps> = ({ active }) => {
-    const [chat, setChat] = useState<[string, string][]>([]);
+const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
+    const [chat, setChat] = useState<[string, string][] | undefined>(undefined);
     const [message, setMessage] = useState<string>("");
     const [isMobileView, setIsMobileView] = useState(isMobile.any());
     const [isExpanded, setIsExpanded] = useState(false);
     const [lastMessageTimes, setLastMessageTimes] = useState<number[]>([]);
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
+    const addMessage = useCallback(
+        (email: string, message: string) => {
+            let name = email;
+
+            // Check if the message is from the user
+            if (name === userEmail) name = "MOI";
+
+            // Clean the name (from the email)
+            name = name.split("@")[0];
+            if (name.length > 10) name = name.slice(0, 10) + "...";
+
+            // Add the message to the chat
+            setChat((chat) => (chat ? [...chat, [name, message]] : [[name, message]]));
+        },
+        [userEmail],
+    );
+
+    // Get messages from API
+    useEffect(() => {
+        if (chat !== undefined) return;
+        API.GET("/messages").then((res) => {
+            res.map((message: [string, string]) => {
+                addMessage(message[0], message[1]);
+            });
+        });
+    }, [chat, addMessage]);
+
     const sendMessage = () => {
         if (message.trim().length === 0) return;
 
         if (lastMessageTimes.filter((time) => Date.now() - time < 5000).length >= 3) {
-            setChat([...chat, ["SYSTEM", "Vous envoyez trop de messages, veuillez patienter quelques secondes..."]]);
+            addMessage("SYSTEM", "Vous envoyez trop de messages, veuillez patienter quelques secondes...");
             return;
         }
 
@@ -31,10 +60,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active }) => {
 
         // Send message to websocket
         socket.emit("message", message, (success: boolean) => {
-            if (success) {
-                setChat([...chat, ["MOI", message]]);
-            } else {
-                setChat([...chat, ["SYSTEM", "Le message n'a pas pu être envoyé..."]]);
+            if (!success) {
+                addMessage("SYSTEM", "Le message n'a pas pu être envoyé...");
             }
         });
 
@@ -50,12 +77,10 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active }) => {
         if (messagesContainerRef.current) {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
-    }, [chat]);
 
-    useEffect(() => {
         // Listen for messages from websocket
         socket.on("message", (email: string, message: string) => {
-            setChat([...chat, [email, message]]);
+            addMessage(email, message);
         });
 
         // Handle window resize
@@ -67,15 +92,16 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active }) => {
 
         return () => {
             window.removeEventListener("resize", handleResize);
+            socket.off("message");
         };
-    }, [chat]);
+    }, [addMessage]);
 
     const chatStyles = isMobileView ? chatStylesMobile : chatStylesDesktop;
 
     return (
         <div className={chatStyles.chat}>
             <div className={`${chatStyles.messages} ${isExpanded && chatStyles.expanded}`} ref={messagesContainerRef}>
-                {chat.map((chatMessage, index) => (
+                {chat?.map((chatMessage, index) => (
                     <div key={index}>
                         {" "}
                         <span>{chatMessage[0]}:</span> {chatMessage[1]}

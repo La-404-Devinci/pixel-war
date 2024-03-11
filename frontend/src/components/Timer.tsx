@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "../styles/palette.module.css";
 
 interface TimerComponentProps {
@@ -28,7 +28,7 @@ const Timer: React.FC<TimerComponentProps> = ({ time, setTime }) => {
         };
     }, [setTime]);
 
-    return <div className={styles.timer}>{formatTime(time)}</div>;
+    return time > 0 && <div className={styles.timer}>{formatTime(time)}</div>;
 };
 
 export default Timer;

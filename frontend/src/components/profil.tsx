@@ -1,5 +1,7 @@
 // import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../styles/profil.module.css";
+import { socket } from "../socket";
 
 interface ProfilComponentProps {
     userEmail: string | undefined;
@@ -7,11 +9,34 @@ interface ProfilComponentProps {
 }
 
 const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymous", onHideProfil }) => {
-    // A UTILISER POUR LE BACKEND
-    // const [posedPixel, setposedPixel] = useState(0);
-    // const [messageSent, setmessageSent] = useState(0);
-    // const [sinceLastMessage, setsinceLastMessage] = useState(0);
-    // const [pixelByHour, setPixelByHour] = useState(0);
+    const [posedPixel, setPosedPixel] = useState(0);
+    const [messageSent, setMessageSent] = useState(0);
+    const [sinceLastPixel, setSinceLastPixel] = useState("N/A");
+    const [pixelByHour, setPixelByHour] = useState("N/A");
+
+    useEffect(() => {
+        socket.on("user-data-update", (data) => {
+            setMessageSent(data.messagesSent);
+            setPosedPixel(data.placedPixels);
+
+            const placementDelta = (Date.now() - Date.parse(data.lastPixelTime as string)) / 1000; // seconds
+
+            if (placementDelta < 60) {
+                setSinceLastPixel(Math.round(placementDelta) + "s");
+            } else if (placementDelta < 3600) {
+                setSinceLastPixel(Math.round(placementDelta / 60) + "m");
+            } else if (placementDelta < 86400) {
+                setSinceLastPixel(Math.round(placementDelta / 3600) + "h");
+            } else {
+                setSinceLastPixel(Math.round(placementDelta / 86400) + "d");
+            }
+
+            const startDelta = (Date.now() - data.startTime) / 1000 / 60 / 60; // hours
+            setPixelByHour(Math.round(data.placedPixels / startDelta) + "px/h");
+        });
+
+        socket.emit("get-stats");
+    }, []);
 
     const handleClose = () => {
         onHideProfil();
@@ -25,23 +50,18 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
                     <img src="/src/assets/x.svg" alt="cross-icon" />
                 </button>
             </div>
-            <div className={styles.containerStats}>
-                <div className={styles.blockStats}>
-                    {/* <p>{posedPixel}</p> */}
-                    <p>Pixel posés</p>
-                </div>
-                <div className={styles.blockStats}>
-                    {/* <p>{messageSent}</p> */}
-                    <p>Messages envoyés</p>
-                </div>
-                <div className={styles.blockStats}>
-                    {/* <p>{sinceLastMessage}</p> */}
-                    <p>Depuis le dernier pixel posé</p>
-                </div>
-                <div className={styles.blockStats}>
-                    {/* <p>{pixelByHour}</p> */}
-                    <p>Pixes par heure (en moyenne)</p>
-                </div>
+            <div className={styles.containerGrid}>
+                <p>{posedPixel}</p>
+                <p>Pixel posés</p>
+
+                <p>{messageSent}</p>
+                <p>Messages envoyés</p>
+
+                <p>{sinceLastPixel}</p>
+                <p>Depuis le dernier pixel posé</p>
+
+                <p>{pixelByHour}</p>
+                <p>Pixes par heure (en moyenne)</p>
             </div>
             <button className={styles.btnLogOut}>Log out</button>
         </div>
