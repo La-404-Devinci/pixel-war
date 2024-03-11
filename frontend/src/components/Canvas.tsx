@@ -11,7 +11,7 @@ interface CanvasProps {
     stopClick: boolean;
 }
 
-const Canvas: React.FC<CanvasProps> = forwardRef((props, ref: React.Ref<HTMLDivElement>) => {
+const Canvas = forwardRef((props: CanvasProps, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null); // Référence pour le canvas
     const cursorRef = useRef<HTMLDivElement>(null); // Référence pour le curseur
 
@@ -151,7 +151,7 @@ const Canvas: React.FC<CanvasProps> = forwardRef((props, ref: React.Ref<HTMLDivE
     }
 
     return (
-        <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={ref}>
+        <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={ref as React.RefObject<HTMLDivElement> | null}>
             {!props.readOnly && (
                 <div
                     ref={cursorRef}

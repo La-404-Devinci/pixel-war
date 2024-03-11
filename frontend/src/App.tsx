@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./App.module.css";
 import { socket } from "./socket";
 import ChatComponent from "./components/chat";
