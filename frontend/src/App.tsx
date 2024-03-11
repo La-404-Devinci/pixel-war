@@ -1,10 +1,10 @@
-// import { useState } from 'react'
 import { SetStateAction, useEffect, useState } from "react";
 import styles from "./App.module.css";
 import { socket } from "./socket";
 import classementItem from "../../common/interfaces/classementItem.interface";
 import ChatComponent from "./components/chat";
 import LeaderboardComponent from "./components/leaderboard";
+import ModalReward from "./components/modalReward";
 import LoginComponent from "./components/login";
 import ProfilComponent from "./components/profil";
 import isMobile from "./utiles/isMobile";
@@ -156,14 +156,12 @@ function App() {
                     </div>
                 )}
 
-                <LeaderboardComponent />
-
                 {displayBtnLogin && (
                     <button
                         onClick={() => handleDisplayComponent("login")}
                         className={styles.btnLogin}
                     >
-                        Login to draw !
+                        Connectez-vous pour dessiner !
                     </button>
                 )}
 
@@ -188,6 +186,10 @@ function App() {
                         active={isConnected}
                     />
                 )}
+                <div className={styles.leaderboard}>
+                    <LeaderboardComponent />
+                    <ModalReward />
+                </div>
             </div>
         </div>
     );

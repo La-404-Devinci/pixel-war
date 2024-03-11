@@ -1,0 +1,30 @@
+.carouselBtnLeft,
+.carouselBtnRight {
+    position: absolute;
+    margin-inline: 16px;
+    height: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.carouselBtnLeft {
+    left: 0;
+}
+
+.carouselBtnRight {
+    right: 0;
+}
+
+.slider {
+    margin: 32px auto;
+}
+
+.slider img {
+    width: 85%;
+}
