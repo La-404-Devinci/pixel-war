@@ -2,87 +2,34 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/assoModal.module.css";
 import AsyncSelect from "react-select/async";
+import { components } from "react-select";
 
-// import { JSX } from 'react/jsx-runtime';
-
-const options = [
-    {
-        image: "https://www.forum-associatif-numerique.fr/uploads/iimpact/logos/Logo-Monochrome-avec-NOUVELLE-ecriture-630fc58ce8a48.png",
-        label: "IIMPACT",
-        value: "iimpact",
-    },
-    {
-        image: "https://www.forum-associatif-numerique.fr/uploads/3v/logos/LogoFullColor-MaelleLemaignen-61191bd85b6f7.png",
-        label: "3V",
-        value: "3v",
-    },
-    {
-        image: "https://www.forum-associatif-numerique.fr/uploads/vincisquad/logos/1-Logo-Couleurs-631c4239386ae.png",
-        label: "Vinci Squad",
-        value: "vincisquad",
-    },
-];
+type Option = {
+    image: string;
+    label: string;
+    value: string;
+};
 
 export default function AssoModal() {
     const [displayAssoModal, setDisplayAssoModal] = useState(true);
-    const [selectedAsso, setSelectedAsso] = useState<Option | null>(null);
+    const [selectedAsso, setSelectedAsso] = useState<string | null>(null);
+    const [options, setOptions] = useState<Option[]>([]);
 
-    const handleHide = (
-        event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-    ) => {
+    useEffect(() => {
+        // TODO: Fetch all associations
+    }, []);
+
+    const handleHide = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
         setDisplayAssoModal(false);
     };
 
-    type CustomMenuProps = {
-        children: React.ReactNode;
-    };
-
-    const customMenu = (props: CustomMenuProps) => {
-        return (
-            <div className={styles.menu}>
-                <div>{props.children}</div>
-            </div>
-        );
-    };
-
-    type Option = {
-        image: string;
-        label: string;
-        value: string;
-    };
-
     const filterAsso = (inputValue: string) => {
-        return options.filter((i: Option) =>
-            i.label.toLowerCase().includes(inputValue.toLowerCase())
-        );
+        return options.filter((i: Option) => i.label.toLowerCase().includes(inputValue.toLowerCase()));
     };
 
-    const loadOptions = (
-        inputValue: string,
-        callback: (options: Option[]) => void
-    ) => {
+    const loadOptions = (inputValue: string, callback: (options: Option[]) => void) => {
         callback(filterAsso(inputValue));
-    };
-
-    type CustomOptionProps = {
-        data: Option;
-    };
-
-    const customOption = (props: CustomOptionProps) => {
-        return (
-            <div className={styles.option}>
-                <p>{props.data.label}</p>
-                <img
-                    src={props.data.image}
-                    alt={props.data.label}
-                />
-            </div>
-        );
-    };
-
-    const customNoOptionMsg = () => {
-        return <p>Aucune association ne correspond à votre recherche.</p>;
     };
 
     useEffect(() => {
@@ -95,38 +42,37 @@ export default function AssoModal() {
         <>
             {displayAssoModal && (
                 <div className={styles.modalAssoContainer}>
-                    {displayAssoModal && (
-                        <div className={styles.modalAsso}>
-                            <h1>Une asso ?</h1>
+                    <div className={styles.modalAsso}>
+                        <h1>Une asso ?</h1>
 
-                            <p>
-                                Si vous faites partie d'une association, entrez
-                                la juste ici pour la représenter.
-                            </p>
+                        <p>Si vous faites partie d'une association, entrez la juste ici pour la représenter.</p>
 
-                            <AsyncSelect
-                                placeholder='Choisissez votre association !'
-                                loadOptions={loadOptions}
-                                defaultOptions
-                                cacheOptions
-                                closeMenuOnSelect={false}
-                                openMenuOnClick
-                                components={{
-                                    Menu: customMenu,
-                                    Option: customOption,
-                                }}
-                                noOptionsMessage={customNoOptionMsg}
-                                onChange={(e) => setSelectedAsso(e || null)}
-                                value={selectedAsso}
-                            />
+                        <AsyncSelect
+                            placeholder="Choisissez votre association !"
+                            loadOptions={loadOptions}
+                            defaultOptions
+                            cacheOptions
+                            closeMenuOnSelect={false}
+                            openMenuOnClick
+                            defaultMenuIsOpen={true}
+                            components={{
+                                Option: (props) => (
+                                    <components.Option {...props} className={styles.option}>
+                                        <img src={props.data.image} alt={props.data.label} />
+                                        <span>{props.data.label}</span>
+                                    </components.Option>
+                                ),
+                            }}
+                            noOptionsMessage={() => <p>Aucune association ne correspond à votre recherche.</p>}
+                            blurInputOnSelect={true}
+                            onChange={(e) => setSelectedAsso(e?.value || null)}
+                            value={options.find((option) => option.value === selectedAsso)}
+                        />
 
-                            <button>C'est parti !</button>
+                        <button>C'est parti !</button>
 
-                            <a onClick={handleHide}>
-                                Je ne suis pas dans une asso
-                            </a>
-                        </div>
-                    )}
+                        <a onClick={handleHide}>Je ne suis pas dans une asso</a>
+                    </div>
                 </div>
             )}
         </>

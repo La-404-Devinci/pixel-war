@@ -11,7 +11,7 @@ import isMobile from "./utiles/isMobile";
 import Canvas from "./components/Canvas";
 import Palette from "./components/Palette";
 import Timer from "./components/Timer";
-import AssoModal from './components/AssoModal';
+import AssoModal from "./components/AssoModal";
 
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -61,8 +61,7 @@ function App() {
             // Multiplicateur de zoom arbitraire
             const zoomFactor = 0.1;
             // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
-            const newZoom =
-                event.deltaY > 0 ? zoom - zoomFactor : zoom + zoomFactor;
+            const newZoom = event.deltaY > 0 ? zoom - zoomFactor : zoom + zoomFactor;
             // Limiter le zoom à un minimum de 0.1 pour éviter les valeurs non valides
             setZoom(Math.max(0.1, newZoom));
         };
@@ -110,84 +109,52 @@ function App() {
 
     // affichage (render)
     return (
-        <div>
-            <div className={styles.canvasContainer}>
-                <Canvas
-                    actualColor={selectedColor}
-                    zoom={zoom}
-                    readOnly={isConnected}
-                />
-                {isConnected && <Palette onColorClick={handleColorSelect} />}
-                <Timer />
-            </div>
+        <>
+            <div>
+                <div className={styles.canvasContainer}>
+                    <Canvas actualColor={selectedColor} zoom={zoom} readOnly={isConnected} />
+                    {isConnected && <Palette onColorClick={handleColorSelect} />}
+                    <Timer />
+                </div>
 
-            {/* <div id="test-login">
+                {/* <div id="test-login">
         <LoginComponent />
       </div> */}
 
-            <div className={styles.homepage}>
-                    <AssoModal />
-                {isConnected && (
-                    <div className={styles.containerTop}>
-                        {isMobile.any() && (
-                            <button
-                                onClick={() => handleDisplayComponent("chat")}
-                                className={styles.btnChat}
-                            >
-                                <img
-                                    src='/src/assets/message.svg'
-                                    alt='icone-chat'
-                                />
-                            </button>
-                        )}
-                        {displayComponent !== "profil" && (
-                            <button
-                                onClick={() => handleDisplayComponent("profil")}
-                                className={styles.btnProfil}
-                            >
-                                <img
-                                    src='/src/assets/user-large.svg'
-                                    alt='icone-user-profil'
-                                />
-                            </button>
-                        )}
-                    </div>
-                )}
+                <div className={styles.homepage}>
+                    {isConnected && (
+                        <div className={styles.containerTop}>
+                            {isMobile.any() && (
+                                <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
+                                    <img src="/src/assets/message.svg" alt="icone-chat" />
+                                </button>
+                            )}
+                            {displayComponent !== "profil" && (
+                                <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
+                                    <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
+                                </button>
+                            )}
+                        </div>
+                    )}
 
-                <LeaderboardComponent />
+                    <LeaderboardComponent />
 
-                {displayBtnLogin && (
-                    <button
-                        onClick={() => handleDisplayComponent("login")}
-                        className={styles.btnLogin}
-                    >
-                        Login to draw !
-                    </button>
-                )}
+                    {displayBtnLogin && (
+                        <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>
+                            Login to draw !
+                        </button>
+                    )}
 
-                {displayComponent === "login" && (
-                    <LoginComponent onLogin={handleLogin} />
-                )}
-                {displayComponent === "profil" && (
-                    <ProfilComponent
-                        userEmail={userEmail}
-                        onHideProfil={() => handleDisplayComponent("none")}
-                    />
-                )}
-                {displayComponent === "chat" && (
-                    <ChatComponent
-                        userEmail={userEmail}
-                        active={isConnected}
-                    />
-                )}
-                {!isMobile.any() && (
-                    <ChatComponent
-                        userEmail={userEmail}
-                        active={isConnected}
-                    />
-                )}
+                    {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
+                    {displayComponent === "profil" && (
+                        <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />
+                    )}
+                    {displayComponent === "chat" && <ChatComponent userEmail={userEmail} active={isConnected} />}
+                    {!isMobile.any() && <ChatComponent userEmail={userEmail} active={isConnected} />}
+                </div>
             </div>
-        </div>
+            <AssoModal />
+        </>
     );
 }
 
