@@ -1,5 +1,5 @@
 // import React, { useEffect } from 'react'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../styles/assoModal.module.css";
 import AsyncSelect from "react-select/async";
 
@@ -25,7 +25,7 @@ const options = [
 
 export default function AssoModal() {
     const [displayAssoModal, setDisplayAssoModal] = useState(true);
-    const [selectedAsso, setSelectedAsso] = useState(null);
+    const [selectedAsso, setSelectedAsso] = useState<Option | null>(null);
 
     const handleHide = (
         event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
@@ -62,9 +62,7 @@ export default function AssoModal() {
         inputValue: string,
         callback: (options: Option[]) => void
     ) => {
-        setTimeout(() => {
-            callback(filterAsso(inputValue));
-        }, 1000);
+        callback(filterAsso(inputValue));
     };
 
     type CustomOptionProps = {
@@ -83,6 +81,16 @@ export default function AssoModal() {
         );
     };
 
+    const customNoOptionMsg = () => {
+        return <p>Aucune association ne correspond à votre recherche.</p>;
+    };
+
+    useEffect(() => {
+        if (selectedAsso) {
+            console.log(selectedAsso);
+        }
+    }, [selectedAsso]);
+
     return (
         <>
             {displayAssoModal && (
@@ -100,10 +108,16 @@ export default function AssoModal() {
                                 placeholder='Choisissez votre association !'
                                 loadOptions={loadOptions}
                                 defaultOptions
+                                cacheOptions
+                                closeMenuOnSelect={false}
+                                openMenuOnClick
                                 components={{
                                     Menu: customMenu,
                                     Option: customOption,
                                 }}
+                                noOptionsMessage={customNoOptionMsg}
+                                onChange={(e) => setSelectedAsso(e || null)}
+                                value={selectedAsso}
                             />
 
                             <button>C'est parti !</button>
