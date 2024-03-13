@@ -4,17 +4,20 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+
+    touch-action: pinch-zoom;
+}
+
+html,
+body,
+#root {
     overflow: hidden;
 
     font-family: "Hanken Grotesk", sans-serif;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
-}
 
-html,
-body,
-#root {
     position: relative;
     z-index: -5;
     background-color: #131518;
