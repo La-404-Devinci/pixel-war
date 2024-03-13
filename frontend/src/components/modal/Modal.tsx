@@ -12,6 +12,7 @@ interface ModalComponentProps {
     textContent?: string;
     children?: React.ReactNode;
     closeBtnContent: string | React.ReactNode;
+    optCloseBtnClassName?: string;
 }
 
 const ModalComponent: React.FC<ModalComponentProps> = ({
@@ -24,6 +25,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
     textContent,
     children,
     closeBtnContent,
+    optCloseBtnClassName,
 }) => {
     const [isOpened, setIsOpened] = useState(false);
 
@@ -54,7 +56,11 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
                         {children}
 
                         <button
-                            className={styles.closeButton}
+                            className={
+                                optCloseBtnClassName
+                                    ? [optCloseBtnClassName].join("")
+                                    : styles.closeButton
+                            }
                             onClick={handleOpened}
                         >
                             {closeBtnContent}

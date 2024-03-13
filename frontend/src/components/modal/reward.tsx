@@ -1,7 +1,7 @@
 import SimpleSlider from "../slider";
 import ModalComponent from "./Modal";
 
-import styles from "../../styles/modalReward.module.css";
+import styles from "../../styles/reward.module.css";
 
 const ModalReward = () => {
     return (

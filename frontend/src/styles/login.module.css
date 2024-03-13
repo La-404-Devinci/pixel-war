@@ -6,11 +6,37 @@
     font-size: 1.4em;
 }
 
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.login label {
+    font-weight: 600;
+    font-size: 1.2em;
+    width: 100%;
+    text-align: left;
+}
+
 .login input {
+    width: 100%;
     margin-block: 1em;
     padding: 1em;
     border-radius: 8px;
     border: 2px solid rgba(0, 0, 0, 0.25);
+}
+
+.login button {
+    width: 100%;
+    cursor: pointer;
+    padding: 1em;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    background-color: #333333;
+    cursor: pointer;
+    color: white;
 }
 
 .btnLogin {
@@ -48,7 +74,9 @@
 }
 
 .close {
-    margin-left: auto;
+    position: absolute;
+    top: 25px;
+    right: 25px;
     cursor: pointer;
     background-color: transparent;
     border: none;

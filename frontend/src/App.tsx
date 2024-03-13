@@ -252,7 +252,7 @@ function App() {
                 <Timer
                     time={time}
                     setTime={setTime}
-                />
+                    />
             </div>
             <div className={styles.homepage}>
                 <div className={styles.modalAssoContainer}>
@@ -262,7 +262,9 @@ function App() {
                 <div className={styles.leaderboard}>
                     <LeaderboardComponent />
                     <ModalReward />
+                    {!isConnected && <LoginComponent/>}
                 </div>
+
             </div>
             {displayComponent === "profil" && (
                 <ProfilComponent
@@ -302,8 +304,6 @@ function App() {
                     )}
                 </div>
             )}
-            //TODO: fix component placement in code
-            {!isConnected && <LoginComponent />}
         </>
     );
 }

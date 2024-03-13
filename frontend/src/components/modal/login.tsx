@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "../../styles/modalLogin.module.css";
+import styles from "../../styles/login.module.css";
 import API from "../../utils/api";
 import ModalComponent from "./Modal";
 
@@ -37,19 +37,19 @@ const LoginComponent = () => {
         <>
             <ModalComponent
                 modalBtnContent='Connectez-vous pour dessiner !'
-                modalBtnClassName='btnLogin'
+                modalBtnClassName={styles.btnLogin}
                 titleContent='Connexion'
                 titleClassName={styles.loginTitle}
                 closeBtnContent={
                     <img
-                        className={styles.close}
                         src='/src/assets/x.svg'
                         alt='Close button'
                     />
                 }
+                optCloseBtnClassName={styles.close}
             >
                 <div className={styles.login}>
-                    <label>Enter your devinci email</label>
+                    <label>Entrez votre email Devinci</label>
                     <input
                         type='email'
                         placeholder='email@edu.devinci.fr'
@@ -61,7 +61,7 @@ const LoginComponent = () => {
                         onClick={handleLoginClick}
                         disabled={!!message}
                     >
-                        Send magic link
+                        Recevoir le lien de connexion
                     </button>
                     {message && (
                         <p
