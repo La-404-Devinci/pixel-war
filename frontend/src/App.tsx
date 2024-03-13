@@ -1,17 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import styles from "./App.module.css";
 import { socket } from "./socket";
 import ChatComponent from "./components/chat";
 import LeaderboardComponent from "./components/leaderboard";
-import ModalReward from "./components/modalReward";
 import LoginComponent from "./components/login";
 import ProfilComponent from "./components/profil";
 import isMobile from "./utils/isMobile";
 import Canvas from "./components/Canvas";
 import Palette from "./components/Palette";
 import Timer from "./components/Timer";
-import API from "./utils/api";
 import AssoModal from "./components/AssoModal";
+import API from "./utils/api";
+import ModalReward from "./components/modalReward";
 
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

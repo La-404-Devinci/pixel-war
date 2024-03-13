@@ -1,68 +1,80 @@
 // import React, { useEffect } from 'react'
-import { useState } from 'react'
-import styles from '../styles/assoModal.module.css'
-import Select from 'react-select';
-import { Input } from 'react-select/animated';
-// import { JSX } from 'react/jsx-runtime';
+import { useEffect, useState } from "react";
+import styles from "../styles/assoModal.module.css";
+import AsyncSelect from "react-select/async";
+import { components } from "react-select";
 
-
+type Option = {
+    image: string;
+    label: string;
+    value: string;
+};
 
 export default function AssoModal() {
+    const [displayAssoModal, setDisplayAssoModal] = useState(true);
+    const [selectedAsso, setSelectedAsso] = useState<string | null>(null);
+    const [options, setOptions] = useState<Option[]>([]);
 
-  const [listAsso, setListAsso] = useState([
-    { id: 'asso1', name: 'Asso john', image: 'https://media.istockphoto.com/id/1023347350/fr/photo/point-dinterrogation-3d-point-rouge-dinterrogation-demandant-signe-de-ponctuation-isol%C3%A9e.jpg?s=612x612&w=0&k=20&c=eVZrCH5I73a5W_2TZ0tlrWdK68UAoXZPaytoZyGoj90='},
-    { id: 'asso2', name: 'Asso bob', image: 'https://media.istockphoto.com/id/1023347350/fr/photo/point-dinterrogation-3d-point-rouge-dinterrogation-demandant-signe-de-ponctuation-isol%C3%A9e.jpg?s=612x612&w=0&k=20&c=eVZrCH5I73a5W_2TZ0tlrWdK68UAoXZPaytoZyGoj90='},
-    { id: 'asso3', name: 'Asso roger', image: 'https://media.istockphoto.com/id/1023347350/fr/photo/point-dinterrogation-3d-point-rouge-dinterrogation-demandant-signe-de-ponctuation-isol%C3%A9e.jpg?s=612x612&w=0&k=20&c=eVZrCH5I73a5W_2TZ0tlrWdK68UAoXZPaytoZyGoj90='},
-    { id: 'asso4', name: 'Asso sebastien', image: 'https://media.istockphoto.com/id/1023347350/fr/photo/point-dinterrogation-3d-point-rouge-dinterrogation-demandant-signe-de-ponctuation-isol%C3%A9e.jpg?s=612x612&w=0&k=20&c=eVZrCH5I73a5W_2TZ0tlrWdK68UAoXZPaytoZyGoj90='},
-    { id: 'asso5', name: 'Asso tom', image: 'https://media.istockphoto.com/id/1023347350/fr/photo/point-dinterrogation-3d-point-rouge-dinterrogation-demandant-signe-de-ponctuation-isol%C3%A9e.jpg?s=612x612&w=0&k=20&c=eVZrCH5I73a5W_2TZ0tlrWdK68UAoXZPaytoZyGoj90='},
-  ]);
+    useEffect(() => {
+        // TODO: Fetch all associations
+    }, []);
 
+    const handleHide = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        setDisplayAssoModal(false);
+    };
 
-  const [selectedAsso, setSelectedAsso] = useState({id: '', name: '', image: ''});
+    const filterAsso = (inputValue: string) => {
+        return options.filter((i: Option) => i.label.toLowerCase().includes(inputValue.toLowerCase()));
+    };
 
-  const [displayAssoModal, setDisplayAssoModal] = useState(true)
+    const loadOptions = (inputValue: string, callback: (options: Option[]) => void) => {
+        callback(filterAsso(inputValue));
+    };
 
-  
-  const handleSelectChange = (selectedOption: unknown) => {
-    setSelectedAsso(selectedOption as unknown as {id: string, name: string, image: string});
-  };
+    useEffect(() => {
+        if (selectedAsso) {
+            console.log(selectedAsso);
+        }
+    }, [selectedAsso]);
 
-  const handleHide = () => {
-    setDisplayAssoModal(false);
-  }
+    return (
+        <>
+            {displayAssoModal && (
+                <div className={styles.modalAssoContainer}>
+                    <div className={styles.modalAsso}>
+                        <h1>Une asso ?</h1>
 
+                        <p>Si vous faites partie d'une association, entrez la juste ici pour la représenter.</p>
 
-  return (
-    <>
-      {displayAssoModal && (
-      
-        <div className={styles.modalAsso}>
-          <h1>
-            Une asso ?
-          </h1>
+                        <AsyncSelect
+                            placeholder="Choisissez votre association !"
+                            loadOptions={loadOptions}
+                            defaultOptions
+                            cacheOptions
+                            closeMenuOnSelect={false}
+                            openMenuOnClick
+                            defaultMenuIsOpen={true}
+                            components={{
+                                Option: (props) => (
+                                    <components.Option {...props} className={styles.option}>
+                                        <img src={props.data.image} alt={props.data.label} />
+                                        <span>{props.data.label}</span>
+                                    </components.Option>
+                                ),
+                            }}
+                            noOptionsMessage={() => <p>Aucune association ne correspond à votre recherche.</p>}
+                            blurInputOnSelect={true}
+                            onChange={(e) => setSelectedAsso(e?.value || null)}
+                            value={options.find((option) => option.value === selectedAsso)}
+                        />
 
-          <p>
-            Si vous faites partie d'une association, entrez la juste ici pour la représenter.
-          </p>
+                        <button>C'est parti !</button>
 
-          <Select className={styles.assoList} placeholder="Choisir une asso"
-            components={{ Input }}
-            options={listAsso.map((asso) => ({
-              value: asso.id,
-              label: asso.name,
-              image: asso.image
-            }))}
-            onChange={handleSelectChange}
-            value={selectedAsso}
-          />
-
-          <button>C'est parti !</button>
-
-          <a onClick={handleHide}>
-            Je ne suis pas dans une asso
-          </a>
-        </div>
-      )}
-    </>
-  )
+                        <a onClick={handleHide}>Je ne suis pas dans une asso</a>
+                    </div>
+                </div>
+            )}
+        </>
+    );
 }
