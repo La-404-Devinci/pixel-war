@@ -3,8 +3,8 @@ import styles from "./App.module.css";
 import { socket } from "./socket";
 import ChatComponent from "./components/chat";
 import LeaderboardComponent from "./components/leaderboard";
-import ModalReward from "./components/modalReward";
-import LoginComponent from "./components/login";
+import ModalReward from "./components/modal/reward";
+import LoginComponent from "./components/modal/login";
 import ProfilComponent from "./components/profil";
 import isMobile from "./utils/isMobile";
 import Canvas from "./components/Canvas";
@@ -64,8 +64,10 @@ function App() {
             if (!success) {
                 console.error("Authentification failed");
                 // Clear 'email' and 'token' cookies
-                document.cookie = "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie =
+                    "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie =
+                    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 window.location.reload();
                 return;
             } else {
@@ -222,7 +224,8 @@ function App() {
 
     const handlePlacePixel = (x: number, y: number) => {
         socket.emit("place-pixel", x, y, selectedColor, (expiresAt: number) => {
-            const timer = Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
+            const timer =
+                Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
             setTime(timer);
         });
     };
@@ -239,11 +242,18 @@ function App() {
                     palette={colors}
                 />
                 {isConnected && (
-                    <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} isActive={time <= 0} />
+                    <Palette
+                        onColorClick={handleColorSelect}
+                        colors={colors}
+                        selectedColor={selectedColor}
+                        isActive={time <= 0}
+                    />
                 )}
-                <Timer time={time} setTime={setTime} />
+                <Timer
+                    time={time}
+                    setTime={setTime}
+                />
             </div>
-
             <div className={styles.homepage}>
                 <div className={styles.modalAssoContainer}>
                     <AssoModal />
@@ -254,31 +264,46 @@ function App() {
                     <ModalReward />
                 </div>
             </div>
-
-            {!isConnected && (
-                <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>
-                    Connectez-vous pour dessiner !
-                </button>
+            {displayComponent === "profil" && (
+                <ProfilComponent
+                    userEmail={email}
+                    onHideProfil={() => handleDisplayComponent("none")}
+                />
             )}
-
-            {displayComponent === "login" && <LoginComponent onClose={() => handleDisplayComponent("none")} />}
-            {displayComponent === "profil" && <ProfilComponent userEmail={email} onHideProfil={() => handleDisplayComponent("none")} />}
-            {(displayComponent === "chat" || !isMobile.any()) && <ChatComponent active={isConnected} userEmail={email ?? "N/A"} />}
-
+            {(displayComponent === "chat" || !isMobile.any()) && (
+                <ChatComponent
+                    active={isConnected}
+                    userEmail={email ?? "N/A"}
+                />
+            )}
             {displayComponent !== "profil" && (
                 <div className={styles.containerTop}>
                     {isMobile.any() && (
-                        <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
-                            <img src="/src/assets/message.svg" alt="icone-chat" />
+                        <button
+                            onClick={() => handleDisplayComponent("chat")}
+                            className={styles.btnChat}
+                        >
+                            <img
+                                src='/src/assets/message.svg'
+                                alt='icone-chat'
+                            />
                         </button>
                     )}
                     {isConnected && displayComponent !== "chat" && (
-                        <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
-                            <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
+                        <button
+                            onClick={() => handleDisplayComponent("profil")}
+                            className={styles.btnProfil}
+                        >
+                            <img
+                                src='/src/assets/user-large.svg'
+                                alt='icone-user-profil'
+                            />
                         </button>
                     )}
                 </div>
             )}
+            //TODO: fix component placement in code
+            {!isConnected && <LoginComponent />}
         </>
     );
 }

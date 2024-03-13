@@ -1,0 +1,40 @@
+.modalContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #ffffff;
+    position: relative;
+    border-radius: 16px;
+    padding: 2em;
+    width: 90%;
+    box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
+}
+
+.modal p {
+    margin: 1em 1em 1em 0;
+}
+
+.closeButton {
+    cursor: pointer;
+    padding: 1em;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    background-color: #333333;
+    cursor: pointer;
+    color: white;
+}
