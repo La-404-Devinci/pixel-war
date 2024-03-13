@@ -97,92 +97,6 @@ function App() {
         }
     }, [colors]);
 
-    // Handle window resize
-    const canvasRef = useRef<HTMLDivElement>(null);
-    const [isDragging, setIsDragging] = useState(false);
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        let drag = false;
-        let canvasX = 0;
-        let canvasY = 0;
-        let moveX = 0;
-        let moveY = 0;
-
-        const handleMouseDown = (event: MouseEvent) => {
-            if (event.button !== 0) return;
-            handleDown(event.clientX, event.clientY);
-        };
-
-        const handleTouchStart = (event: TouchEvent) => {
-            if (event.touches.length !== 1) return;
-            handleDown(event.touches[0].clientX, event.touches[0].clientY);
-        };
-
-        const handleDown = (x: number, y: number) => {
-            drag = true;
-            setTimeout(() => {
-                setIsDragging(true);
-            }, 100);
-            moveX = x;
-            moveY = y;
-        };
-
-        const handleMouseMove = (event: MouseEvent) => {
-            handleMove(event.clientX, event.clientY);
-        };
-
-        const handleTouchMove = (event: TouchEvent) => {
-            handleMove(event.touches[0].clientX, event.touches[0].clientY);
-        };
-
-        const handleMove = (x: number, y: number) => {
-            if (!drag) return;
-            // déplacement de l'utilisateur
-            const deltaX = x - moveX;
-            const deltaY = y - moveY;
-
-            canvasX += deltaX;
-            canvasY += deltaY;
-            moveX = x;
-            moveY = y;
-
-            // déplacement du canvas
-            canvas.style.left = `${canvasX}px`;
-            canvas.style.top = `${canvasY}px`;
-        };
-
-        const handleUp = () => {
-            drag = false;
-            setTimeout(() => {
-                setIsDragging(false);
-            }, 100);
-        };
-
-        // Desktop events
-        window.addEventListener("mouseup", handleUp);
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mousedown", handleMouseDown);
-
-        // Mobile events
-        window.addEventListener("touchend", handleUp);
-        window.addEventListener("touchmove", handleTouchMove);
-        window.addEventListener("touchstart", handleTouchStart);
-        return () => {
-            // Desktop events
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleUp);
-            window.removeEventListener("mousedown", handleMouseDown);
-
-            // Mobile events
-            window.removeEventListener("touchmove", handleTouchMove);
-            window.removeEventListener("touchend", handleUp);
-            window.removeEventListener("touchstart", handleTouchStart);
-        };
-    }, []);
-
     useEffect(() => {
         const handleResize = (e: Event) => {
             e.preventDefault();
@@ -196,9 +110,9 @@ function App() {
         };
     }, []);
 
-    if (!colors || !socketConnected) {
-        return <div>Loading...</div>;
-    }
+    // if (!colors || !socketConnected) {
+    //     return <div>Loading...</div>;
+    // }
 
     const handleColorSelect = (color: number) => {
         setSelectedColor(color);
@@ -230,29 +144,20 @@ function App() {
     return (
         <>
             <div className={styles.canvasContainer}>
-                <Canvas
-                    ref={canvasRef}
-                    actualColor={selectedColor}
-                    readOnly={!isConnected}
-                    stopClick={isDragging}
-                    onPlacePixel={handlePlacePixel}
-                    palette={colors}
-                />
+                <Canvas actualColor={selectedColor} readOnly={!isConnected} onPlacePixel={handlePlacePixel} palette={colors ?? []} />
                 {isConnected && (
                     <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} isActive={time <= 0} />
                 )}
                 <Timer time={time} setTime={setTime} />
             </div>
 
-            <div className={styles.homepage}>
-                <div className={styles.modalAssoContainer}>
-                    <AssoModal />
-                </div>
+            <div className={styles.modalAssoContainer}>
+                <AssoModal />
+            </div>
 
-                <div className={styles.leaderboard}>
-                    <LeaderboardComponent />
-                    <ModalReward />
-                </div>
+            <div className={styles.leaderboard}>
+                <LeaderboardComponent />
+                <ModalReward />
             </div>
 
             {!isConnected && (
@@ -268,9 +173,21 @@ function App() {
             {displayComponent !== "profil" && (
                 <div className={styles.containerTop}>
                     {isMobile.any() && (
-                        <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
-                            <img src="/src/assets/message.svg" alt="icone-chat" />
-                        </button>
+                        <>
+                            <button
+                                onClick={() =>
+                                    document.body.requestFullscreen({
+                                        navigationUI: "hide",
+                                    })
+                                }
+                                className={styles.btnChat}
+                            >
+                                <img src="/src/assets/trophy.svg" alt="icone-trophy" />
+                            </button>
+                            <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
+                                <img src="/src/assets/message.svg" alt="icone-chat" />
+                            </button>
+                        </>
                     )}
                     {isConnected && displayComponent !== "chat" && (
                         <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
