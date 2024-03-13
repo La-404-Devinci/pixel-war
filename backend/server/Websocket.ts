@@ -7,14 +7,12 @@ const client = new PrismaClient();
 
 class WSS {
     public static io: Server;
+    private static _startTime = Date.now();
 
     public static init(server: http.Server) {
         WSS.io = new SocketIO.Server(server, {
             cors: {
-                origin:
-                    process.env.NODE_ENV === "production"
-                        ? undefined
-                        : "http://localhost:5173",
+                origin: process.env.NODE_ENV === "production" ? undefined : "http://localhost:5173",
             },
         });
     }
@@ -85,7 +83,13 @@ class WSS {
      * @param user The user data
      */
     static async updateUserData(socket: Socket, user: unknown) {
-        socket.emit("user-data-update", user);
+        const data = user as {
+            placedPixels: number;
+            lastPixelTime: Date;
+            messagesSent: number;
+        };
+
+        socket.emit("user-data-update", { ...data, startTime: this._startTime });
     }
 
     /**

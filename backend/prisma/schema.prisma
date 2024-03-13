@@ -11,12 +11,13 @@ datasource db {
 }
 
 model Account {
-    id                   Int      @id @default(autoincrement())
-    devinciEmail         String @unique()
-    isMuted              Boolean @default(false)
-    isBanned             Boolean @default(false)
-    isAdmin              Boolean @default(false)
-    placedPixels         Int @default(0)
+    id                   Int       @id @default(autoincrement())
+    devinciEmail         String    @unique()
+    isMuted              Boolean   @default(false)
+    isBanned             Boolean   @default(false)
+    isAdmin              Boolean   @default(false)
+    placedPixels         Int       @default(0)
+    messagesSent         Int       @default(0)
     timeAlive            Int?
     lastPixelTime        DateTime?
     lastSentMessageTimes Json?
@@ -24,10 +25,9 @@ model Account {
 }
 
 model LogEntry {
-    id           Int      @id @default(autoincrement())
+    id           Int    @id @default(autoincrement())
     devinciEmail String
     time         Int
     ip           String
     action       Json
 }
-

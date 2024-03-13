@@ -9,6 +9,8 @@
     background-color: white;
     position: fixed;
     right: 0;
+    top: 0;
+    bottom: 0;
 }
 
 .btnLogOut {
@@ -44,17 +46,14 @@
     border: none;
 }
 
-.containerStats {
+.containerGrid {
     width: 100%;
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    gap: 1em;
 }
 
-.blockStats {
-    display: flex;
-    justify-content: space-between;
-    margin-block: 1em;
-}
-
-.blockStats p:nth-child(1) {
+.containerGrid p:nth-child(2n + 1) {
     font-weight: bold;
 }
 
@@ -68,7 +67,7 @@
         font-size: 1.2em;
     }
 
-   p {
-    font-size: 1.2em;
-   }
+    p {
+        font-size: 1.2em;
+    }
 }
