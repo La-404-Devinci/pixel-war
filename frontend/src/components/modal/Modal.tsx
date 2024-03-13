@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import styles from "../../styles/Modal.module.css";
+import styles from "../../styles/modal/Modal.module.css";
 
 interface ModalComponentProps {
+    forceOpen?: boolean;
     modalBtnClassName?: string;
-    modalBtnContent: React.ReactNode;
+    modalBtnContent?: React.ReactNode;
     maxWidth?: number;
     modalComponentClassName?: string;
     titleContent: string;
@@ -13,9 +14,11 @@ interface ModalComponentProps {
     children?: React.ReactNode;
     closeBtnContent: string | React.ReactNode;
     optCloseBtnClassName?: string;
+    linkAsCloseBtn?: boolean;
 }
 
 const ModalComponent: React.FC<ModalComponentProps> = ({
+    forceOpen,
     modalBtnClassName,
     modalBtnContent,
     maxWidth = 400,
@@ -26,21 +29,28 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
     children,
     closeBtnContent,
     optCloseBtnClassName,
+    linkAsCloseBtn,
 }) => {
-    const [isOpened, setIsOpened] = useState(false);
+    const [isOpened, setIsOpened] = useState<boolean>(false);
 
     const handleOpened = () => {
         setIsOpened(!isOpened);
     };
 
+    useEffect(() => {
+        forceOpen && setIsOpened(true);
+    }, [forceOpen]);
+
     return (
         <>
-            <button
-                className={[modalBtnClassName].join("")}
-                onClick={handleOpened}
-            >
-                {modalBtnContent}
-            </button>
+            {modalBtnContent && (
+                <button
+                    className={[modalBtnClassName].join("")}
+                    onClick={handleOpened}
+                >
+                    {modalBtnContent}
+                </button>
+            )}
             {isOpened && (
                 <div className={styles.modalContainer}>
                     <div
@@ -54,17 +64,21 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
                         {textContent && <p>{textContent}</p>}
 
                         {children}
-
-                        <button
-                            className={
-                                optCloseBtnClassName
-                                    ? [optCloseBtnClassName].join("")
-                                    : styles.closeButton
-                            }
-                            onClick={handleOpened}
-                        >
-                            {closeBtnContent}
-                        </button>
+                        
+                        {linkAsCloseBtn ? (
+                            <a onClick={handleOpened}>{closeBtnContent}</a>
+                        ) : (
+                            <button
+                                className={
+                                    optCloseBtnClassName
+                                        ? [optCloseBtnClassName].join("")
+                                        : styles.closeButton
+                                }
+                                onClick={handleOpened}
+                            >
+                                {closeBtnContent}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

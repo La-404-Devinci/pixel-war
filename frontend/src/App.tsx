@@ -10,7 +10,7 @@ import isMobile from "./utils/isMobile";
 import Canvas from "./components/Canvas";
 import Palette from "./components/Palette";
 import Timer from "./components/Timer";
-import AssoModal from "./components/AssoModal";
+import AssoModal from "./components/modal/asso";
 import API from "./utils/api";
 
 function App() {
@@ -162,15 +162,15 @@ function App() {
                     />
             </div>
 
-            <div className={styles.modalAssoContainer}>
-                <AssoModal />
-            </div>
+            {/* //TODO: remove component after user chooses asso */}
+            <AssoModal />
 
             <div className={styles.leaderboard}>
                 <LeaderboardComponent />
                 <ModalReward />
                 {!isConnected && <LoginComponent/>}
             </div>
+
             {displayComponent === "profil" && (
                 <ProfilComponent
                     userEmail={email}

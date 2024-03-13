@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "../../styles/login.module.css";
+import styles from "../../styles/modal/login.module.css";
 import API from "../../utils/api";
 import ModalComponent from "./Modal";
 
