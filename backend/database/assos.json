@@ -229,7 +229,11 @@
         "label": "Léofive",
         "value": "leofive"
     },
-    { "image": "https://www.forum-associatif-numerique.fr/uploads/leopompom/logos/leopompom.png", "label": "LeoPompom", "value": "leopompom" },
+    {
+        "image": "https://www.forum-associatif-numerique.fr/uploads/leopompom/logos/leopompom.png",
+        "label": "LeoPompom",
+        "value": "leopompom"
+    },
     {
         "image": "https://www.forum-associatif-numerique.fr/uploads/leorugby/logos/Logo-detoure-62fe050fc6693.png",
         "label": "LéoRugby",
@@ -264,11 +268,6 @@
         "image": "https://www.forum-associatif-numerique.fr/uploads/leoworkout/logos/logo-LW-630bba9f2f465.png",
         "label": "LéoWorkout",
         "value": "leoworkout"
-    },
-    {
-        "image": "https://www.forum-associatif-numerique.fr/uploads/slvaluee-session/logos/LOGO-COULEUR-Lisa-Kintrup-612be533bc5e3.png",
-        "label": "Slvaluee Session",
-        "value": "slvaluee-session"
     },
     {
         "image": "https://www.forum-associatif-numerique.fr/uploads/vinci-racing-team/logos/506828c8-611687a183663.png",

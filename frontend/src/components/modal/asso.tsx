@@ -5,6 +5,7 @@ import AsyncSelect from "react-select/async";
 import { components } from "react-select";
 
 import ModalComponent from "./Modal";
+import API from "../../utils/api";
 
 type Option = {
     image: string;
@@ -17,22 +18,21 @@ export default function AssoModal() {
     const [options, setOptions] = useState<Option[]>([]);
 
     useEffect(() => {
-        // TODO: Fetch all associations
-    }, []);
-
-    const filterAsso = (inputValue: string) => {
-        return options.filter((i: Option) => i.label.toLowerCase().includes(inputValue.toLowerCase()));
-    };
-
-    const loadOptions = (inputValue: string, callback: (options: Option[]) => void) => {
-        callback(filterAsso(inputValue));
-    };
-
-    useEffect(() => {
         if (selectedAsso) {
             console.log(selectedAsso);
         }
     }, [selectedAsso]);
+
+    useEffect(() => {
+        API.GET("/assos").then((res) => {
+            console.log(res);
+            setOptions(res);
+        });
+    }, []);
+
+    if (options.length === 0) {
+        return null;
+    }
 
     return (
         <>
@@ -45,30 +45,31 @@ export default function AssoModal() {
                 closeBtnContent="Je n'ai pas d'association"
                 linkAsCloseBtn={true}
             >
-                        <AsyncSelect
-                            placeholder="Choisissez votre association !"
-                            loadOptions={loadOptions}
-                            defaultOptions
-                            cacheOptions
-                            closeMenuOnSelect={false}
-                            openMenuOnClick
-                            defaultMenuIsOpen={true}
-                            components={{
-                                Option: (props) => (
-                                    <components.Option {...props} className={styles.option}>
-                                        <img src={props.data.image} alt={props.data.label} />
-                                        <span>{props.data.label}</span>
-                                    </components.Option>
-                                ),
-                            }}
-                            noOptionsMessage={() => <p>Aucune association ne correspond à votre recherche.</p>}
-                            blurInputOnSelect={true}
-                            onChange={(e) => setSelectedAsso(e?.value || null)}
-                            value={options.find((option) => option.value === selectedAsso)}
-                        />
-                        
-                        {/* //TODO: Add Submit to back */}
-                        <button className={styles.chooseAssoBtn}>C'est parti !</button>
+                <AsyncSelect
+                    placeholder="Choisissez votre association !"
+                    loadOptions={(inputValue, callback) => {
+                        console.log(inputValue);
+                        if (!inputValue) return callback(options);
+                        callback(options.filter((i: Option) => i.label.toLowerCase().includes(inputValue.toLowerCase())));
+                    }}
+                    defaultOptions={true}
+                    openMenuOnClick
+                    components={{
+                        Option: (props) => (
+                            <components.Option {...props} className={styles.option}>
+                                <img src={props.data.image} alt={props.data.label} />
+                                <span>{props.data.label}</span>
+                            </components.Option>
+                        ),
+                    }}
+                    noOptionsMessage={() => <p>Aucune association ne correspond à votre recherche.</p>}
+                    blurInputOnSelect={true}
+                    onChange={(e) => setSelectedAsso(e?.value || null)}
+                    value={options.find((option) => option.value === selectedAsso)}
+                />
+
+                {/* //TODO: Add Submit to back */}
+                <button className={styles.chooseAssoBtn}>C'est parti !</button>
             </ModalComponent>
         </>
     );
