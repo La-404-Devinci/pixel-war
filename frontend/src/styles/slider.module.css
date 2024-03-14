@@ -22,9 +22,19 @@
 }
 
 .slider {
-    margin: 32px auto;
+    margin-bottom: 32px;
+}
+
+.slider p:first-child{
+    font-size: 1.5em;
+}
+
+@media screen and (max-width: 768px){
+    .slider p:first-child{
+        font-size: 1em;
+    }
 }
 
 .slider img {
-    width: 85%;
+    width: 75%;
 }

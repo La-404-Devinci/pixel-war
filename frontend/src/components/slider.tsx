@@ -7,7 +7,7 @@ import {
 } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
 
-import styles from "../styles/carousel.module.css";
+import styles from "../styles/slider.module.css";
 import { useEffect, useState } from "react";
 
 const SimpleSlider = () => {
@@ -59,7 +59,7 @@ const SimpleSlider = () => {
                         src='/src/assets/billets-disney.png'
                         alt='Billets Disney'
                     />
-                    <p>2 billets Disney</p>
+                    <p>2 places pour Disneyland Paris</p>
                 </Slide>
                 <Slide
                     index={2}

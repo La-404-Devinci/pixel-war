@@ -1,17 +1,17 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./App.module.css";
 import { socket } from "./socket";
 import ChatComponent from "./components/chat";
 import LeaderboardComponent from "./components/leaderboard";
-import LoginComponent from "./components/login";
+import ModalReward from "./components/modal/reward";
+import LoginComponent from "./components/modal/login";
 import ProfilComponent from "./components/profil";
 import isMobile from "./utils/isMobile";
 import Canvas from "./components/Canvas";
 import Palette from "./components/Palette";
 import Timer from "./components/Timer";
-import AssoModal from "./components/AssoModal";
+import AssoModal from "./components/modal/asso";
 import API from "./utils/api";
-import ModalReward from "./components/modalReward";
 
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -64,8 +64,10 @@ function App() {
             if (!success) {
                 console.error("Authentification failed");
                 // Clear 'email' and 'token' cookies
-                document.cookie = "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie =
+                    "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie =
+                    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 window.location.reload();
                 return;
             } else {
@@ -136,7 +138,8 @@ function App() {
 
     const handlePlacePixel = (x: number, y: number) => {
         socket.emit("place-pixel", x, y, selectedColor, (expiresAt: number) => {
-            const timer = Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
+            const timer =
+                Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
             setTime(timer);
         });
     };
@@ -146,30 +149,40 @@ function App() {
             <div className={styles.canvasContainer}>
                 <Canvas actualColor={selectedColor} readOnly={!isConnected} onPlacePixel={handlePlacePixel} palette={colors ?? []} />
                 {isConnected && (
-                    <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} isActive={time <= 0} />
+                    <Palette
+                        onColorClick={handleColorSelect}
+                        colors={colors}
+                        selectedColor={selectedColor}
+                        isActive={time <= 0}
+                    />
                 )}
-                <Timer time={time} setTime={setTime} />
+                <Timer
+                    time={time}
+                    setTime={setTime}
+                    />
             </div>
 
-            <div className={styles.modalAssoContainer}>
-                <AssoModal />
-            </div>
+            {/* //TODO: remove component after user chooses asso */}
+            <AssoModal />
 
             <div className={styles.leaderboard}>
                 <LeaderboardComponent />
                 <ModalReward />
+                {!isConnected && <LoginComponent/>}
             </div>
 
-            {!isConnected && (
-                <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>
-                    Connectez-vous pour dessiner !
-                </button>
+            {displayComponent === "profil" && (
+                <ProfilComponent
+                    userEmail={email}
+                    onHideProfil={() => handleDisplayComponent("none")}
+                />
             )}
-
-            {displayComponent === "login" && <LoginComponent onClose={() => handleDisplayComponent("none")} />}
-            {displayComponent === "profil" && <ProfilComponent userEmail={email} onHideProfil={() => handleDisplayComponent("none")} />}
-            {(displayComponent === "chat" || !isMobile.any()) && <ChatComponent active={isConnected} userEmail={email ?? "N/A"} />}
-
+            {(displayComponent === "chat" || !isMobile.any()) && (
+                <ChatComponent
+                    active={isConnected}
+                    userEmail={email ?? "N/A"}
+                />
+            )}
             {displayComponent !== "profil" && (
                 <div className={styles.containerTop}>
                     {isMobile.any() && (
@@ -190,8 +203,14 @@ function App() {
                         </>
                     )}
                     {isConnected && displayComponent !== "chat" && (
-                        <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
-                            <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
+                        <button
+                            onClick={() => handleDisplayComponent("profil")}
+                            className={styles.btnProfil}
+                        >
+                            <img
+                                src='/src/assets/user-large.svg'
+                                alt='icone-user-profil'
+                            />
                         </button>
                     )}
                 </div>

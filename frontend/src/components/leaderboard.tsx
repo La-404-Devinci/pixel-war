@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import styles from "../styles/leaderboard.module.css";
+import styles from "../styles/modal/leaderboard.module.css";
 import { socket } from "../socket";
 import classementItem from "../../../common/interfaces/classementItem.interface";
 

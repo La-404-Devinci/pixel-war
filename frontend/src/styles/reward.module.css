@@ -1,0 +1,27 @@
+.modalRewardTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.btnModalReward {
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.btnModalReward img {
+    height: 30px;
+}
+
+.modalReward {
+    align-items: center;
+    text-align: center;
+}
+
+.sliderContainer {
+    width: 80%;
+}
