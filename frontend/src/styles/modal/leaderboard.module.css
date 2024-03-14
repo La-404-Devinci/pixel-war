@@ -5,39 +5,36 @@
     justify-content: center;
     max-width: 250px;
     width: 75vw;
-    background-color: rgba(255, 255, 255, 0.75);
-    border-radius: 16px;
+    position: relative;
+    top: 1em;
+    margin-left: 1em;
 }
 
-.header {
-    width: 100%;
-    background-color: white;
-    cursor: pointer;
-    padding: 0.3em;
-    border-radius: 16px;
-}
-
-.header button {
-    width: 100%;
-    height: 100%;
+.btnExpand {
     display: flex;
     align-items: center;
-    font-size: 1em;
-    border: none;
-    gap: 10px;
+    gap: 0.5em;
     border-radius: 16px;
-    cursor: pointer;
-    background-color: white;
-    padding-inline: 0.5em;
+    width: 100%;
+    padding: 0.55em 1em;
+    border: none;
+    position: absolute;
 }
 
 .expanded {
+    position: absolute;
+    z-index: -1;
+    top: 0;
     width: 100%;
+    background-color: rgba(255, 255, 255, 0.75);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
     padding: 1em;
 }
 
 @media screen and (max-width: 768px) {
     .leaderboard {
+        margin-left: 0;
         max-width: 230px;
     }
 }

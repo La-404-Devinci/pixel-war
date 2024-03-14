@@ -4,17 +4,22 @@
 }
 
 .btnModalReward {
-    height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: transparent;
     border: none;
     cursor: pointer;
+    width: 4em;
+    height: 4em;
+    padding: 1.25em;
+    background-color: white;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
 }
 
 .btnModalReward img {
-    height: 30px;
+    width: 100%;
 }
 
 .modalReward {
@@ -23,5 +28,5 @@
 }
 
 .sliderContainer {
-    width: 80%;
+    width: 100%;
 }
