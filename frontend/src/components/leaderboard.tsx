@@ -26,12 +26,10 @@ const LeaderboardComponent = () => {
 
     return (
         <div className={styles.leaderboard}>
-            <div className={styles.header}>
                 <button onClick={handleExpand} className={styles.btnExpand}>
                     <img src={isExpanded ? "/src/assets/angle-up.svg" : "/src/assets/angle-down.svg"} alt="arrow-down" />
                     Classement
                 </button>
-            </div>
             {isExpanded && (
                 <div className={styles.expanded}>
                     {classement.length === 0 && <p>Le classement est vide</p>}

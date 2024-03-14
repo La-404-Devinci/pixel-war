@@ -1,3 +1,8 @@
+.chatContainer{
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
 .chat {
     display: flex;
     flex-direction: column;

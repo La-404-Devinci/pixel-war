@@ -147,7 +147,12 @@ function App() {
     return (
         <>
             <div className={styles.canvasContainer}>
-                <Canvas actualColor={selectedColor} readOnly={!isConnected} onPlacePixel={handlePlacePixel} palette={colors ?? []} />
+                <Canvas
+                    actualColor={selectedColor}
+                    readOnly={!isConnected}
+                    onPlacePixel={handlePlacePixel}
+                    palette={colors ?? []}
+                />
                 {isConnected && (
                     <Palette
                         onColorClick={handleColorSelect}
@@ -159,16 +164,33 @@ function App() {
                 <Timer
                     time={time}
                     setTime={setTime}
-                    />
+                />
             </div>
 
             {/* //TODO: remove component after user chooses asso */}
-            <AssoModal />
+            {/* <AssoModal /> */}
 
-            <div className={styles.leaderboard}>
+            <div className={styles.navbarContainer}>
                 <LeaderboardComponent />
                 <ModalReward />
-                {!isConnected && <LoginComponent/>}
+                {!isConnected && <LoginComponent />}
+                <ChatComponent
+                    active={isConnected}
+                    userEmail={email ?? "N/A"}
+                />
+
+                {/* Profile button */}
+                {isConnected && displayComponent !== "chat" && (
+                    <button
+                        onClick={() => handleDisplayComponent("profil")}
+                        className={styles.btnProfil}
+                    >
+                        <img
+                            src='/src/assets/user-large.svg'
+                            alt='icone-user-profil'
+                        />
+                    </button>
+                )} 
             </div>
 
             {displayComponent === "profil" && (
@@ -176,44 +198,6 @@ function App() {
                     userEmail={email}
                     onHideProfil={() => handleDisplayComponent("none")}
                 />
-            )}
-            {(displayComponent === "chat" || !isMobile.any()) && (
-                <ChatComponent
-                    active={isConnected}
-                    userEmail={email ?? "N/A"}
-                />
-            )}
-            {displayComponent !== "profil" && (
-                <div className={styles.containerTop}>
-                    {isMobile.any() && (
-                        <>
-                            <button
-                                onClick={() =>
-                                    document.body.requestFullscreen({
-                                        navigationUI: "hide",
-                                    })
-                                }
-                                className={styles.btnChat}
-                            >
-                                <img src="/src/assets/trophy.svg" alt="icone-trophy" />
-                            </button>
-                            <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}>
-                                <img src="/src/assets/message.svg" alt="icone-chat" />
-                            </button>
-                        </>
-                    )}
-                    {isConnected && displayComponent !== "chat" && (
-                        <button
-                            onClick={() => handleDisplayComponent("profil")}
-                            className={styles.btnProfil}
-                        >
-                            <img
-                                src='/src/assets/user-large.svg'
-                                alt='icone-user-profil'
-                            />
-                        </button>
-                    )}
-                </div>
             )}
         </>
     );
