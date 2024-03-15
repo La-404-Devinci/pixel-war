@@ -1,8 +1,9 @@
-import React, { forwardRef, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import styles from "../styles/canvas.module.css";
 import { socket } from "../socket";
 import API from "../utils/api";
 import isMobile from "../utils/isMobile";
+import { usePinch } from "@use-gesture/react";
 
 interface CanvasProps {
     actualColor: number;
@@ -24,7 +25,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         const canvas = canvasRef.current;
         if (!container || !canvas) return;
 
-        let pinch: boolean | number = false;
+        // let pinch: boolean | number = false;
         let canvasX = 0;
         let canvasY = 0;
         let lastX = 0;
@@ -54,11 +55,11 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleTouchStart = (event: TouchEvent) => {
-            if (event.touches.length > 1) {
-                event.preventDefault();
-                pinch = true;
-                return;
-            }
+            // if (event.touches.length > 1) {
+            //     event.preventDefault();
+            //     pinch = true;
+            //     return;
+            // }
 
             handleDown(event.touches[0].clientX, event.touches[0].clientY);
         };
@@ -75,21 +76,21 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleTouchMove = (event: TouchEvent) => {
-            if (pinch) {
-                event.preventDefault();
-                const distance = Math.hypot(
-                    event.touches[0].clientX - event.touches[1].clientX,
-                    event.touches[0].clientY - event.touches[1].clientY,
-                );
-                if (pinch === true) pinch = distance;
-                const delta = distance - pinch;
-                pinch = distance;
+            // if (pinch) {
+            //     event.preventDefault();
+            //     const distance = Math.hypot(
+            //         event.touches[0].clientX - event.touches[1].clientX,
+            //         event.touches[0].clientY - event.touches[1].clientY,
+            //     );
+            //     if (pinch === true) pinch = distance;
+            //     const delta = distance - pinch;
+            //     pinch = distance;
 
-                const newZoom = zoom - delta * 0.01;
-                setZoom(Math.max(0.1, newZoom));
+            //     const newZoom = zoom - delta * 0.01;
+            //     setZoom(Math.max(0.1, newZoom));
 
-                return;
-            }
+            //     return;
+            // }
 
             handleMove(event.touches[0].clientX, event.touches[0].clientY);
         };
@@ -127,11 +128,11 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleTouchUp = (event: TouchEvent) => {
-            if (pinch) {
-                event.preventDefault();
-                pinch = false;
-                return;
-            }
+            // if (pinch) {
+            //     event.preventDefault();
+            //     pinch = false;
+            //     return;
+            // }
 
             handleUp();
         };
@@ -282,6 +283,20 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
     }, [palette, pixelSize]);
 
+    //TODO: offset: [d] only returns positive values
+    usePinch(
+        ({ offset: [d] }) => {
+            const newZoom = zoom - d * 0.01;
+            console.log(zoom)
+            setZoom(Math.max(0.1, newZoom));
+        },
+        {
+            target: containerRef,
+            eventOptions: { passive: false },
+        },
+    );
+
+    
     return (
         <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={containerRef}>
             {!readOnly && <div ref={cursorRef} className={styles.cursor} style={{ width: pixelSize, height: pixelSize }}></div>}
