@@ -237,6 +237,22 @@ class AccountController {
     }
 
     /**
+     * Get the user's association
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async getAssociation(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            res.status(200).send(req.account.association);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * Get the user's stats
      * @server WebSocket
      *

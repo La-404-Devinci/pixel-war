@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useState, useRef } from "react";
 import styles from "../styles/canvas.module.css";
 import { socket } from "../socket";
 import API from "../utils/api";
+import isMobile from "../utils/isMobile";
 
 interface CanvasProps {
     actualColor: number;
@@ -10,26 +11,42 @@ interface CanvasProps {
     palette: string[];
 }
 
-const Canvas = (props: CanvasProps) => {
+const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) => {
+    const pixelSize = 20;
+
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const cursorRef = useRef<HTMLDivElement>(null);
-
-    const [pixelSize, setPixelWidth] = useState(20);
     const [zoom, setZoom] = useState(1);
-    const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {
         const container = containerRef.current;
         const canvas = canvasRef.current;
         if (!container || !canvas) return;
 
-        let drag = false;
         let pinch: boolean | number = false;
         let canvasX = 0;
         let canvasY = 0;
-        let moveX = 0;
-        let moveY = 0;
+        let lastX = 0;
+        let lastY = 0;
+        let startDragX = 0;
+        let startDragY = 0;
+
+        const getCursorPosition = (x: number, y: number) => {
+            const canvas = canvasRef.current;
+            if (!canvas) return [0, 0];
+
+            const relativeX = x - canvas.getBoundingClientRect().left;
+            const relativeY = y - canvas.getBoundingClientRect().top;
+
+            const zoomX = relativeX / zoom;
+            const zoomY = relativeY / zoom;
+
+            const pixelX = Math.floor(zoomX / pixelSize);
+            const pixelY = Math.floor(zoomY / pixelSize);
+
+            return [pixelX, pixelY];
+        };
 
         const handleMouseDown = (event: MouseEvent) => {
             if (event.button !== 0) return;
@@ -37,17 +54,20 @@ const Canvas = (props: CanvasProps) => {
         };
 
         const handleTouchStart = (event: TouchEvent) => {
-            if (event.touches.length !== 1) return;
+            if (event.touches.length > 1) {
+                event.preventDefault();
+                pinch = true;
+                return;
+            }
+
             handleDown(event.touches[0].clientX, event.touches[0].clientY);
         };
 
         const handleDown = (x: number, y: number) => {
-            drag = true;
-            setTimeout(() => {
-                setIsDragging(true);
-            }, 100);
-            moveX = x;
-            moveY = y;
+            lastX = x;
+            lastY = y;
+            startDragX = x;
+            startDragY = y;
         };
 
         const handleMouseMove = (event: MouseEvent) => {
@@ -55,30 +75,90 @@ const Canvas = (props: CanvasProps) => {
         };
 
         const handleTouchMove = (event: TouchEvent) => {
+            if (pinch) {
+                event.preventDefault();
+                const distance = Math.hypot(
+                    event.touches[0].clientX - event.touches[1].clientX,
+                    event.touches[0].clientY - event.touches[1].clientY,
+                );
+                if (pinch === true) pinch = distance;
+                const delta = distance - pinch;
+                pinch = distance;
+
+                const newZoom = zoom - delta * 0.01;
+                setZoom(Math.max(0.1, newZoom));
+
+                return;
+            }
+
             handleMove(event.touches[0].clientX, event.touches[0].clientY);
         };
 
         const handleMove = (x: number, y: number) => {
-            if (!drag) return;
+            if (!isMobile.any()) {
+                const [pixelX, pixelY] = getCursorPosition(x, y);
+                const cursor = cursorRef.current;
+
+                if (cursor) {
+                    cursor.style.left = pixelX * pixelSize + "px";
+                    cursor.style.top = pixelY * pixelSize + "px";
+                }
+            }
+
+            if (startDragX === 0 && startDragY === 0) return;
+
             // déplacement de l'utilisateur
-            const deltaX = x - moveX;
-            const deltaY = y - moveY;
+            const deltaX = x - lastX;
+            const deltaY = y - lastY;
 
             canvasX += deltaX;
             canvasY += deltaY;
-            moveX = x;
-            moveY = y;
+            lastX = x;
+            lastY = y;
 
             // déplacement du canvas
             container.style.left = `${canvasX}px`;
             container.style.top = `${canvasY}px`;
         };
 
+        const handleMouseUp = (event: MouseEvent) => {
+            if (event.button !== 0) return;
+            handleUp();
+        };
+
+        const handleTouchUp = (event: TouchEvent) => {
+            if (pinch) {
+                event.preventDefault();
+                pinch = false;
+                return;
+            }
+
+            handleUp();
+        };
+
         const handleUp = () => {
-            drag = false;
-            setTimeout(() => {
-                setIsDragging(false);
-            }, 100);
+            // consider drag if the user moved more than 7 pixels
+            const drag = Math.abs(startDragX - lastX) > 7 || Math.abs(startDragY - lastY) > 7;
+
+            startDragX = 0;
+            startDragY = 0;
+
+            if (!drag && !readOnly) {
+                const [pixelX, pixelY] = getCursorPosition(lastX, lastY);
+                const cursor = cursorRef.current;
+
+                if (cursor) {
+                    // Place pixel if the cursor is at the same position
+                    if (cursor.style.left === pixelX * pixelSize + "px" && cursor.style.top === pixelY * pixelSize + "px") {
+                        onPlacePixel(pixelX, pixelY);
+                        return;
+                    }
+
+                    // Otherwise, move the cursor to the pixel position (mobile placement confirmation)
+                    cursor.style.left = pixelX * pixelSize + "px";
+                    cursor.style.top = pixelY * pixelSize + "px";
+                }
+            }
         };
 
         const handleWheel = (event: WheelEvent) => {
@@ -91,63 +171,35 @@ const Canvas = (props: CanvasProps) => {
         };
 
         // Desktop events
-        window.addEventListener("mouseup", handleUp);
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mousedown", handleMouseDown);
+        if (!isMobile.any()) {
+            window.addEventListener("mouseup", handleMouseUp);
+            window.addEventListener("mousemove", handleMouseMove);
+            window.addEventListener("mousedown", handleMouseDown);
+        }
 
         // Mobile events
-        window.addEventListener("touchend", (e) => {
-            if (pinch) {
-                e.preventDefault();
-                pinch = false;
-                return;
-            }
-
-            handleUp();
-        });
-
-        window.addEventListener("touchmove", (e) => {
-            if (pinch) {
-                e.preventDefault();
-                const distance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                if (pinch === true) pinch = distance;
-                const delta = distance - pinch;
-                pinch = distance;
-
-                const newZoom = zoom - delta * 0.01;
-                setZoom(Math.max(0.1, newZoom));
-
-                return;
-            }
-
-            handleTouchMove(e);
-        });
-
-        window.addEventListener("touchstart", (e) => {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-                pinch = true;
-                return;
-            }
-
-            handleTouchStart(e);
-        });
+        else {
+            window.addEventListener("touchend", handleTouchUp);
+            window.addEventListener("touchmove", handleTouchMove);
+            window.addEventListener("touchstart", handleTouchStart);
+        }
 
         window.addEventListener("wheel", handleWheel);
 
         return () => {
             // Desktop events
             window.removeEventListener("wheel", handleWheel);
+
+            window.removeEventListener("mouseup", handleMouseUp);
             window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleUp);
             window.removeEventListener("mousedown", handleMouseDown);
 
             // Mobile events
+            window.removeEventListener("touchend", handleTouchUp);
             window.removeEventListener("touchmove", handleTouchMove);
-            window.removeEventListener("touchend", handleUp);
             window.removeEventListener("touchstart", handleTouchStart);
         };
-    }, [zoom]);
+    }, [zoom, onPlacePixel, readOnly]);
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -204,9 +256,9 @@ const Canvas = (props: CanvasProps) => {
         // Accéder aux éléments DOM à travers les refs
         const cursor = cursorRef.current;
         if (cursor) {
-            cursor.style.setProperty("--color", props.palette[props.actualColor]);
+            cursor.style.setProperty("--color", palette[actualColor]);
         }
-    }, [props.actualColor, props.palette]);
+    }, [actualColor, palette]);
 
     useEffect(() => {
         socket.on("canvas-pixel-update", (x: number, y: number, color: number[]) => {
@@ -228,60 +280,12 @@ const Canvas = (props: CanvasProps) => {
         return () => {
             socket.off("canvas-pixel-update");
         };
-    }, [props.palette, pixelSize]);
-
-    function getCursorPosition(event: React.MouseEvent<HTMLElement>) {
-        const canvas = canvasRef.current;
-        if (!canvas) return [0, 0];
-
-        const relativeX = event.clientX - canvas.getBoundingClientRect().left;
-        const relativeY = event.clientY - canvas.getBoundingClientRect().top;
-
-        const zoomX = relativeX / zoom;
-        const zoomY = relativeY / zoom;
-
-        const pixelX = Math.floor(zoomX / pixelSize);
-        const pixelY = Math.floor(zoomY / pixelSize);
-
-        return [pixelX, pixelY];
-    }
-
-    function handleClick(event: React.MouseEvent<HTMLElement>) {
-        if (!props.readOnly) return;
-        if (isDragging) return;
-
-        const [pixelX, pixelY] = getCursorPosition(event);
-        props.onPlacePixel(pixelX, pixelY);
-    }
-
-    function handleMove(event: React.MouseEvent<HTMLCanvasElement>) {
-        const [pixelX, pixelY] = getCursorPosition(event);
-        const cursor = cursorRef.current;
-
-        if (cursor) {
-            cursor.style.left = pixelX * pixelSize + "px";
-            cursor.style.top = pixelY * pixelSize + "px";
-        }
-    }
+    }, [palette, pixelSize]);
 
     return (
         <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={containerRef}>
-            {!props.readOnly && (
-                <div
-                    ref={cursorRef}
-                    className={styles.cursor}
-                    style={{ width: pixelSize, height: pixelSize }}
-                    onMouseDown={handleClick as React.MouseEventHandler<HTMLDivElement>}
-                ></div>
-            )}
-            <canvas
-                ref={canvasRef}
-                className={styles.game}
-                width={500}
-                height={500}
-                onMouseMove={!props.readOnly ? handleMove : undefined}
-                onMouseDown={!props.readOnly ? handleClick : undefined}
-            ></canvas>
+            {!readOnly && <div ref={cursorRef} className={styles.cursor} style={{ width: pixelSize, height: pixelSize }}></div>}
+            <canvas ref={canvasRef} className={styles.game} width={500} height={500}></canvas>
         </div>
     );
 };

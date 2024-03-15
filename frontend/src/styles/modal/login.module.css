@@ -40,7 +40,10 @@
 }
 
 .btnLogin {
-    padding: 1.5em 2.5em 1.5em 2.5em;
+    padding: 1.5em 2.5em 1.5em 2.5em !important;
+    width: auto !important;
+    height: auto !important;
+
     background-color: white;
     border-radius: 10px;
     border: none;

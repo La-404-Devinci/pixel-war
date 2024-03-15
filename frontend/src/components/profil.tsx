@@ -19,16 +19,20 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
             setMessageSent(data.messagesSent);
             setPosedPixel(data.placedPixels);
 
-            const placementDelta = (Date.now() - Date.parse(data.lastPixelTime as string)) / 1000; // seconds
+            if (data.lastPixelTime) {
+                const placementDelta = (Date.now() - Date.parse(data.lastPixelTime as string)) / 1000; // seconds
 
-            if (placementDelta < 60) {
-                setSinceLastPixel(Math.round(placementDelta) + "s");
-            } else if (placementDelta < 3600) {
-                setSinceLastPixel(Math.round(placementDelta / 60) + "m");
-            } else if (placementDelta < 86400) {
-                setSinceLastPixel(Math.round(placementDelta / 3600) + "h");
+                if (placementDelta < 60) {
+                    setSinceLastPixel(Math.round(placementDelta) + "s");
+                } else if (placementDelta < 3600) {
+                    setSinceLastPixel(Math.round(placementDelta / 60) + "m");
+                } else if (placementDelta < 86400) {
+                    setSinceLastPixel(Math.round(placementDelta / 3600) + "h");
+                } else {
+                    setSinceLastPixel(Math.round(placementDelta / 86400) + "j");
+                }
             } else {
-                setSinceLastPixel(Math.round(placementDelta / 86400) + "d");
+                setSinceLastPixel("N/A");
             }
 
             const startDelta = (Date.now() - data.startTime) / 1000 / 60 / 60; // hours
@@ -40,6 +44,14 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
 
     const handleClose = () => {
         onHideProfil();
+    };
+
+    const handleLogout = () => {
+        // Clear 'email' and 'token' cookies
+        document.cookie = "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.reload();
+        return;
     };
 
     return (
@@ -63,7 +75,9 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
                 <p>{pixelByHour}</p>
                 <p>Pixes par heure (en moyenne)</p>
             </div>
-            <button className={styles.btnLogOut}>Déconnexion</button>
+            <button className={styles.btnLogOut} onClick={handleLogout}>
+                Déconnexion
+            </button>
         </div>
     );
 };

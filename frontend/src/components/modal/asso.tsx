@@ -6,6 +6,7 @@ import { components } from "react-select";
 
 import ModalComponent from "./Modal";
 import API from "../../utils/api";
+import { socket } from "../../socket";
 
 type Option = {
     image: string;
@@ -24,15 +25,42 @@ export default function AssoModal() {
     }, [selectedAsso]);
 
     useEffect(() => {
-        API.GET("/assos").then((res) => {
-            console.log(res);
-            setOptions(res);
-        });
+        API.GET("/asso")
+            .then((res) => {
+                console.log(res);
+                if (res) {
+                    setSelectedAsso(res);
+
+                    API.GET("/assos")
+                        .then((res) => {
+                            console.log(res);
+                            setOptions(res);
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                        });
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }, []);
 
     if (options.length === 0) {
         return null;
     }
+
+    const handleAssoChange = () => {
+        API.POST("/asso", { association: selectedAsso })
+            .then(() => {
+                console.log("Association updated");
+                setSelectedAsso(null);
+                setOptions([]);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
 
     return (
         <>
@@ -67,9 +95,9 @@ export default function AssoModal() {
                     onChange={(e) => setSelectedAsso(e?.value || null)}
                     value={options.find((option) => option.value === selectedAsso)}
                 />
-
-                {/* //TODO: Add Submit to back */}
-                <button className={styles.chooseAssoBtn}>C'est parti !</button>
+                <button className={styles.chooseAssoBtn} onClick={handleAssoChange} disabled={!selectedAsso}>
+                    C'est parti !
+                </button>
             </ModalComponent>
         </>
     );

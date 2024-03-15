@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../../styles/modal/login.module.css";
 import API from "../../utils/api";
 import ModalComponent from "./Modal";
@@ -7,6 +7,15 @@ const LoginComponent = () => {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [isEmailValid, setIsEmailValid] = useState(false);
+    const [isDemo, setIsDemo] = useState(false);
+
+    useEffect(() => {
+        API.GET("/demo").then((res) => {
+            if (res.demo === "🗿") {
+                setIsDemo(true);
+            }
+        });
+    }, []);
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newEmail = event.target.value;
@@ -15,65 +24,45 @@ const LoginComponent = () => {
     };
 
     const handleLoginClick = () => {
-        if (email.endsWith("@edu.devinci.fr")) {
-            setMessage(
-                "L'email a bien été envoyé, veuillez vérifier votre boîte de réception (et vos spams) pour le lien de connexion"
-            );
-
-            try {
-                API.POST("/auth/send-magic-link", { email });
-                setIsEmailValid(true);
-            } catch (error) {
-                setMessage("Erreur lors de l'envoi de l'email");
-                setIsEmailValid(false);
-            }
+        if (isDemo) {
+            API.POST("/demo/login", { username: email }).then((res) => {
+                window.location.href = res.link;
+            });
         } else {
-            setMessage("Email non valide");
-            setIsEmailValid(false);
+            API.POST("/auth/send-magic-link", { email })
+                .then(() => {
+                    setMessage("Email envoyé. Regardez vos mails.");
+                    setIsEmailValid(true);
+                })
+                .catch(() => {
+                    setMessage("Erreur lors de l'envoi de l'email");
+                    setIsEmailValid(false);
+                });
         }
     };
 
     return (
         <>
             <ModalComponent
-                modalBtnContent='Connectez-vous pour dessiner !'
+                modalBtnContent="Connectez-vous pour dessiner !"
                 modalBtnClassName={styles.btnLogin}
-                titleContent='Connexion'
+                titleContent="Connexion"
                 titleClassName={styles.loginTitle}
-                closeBtnContent={
-                    <img
-                        src='/src/assets/x.svg'
-                        alt='Close button'
-                    />
-                }
+                closeBtnContent={<img src="/src/assets/x.svg" alt="Close button" />}
                 optCloseBtnClassName={styles.close}
             >
                 <div className={styles.login}>
-                    <label>Entrez votre email Devinci</label>
+                    <label>{isDemo ? "Entrez votre pseudo" : "Entrez votre email Devinci"}</label>
                     <input
-                        type='email'
-                        placeholder='email@edu.devinci.fr'
+                        type={isDemo ? "text" : "email"}
+                        placeholder={isDemo ? "bino" : "email@edu.devinci.fr"}
                         value={email}
                         onChange={handleEmailChange}
                     />
-                    <button
-                        className={styles.btnSendMagicLink}
-                        onClick={handleLoginClick}
-                        disabled={!!message}
-                    >
-                        Recevoir le lien de connexion
+                    <button className={styles.btnSendMagicLink} onClick={handleLoginClick} disabled={!!message}>
+                        {isDemo ? "Se connecter" : "Recevoir le lien de connexion"}
                     </button>
-                    {message && (
-                        <p
-                            className={
-                                isEmailValid
-                                    ? styles.validMessage
-                                    : styles.invalidMessage
-                            }
-                        >
-                            {message}
-                        </p>
-                    )}
+                    {message && <p className={isEmailValid ? styles.validMessage : styles.invalidMessage}>{message}</p>}
                 </div>
             </ModalComponent>
         </>

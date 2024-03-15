@@ -12,6 +12,7 @@ import CanvasController from "./controllers/Canvas";
 import ChatController from "./controllers/Chat";
 import GoofyController from "./controllers/Goofy";
 import AssosController from "./controllers/Assos";
+import DemoController from "./controllers/Demo";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -81,6 +82,12 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
     next();
 });
 
+// Demo routes
+if (process.env.DEMO === "true") {
+    app.get("/demo", DemoController.getDemo);
+    app.post("/demo/login", DemoController.login);
+}
+
 // Express routes
 app.post("/auth/send-magic-link", AccountController.sendMagicLink);
 app.get("/auth/login", AccountController.login);
@@ -88,7 +95,11 @@ app.get("/canvas/image", CanvasController.getCanvasImage);
 app.get("/canvas/palette", CanvasController.getCanvasPalette);
 
 // Asso routes
-app.post("/api/asso", verifyUser, AccountController.setAssociation);
+if (process.env.DEMO !== "true") {
+    app.post("/asso", verifyUser, AccountController.setAssociation);
+    app.get("/asso", verifyUser, AccountController.getAssociation);
+    app.get("/assos", AssosController.getAssos);
+}
 
 // Messages routes
 app.get("/messages", ChatController.getMessages);
@@ -110,9 +121,6 @@ app.use("/a/", router);
 
 // Goofy routes
 app.get("/admin", GoofyController.getAdminPage);
-
-// Info routes
-app.get("/assos", AssosController.getAssos);
 
 // Error handling
 app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {

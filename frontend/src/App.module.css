@@ -25,14 +25,17 @@
 .navbarContainer {
     position: fixed;
     top: 1em;
+    left: 1em;
+    right: 1em;
     display: flex;
     align-items: flex-start;
     gap: 0.5em;
-    width: 100%;
 }
 
-@media screen and (max-width: 768px) {
-    .btnLogin {
-        padding: 1.4em;
+@media screen and (max-width: 475px) {
+    .navbarContainer > button {
+        padding: 0.75em;
+        height: 3em;
+        width: 3em;
     }
 }

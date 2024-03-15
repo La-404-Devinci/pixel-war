@@ -4,13 +4,14 @@
 }
 
 .cursor {
-    background-color: none;
     outline: 2px dashed #c4c4c4;
     outline-offset: -2px;
     border: 2px solid black;
     box-sizing: border-box;
     position: absolute;
     cursor: none;
+    top: -40px;
+    left: -40px;
 }
 
 .cursor::before {
@@ -27,4 +28,5 @@
 
 .canvas {
     position: relative;
+    overflow: hidden;
 }

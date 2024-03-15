@@ -13,7 +13,6 @@ export default abstract class API {
 
         if (!data.ok) {
             const content = await data.text();
-            alert(content);
             throw new Error(content);
         }
 
@@ -31,7 +30,6 @@ export default abstract class API {
 
         if (!data.ok) {
             const content = await data.text();
-            alert(content);
             throw new Error(content);
         }
 
