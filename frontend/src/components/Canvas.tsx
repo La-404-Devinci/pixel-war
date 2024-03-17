@@ -12,13 +12,17 @@ interface CanvasProps {
     palette: string[];
 }
 
-const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) => {
+const Canvas = ({
+    actualColor,
+    readOnly,
+    onPlacePixel,
+    palette,
+}: CanvasProps) => {
     const pixelSize = 20;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const cursorRef = useRef<HTMLDivElement>(null);
-    const [zoom, setZoom] = useState(1);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -32,6 +36,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         let lastY = 0;
         let startDragX = 0;
         let startDragY = 0;
+        let zoom = 1;
 
         const getCursorPosition = (x: number, y: number) => {
             const canvas = canvasRef.current;
@@ -139,7 +144,9 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
 
         const handleUp = () => {
             // consider drag if the user moved more than 7 pixels
-            const drag = Math.abs(startDragX - lastX) > 7 || Math.abs(startDragY - lastY) > 7;
+            const drag =
+                Math.abs(startDragX - lastX) > 7 ||
+                Math.abs(startDragY - lastY) > 7;
 
             startDragX = 0;
             startDragY = 0;
@@ -150,7 +157,10 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
 
                 if (cursor) {
                     // Place pixel if the cursor is at the same position
-                    if (cursor.style.left === pixelX * pixelSize + "px" && cursor.style.top === pixelY * pixelSize + "px") {
+                    if (
+                        cursor.style.left === pixelX * pixelSize + "px" &&
+                        cursor.style.top === pixelY * pixelSize + "px"
+                    ) {
                         onPlacePixel(pixelX, pixelY);
                         return;
                     }
@@ -166,9 +176,10 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             // Multiplicateur de zoom arbitraire
             const zoomFactor = 0.1;
             // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
-            const newZoom = event.deltaY > 0 ? zoom - zoomFactor : zoom + zoomFactor;
-            // Limiter le zoom à un minimum de 0.1 pour éviter les valeurs non valides
-            setZoom(Math.max(0.1, newZoom));
+            zoom = event.deltaY > 0 ? zoom + zoomFactor : zoom - zoomFactor;
+
+            if (zoom < 0.1) zoom = 0.1;
+            container.style.transform = `scale(${zoom})`;
         };
 
         // Desktop events
@@ -200,7 +211,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             window.removeEventListener("touchmove", handleTouchMove);
             window.removeEventListener("touchstart", handleTouchStart);
         };
-    }, [zoom, onPlacePixel, readOnly]);
+    }, [onPlacePixel, readOnly]);
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -228,8 +239,14 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             }
 
             // Get zoom
-            const minScreenSize = Math.min(window.innerWidth, window.innerHeight);
-            const maxCanvasSize = Math.max(width * pixelSize, height * pixelSize);
+            const minScreenSize = Math.min(
+                window.innerWidth,
+                window.innerHeight
+            );
+            const maxCanvasSize = Math.max(
+                width * pixelSize,
+                height * pixelSize
+            );
             const newZoom = minScreenSize / maxCanvasSize;
             setZoom(newZoom * 0.9);
 
@@ -247,7 +264,12 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
 
                     ctx.beginPath();
                     ctx.fillStyle = `rgb(${colorR},${colorG},${colorB})`;
-                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                    ctx.fillRect(
+                        x * pixelSize,
+                        y * pixelSize,
+                        pixelSize,
+                        pixelSize
+                    );
                 }
             }
         });
@@ -262,45 +284,59 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
     }, [actualColor, palette]);
 
     useEffect(() => {
-        socket.on("canvas-pixel-update", (x: number, y: number, color: number[]) => {
-            const canvas = canvasRef.current;
-            if (!canvas) return;
+        socket.on(
+            "canvas-pixel-update",
+            (x: number, y: number, color: number[]) => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
 
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return;
 
-            ctx.beginPath();
-            ctx.fillStyle = "rgb(" + color.join(",") + ")";
+                ctx.beginPath();
+                ctx.fillStyle = "rgb(" + color.join(",") + ")";
 
-            const xCoord = x * pixelSize;
-            const yCoord = y * pixelSize;
+                const xCoord = x * pixelSize;
+                const yCoord = y * pixelSize;
 
-            ctx.fillRect(xCoord, yCoord, pixelSize, pixelSize);
-        });
+                ctx.fillRect(xCoord, yCoord, pixelSize, pixelSize);
+            }
+        );
 
         return () => {
             socket.off("canvas-pixel-update");
         };
     }, [palette, pixelSize]);
 
-    //TODO: offset: [d] only returns positive values
+    //TODO: zoom to center of pinch
     usePinch(
-        ({ offset: [d] }) => {
-            const newZoom = zoom - d * 0.01;
-            console.log(zoom)
-            setZoom(Math.max(0.1, newZoom));
+        ({offset: [d] }) => {
+            containerRef.current!.style.transform = `scale(${d})`;
         },
         {
             target: containerRef,
             eventOptions: { passive: false },
-        },
+        }
     );
 
-    
     return (
-        <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={containerRef}>
-            {!readOnly && <div ref={cursorRef} className={styles.cursor} style={{ width: pixelSize, height: pixelSize }}></div>}
-            <canvas ref={canvasRef} className={styles.game} width={500} height={500}></canvas>
+        <div
+            className={styles.canvas}
+            ref={containerRef}
+        >
+            {!readOnly && (
+                <div
+                    ref={cursorRef}
+                    className={styles.cursor}
+                    style={{ width: pixelSize, height: pixelSize }}
+                ></div>
+            )}
+            <canvas
+                ref={canvasRef}
+                className={styles.game}
+                width={500}
+                height={500}
+            ></canvas>
         </div>
     );
 };
