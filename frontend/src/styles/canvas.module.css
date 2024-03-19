@@ -1,24 +1,32 @@
-.testCanvas{
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .game{
+.game {
     cursor: none;
     background-color: white;
-  }
-  
-  .cursor{
-    background-color: none;
+}
+
+.cursor {
+    outline: 2px dashed #c4c4c4;
+    outline-offset: -2px;
     border: 2px solid black;
     box-sizing: border-box;
     position: absolute;
     cursor: none;
-  }
-  
-  .canvas {
+    top: -40px;
+    left: -40px;
+}
+
+.cursor::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: var(--color);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.canvas {
     position: relative;
-  }
+    overflow: hidden;
+}

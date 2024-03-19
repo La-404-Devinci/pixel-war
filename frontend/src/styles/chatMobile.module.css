@@ -1,20 +1,35 @@
+.btnChat {
+    width: 4em;
+    height: 4em;
+    padding: 1.25em;
+    background-color: white;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 4px 4px 5px 0px rgba(0, 0, 0, 0.25);
+}
+
+.active{
+    z-index: 1;
+}
+
+.btnChat img {
+    width: 100%;
+}
 
 .chat {
     display: flex;
     flex-direction: column-reverse;
     align-items: center;
     overflow-y: auto;
-    position: fixed;
-    width: 100%;
-    max-width: 100%;
-    max-height: 85%;
-    margin-bottom: 1em;
+
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    backdrop-filter: blur(10px); 
-    -webkit-backdrop-filter: blur(10px); 
+    left: 0;
+    top: 0;
+    right: 0;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .messages {
@@ -45,7 +60,7 @@ span {
     background-color: white;
     border-radius: 16px;
     position: fixed;
-    bottom: 0;    
+    bottom: 0;
 }
 
 .input input {
@@ -71,21 +86,20 @@ span {
     width: 25px;
 }
 
-
 ::-webkit-scrollbar {
     width: 10px;
 }
-  
+
 ::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.75);
     border-radius: 16px;
 }
-  
+
 ::-webkit-scrollbar-thumb {
     border-radius: 16px;
     background: #b5b5b5;
 }
-  
+
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }

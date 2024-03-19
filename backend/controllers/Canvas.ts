@@ -11,9 +11,9 @@ class CanvasController {
     private static _canvas: Canvas = {
         pixels: Buffer.alloc(1024 * 1024 * 3), // 3 bytes per pixel (RGB)
         changes: 0,
-        width: 1024, // Soft-width limit
-        height: 1024, // Soft-height limit
-        cooldown: 60, // Pixel placement cooldown in seconds
+        width: 128, // Soft-width limit
+        height: 128, // Soft-height limit
+        cooldown: 5, // Pixel placement cooldown in seconds
     };
 
     private static _palette: [number, number, number][] = [
@@ -34,16 +34,34 @@ class CanvasController {
      *
      * @param req The Express request object
      * @param res The Express response object
+     * @param next The Express next function
      */
-    public static async getCanvasImage(
-        req: express.Request,
-        res: express.Response
-    ) {
-        res.status(200).json({
-            pixels: this._canvas.pixels,
-            width: this._canvas.width,
-            height: this._canvas.height,
-        });
+    public static async getCanvasImage(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            res.status(200).json({
+                pixels: CanvasController._canvas.pixels,
+                width: CanvasController._canvas.width,
+                height: CanvasController._canvas.height,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Get the canvas color palette
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async getCanvasPalette(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            res.status(200).json(CanvasController._palette);
+        } catch (error) {
+            next(error);
+        }
     }
 
     /**
@@ -53,15 +71,7 @@ class CanvasController {
      * @param socket The socket that sent the pixel data
      * @param data The payload
      */
-    public static async placePixel(
-        socket: SocketIO.Socket,
-        [x, y, palette, callback]: [
-            number,
-            number,
-            number,
-            (timer: number) => void,
-        ]
-    ) {
+    public static async placePixel(socket: SocketIO.Socket, [x, y, palette, callback]: [number, number, number, (timer: number) => void]) {
         // Get the user
         const user = await prisma.account.findFirst({
             where: {
@@ -75,29 +85,19 @@ class CanvasController {
         // Check if the user timer is elapsed
         if (
             user.lastPixelTime &&
-            new Date(user.lastPixelTime).getTime() >
-                new Date().getTime() - this._canvas.cooldown * 1000
+            new Date(user.lastPixelTime).getTime() > new Date().getTime() - CanvasController._canvas.cooldown * 1000
         ) {
-            return callback(
-                new Date(user.lastPixelTime).getTime() -
-                    new Date().getTime() +
-                    this._canvas.cooldown * 1000
-            );
+            // Return the "expires at" time
+            return callback(new Date(user.lastPixelTime).getTime() + CanvasController._canvas.cooldown * 1000);
         }
 
-        if (
-            x < 0 ||
-            y < 0 ||
-            x >= this._canvas.width ||
-            y >= this._canvas.height
-        )
-            return callback(0);
+        if (x < 0 || y < 0 || x >= CanvasController._canvas.width || y >= CanvasController._canvas.height) return callback(0);
 
         // Get pixel index (from the canvas buffer)
-        const pixelIndex = (y * this._canvas.width + x) * 3;
+        const pixelIndex = (y * 1024 + x) * 3;
 
         // Get palette item
-        const color = this._palette[palette];
+        const color = CanvasController._palette[palette];
         if (!color) return callback(0);
 
         // Log the pixel placement
@@ -116,9 +116,9 @@ class CanvasController {
         });
 
         // Set the pixel
-        this._canvas.pixels.writeUInt8(color[0], pixelIndex);
-        this._canvas.pixels.writeUInt8(color[1], pixelIndex + 1);
-        this._canvas.pixels.writeUInt8(color[2], pixelIndex + 2);
+        CanvasController._canvas.pixels.writeUInt8(color[0], pixelIndex);
+        CanvasController._canvas.pixels.writeUInt8(color[1], pixelIndex + 1);
+        CanvasController._canvas.pixels.writeUInt8(color[2], pixelIndex + 2);
 
         // Update the user timer
         if (!user.isAdmin) {
@@ -137,7 +137,10 @@ class CanvasController {
         // Broadcast the modification to all clients
         WSS.updateCanvasPixel(x, y, color);
         WSS.updateUserData(socket, user);
-        WSS.updateClassement(socket);
+        WSS.updateClassement();
+
+        // Send the "expires at" time
+        callback(new Date().getTime() + CanvasController._canvas.cooldown * 1000);
     }
 
     // Admin routes
@@ -147,28 +150,30 @@ class CanvasController {
      *
      * @param req The Express request object
      * @param res The Express response object
+     * @param next The Express next function
      */
-    public static async resetCanvas(
-        req: express.Request,
-        res: express.Response
-    ) {
-        prisma.logEntry.create({
-            data: {
-                devinciEmail: "anon",
-                time: new Date().getTime(),
-                ip: req.ip || "Unknown",
-                action: {
-                    type: "canvas_reset",
+    public static async resetCanvas(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            prisma.logEntry.create({
+                data: {
+                    devinciEmail: "anon",
+                    time: new Date().getTime(),
+                    ip: req.ip || "Unknown",
+                    action: {
+                        type: "canvas_reset",
+                    },
                 },
-            },
-        });
+            });
 
-        this._canvas.changes = 0;
-        this._canvas.pixels.fill(0);
+            CanvasController._canvas.changes = 0;
+            CanvasController._canvas.pixels.fill(0);
 
-        WSS.resetCanvas();
+            WSS.resetCanvas();
 
-        res.status(200).send("Canvas reset");
+            res.status(200).send("Canvas reset");
+        } catch (error) {
+            next(error);
+        }
     }
 
     /**
@@ -177,39 +182,41 @@ class CanvasController {
      *
      * @param req The Express request object
      * @param res The Express response object
+     * @param next The Express next function
      */
-    public static async changeCanvasSize(
-        req: express.Request,
-        res: express.Response
-    ) {
-        const { height, width }: { height: number; width: number } = req.body;
+    public static async changeCanvasSize(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            const { height, width }: { height: number; width: number } = req.body;
 
-        if (width < 0 || height < 0) {
-            return res.status(400).send("Invalid canvas size");
-        } else if (width > 1024 || height > 1024) {
-            return res.status(400).send("Canvas size too large");
-        }
+            if (width < 0 || height < 0) {
+                return res.status(400).send("Invalid canvas size");
+            } else if (width > 1024 || height > 1024) {
+                return res.status(400).send("Canvas size too large");
+            }
 
-        this._canvas.changes++;
-        this._canvas.width = width;
-        this._canvas.height = height;
+            CanvasController._canvas.changes++;
+            CanvasController._canvas.width = width;
+            CanvasController._canvas.height = height;
 
-        prisma.logEntry.create({
-            data: {
-                devinciEmail: "null",
-                time: new Date().getTime(),
-                ip: req.ip || "Unknown",
-                action: {
-                    type: "canvas_resize",
-                    width,
-                    height,
+            prisma.logEntry.create({
+                data: {
+                    devinciEmail: "null",
+                    time: new Date().getTime(),
+                    ip: req.ip || "Unknown",
+                    action: {
+                        type: "canvas_resize",
+                        width,
+                        height,
+                    },
                 },
-            },
-        });
+            });
 
-        WSS.updateCanvasSize(width, height);
+            WSS.updateCanvasSize(width, height);
 
-        res.status(200).send("Canvas size changed");
+            res.status(200).send("Canvas size changed");
+        } catch (error) {
+            next(error);
+        }
     }
 
     /**
@@ -218,32 +225,34 @@ class CanvasController {
      *
      * @param req The Express request object
      * @param res The Express response object
+     * @param next The Express next function
      */
-    public static async changePixelPlacementCooldown(
-        req: express.Request,
-        res: express.Response
-    ) {
-        const { cooldown }: { cooldown: number } = req.body;
+    public static async changePixelPlacementCooldown(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            const { cooldown }: { cooldown: number } = req.body;
 
-        if (cooldown < 0) return res.status(400).send("Invalid cooldown");
+            if (cooldown < 0) return res.status(400).send("Invalid cooldown");
 
-        this._canvas.cooldown = cooldown;
+            CanvasController._canvas.cooldown = cooldown;
 
-        prisma.logEntry.create({
-            data: {
-                devinciEmail: "anon",
-                time: new Date().getTime(),
-                ip: req.ip || "Unknown",
-                action: {
-                    type: "cooldown_change",
-                    cooldown,
+            prisma.logEntry.create({
+                data: {
+                    devinciEmail: "anon",
+                    time: new Date().getTime(),
+                    ip: req.ip || "Unknown",
+                    action: {
+                        type: "cooldown_change",
+                        cooldown,
+                    },
                 },
-            },
-        });
+            });
 
-        WSS.updatePixelPlacementCooldown(cooldown);
+            WSS.updatePixelPlacementCooldown(cooldown);
 
-        res.status(200).send("Cooldown changed");
+            res.status(200).send("Cooldown changed");
+        } catch (error) {
+            next(error);
+        }
     }
 
     /**
@@ -252,71 +261,50 @@ class CanvasController {
      *
      * @param req The Express request object
      * @param res The Express response object
+     * @param next The Express next function
      */
-    public static async editCanvasColorPalette(
-        req: express.Request,
-        res: express.Response
-    ) {
-        // TODO: Edit the canvas color palette and log the action
-        /**
-         * VALIDATION
-         * * Check if the user is an admin
-         * * Validate the new color palette
-         *
-         * PROCESS
-         * * Edit the canvas color palette in the database
-         * * Log the canvas color palette edit
-         *
-         * RESPONSE
-         * * Send a success response
-         * * Broadcast the canvas color palette edit to all clients
-         * * Send the updated leaderboard to all clients
-         * * Send the updated user data to all clients
-         * * Send the updated canvas to all clients
-         */
+    public static async editCanvasColorPalette(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            const { colors } = req.body;
 
-        const { colors } = req.body;
-
-        if (colors.length != 8) {
-            res.status(500).send("Must specify 9 colors");
-            return;
-        }
-
-        colors.forEach((color: number[]) => {
-            if (color.length != 3) {
-                res.status(500).send("Color not recognized");
-                return;
-            }
-
-            color.forEach((rgbValue: number) => {
-                if (rgbValue < 0 || rgbValue > 255) {
+            colors.forEach((color: number[]) => {
+                if (color.length != 3) {
                     res.status(500).send("Color not recognized");
                     return;
                 }
+
+                color.forEach((rgbValue: number) => {
+                    if (rgbValue < 0 || rgbValue > 255) {
+                        res.status(500).send("Color not recognized");
+                        return;
+                    }
+                });
             });
-        });
 
-        const newPalette: number[][] = [];
+            const newPalette: number[][] = [];
 
-        for (const color of colors) {
-            newPalette.push(color);
-        }
+            for (const color of colors) {
+                newPalette.push(color);
+            }
 
-        prisma.logEntry.create({
-            data: {
-                devinciEmail: "null",
-                time: new Date().getTime(),
-                ip: req.ip || "Unknown",
-                action: {
-                    type: "update_palette",
-                    palette: newPalette,
+            prisma.logEntry.create({
+                data: {
+                    devinciEmail: "null",
+                    time: new Date().getTime(),
+                    ip: req.ip || "Unknown",
+                    action: {
+                        type: "update_palette",
+                        palette: newPalette,
+                    },
                 },
-            },
-        });
+            });
 
-        WSS.updateColorPalette(newPalette);
+            WSS.updateColorPalette(newPalette);
 
-        res.status(200).send("Palette updated");
+            res.status(200).send("Palette updated");
+        } catch (error) {
+            next(error);
+        }
     }
 }
 

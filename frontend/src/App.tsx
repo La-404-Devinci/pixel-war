@@ -1,149 +1,205 @@
-// import { useState } from 'react'
-import { SetStateAction, useEffect, useState } from 'react';
-import styles from './App.module.css'
-import { socket } from './socket';
-import classementItem from '../../common/interfaces/classementItem.interface'
-import ChatComponent from './components/chat'
-import LeaderboardComponent from './components/leaderboard'
-import LoginComponent from './components/login'
-import ProfilComponent from './components/profil'
-import isMobile from './utiles/isMobile'
-import Canvas from './components/Canvas'
-import Palette from './components/Palette';
-import Timer from './components/Timer';
+import { useEffect, useState } from "react";
+import styles from "./App.module.css";
+import { socket } from "./socket";
+import ChatComponent from "./components/chat";
+import LeaderboardComponent from "./components/leaderboard";
+import ModalReward from "./components/modal/reward";
+import LoginComponent from "./components/modal/login";
+import ProfilComponent from "./components/profil";
+import isMobile from "./utils/isMobile";
+import Canvas from "./components/Canvas";
+import Palette from "./components/Palette";
+import Timer from "./components/Timer";
+import AssoModal from "./components/modal/asso";
+import API from "./utils/api";
 
 function App() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [classement, setClassement] = useState<classementItem[]>([])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isConnected, setIsConnected] = useState(socket.connected);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const cookies = document.cookie.split(";");
+    let email = undefined;
+    let token = undefined;
 
-
-  const [selectedColor, setSelectedColor] = useState("white");
-
-  const [zoom, setZoom] = useState(1);
-
-  const [userEmail, setUserEmail] = useState("");
-  const [displayBtnLogin, setDisplayBtnLogin] = useState(true);
-  const [displayComponent, setDisplayComponent] = useState("none");
-  const [isMobileView, setIsMobileView] = useState(isMobile.any())
-
-  useEffect(() => {
-    function onConnect() {
-      setIsConnected(true);
+    for (let i = 0; i < cookies.length; i++) {
+        if (cookies[i].includes("email")) {
+            email = decodeURIComponent(cookies[i].split("=")[1]);
+        } else if (cookies[i].includes("token")) {
+            token = decodeURIComponent(cookies[i].split("=")[1]);
+        }
     }
 
-    function onDisconnect() {
-      setIsConnected(false);
-    }
+    const isConnected = email !== undefined && token !== undefined;
+    const [socketConnected, setSocketConnected] = useState(false);
 
-    function onclassementUpdate(data: classementItem[]) {
-      setClassement(data)
-    }
+    const [selectedColor, setSelectedColor] = useState(0);
+    const [displayComponent, setDisplayComponent] = useState("none");
+    const [isMobileView, setIsMobileView] = useState(isMobile.any());
+    const [colors, setColors] = useState<string[] | undefined>(undefined);
+    const [time, setTime] = useState(0);
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('classementUpdate', onclassementUpdate);
-
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('classementUpdate', onclassementUpdate);
-    };
-  }, []);
-
-
-
-  const handleColorSelect = (color: SetStateAction<string>) => {
-    setSelectedColor(color);
-    console.log('Couleur sélectionnée dans App.tsx:', color);
-  };
-
-
-
-  useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      // Multiplicateur de zoom arbitraire
-      const zoomFactor = 0.1;
-      // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
-      const newZoom = event.deltaY > 0 ? zoom - zoomFactor : zoom + zoomFactor;
-      // Limiter le zoom à un minimum de 0.1 pour éviter les valeurs non valides
-      setZoom(Math.max(0.1, newZoom));
+    const setColorsFromAPI = (colors: number[][]) => {
+        setColors(colors.map((color) => `rgb(${color.join(",")})`));
     };
 
-    window.addEventListener('wheel', handleWheel);
+    // Socket events
+    useEffect(() => {
+        socket.on("connect", () => {
+            console.log("Connected to server");
+            // Authentification
+            if (!token || !email) {
+                console.error("Missing token or email");
+                setSocketConnected(true);
+                return;
+            }
 
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
+            socket.emit("auth", token, email);
+            socket.emit("get-classement");
+            socket.emit("get-stats");
+        });
+
+        socket.on("disconnect", () => {
+            console.log("Disconnected from server");
+        });
+
+        socket.on("auth-callback", (success: boolean) => {
+            if (!success) {
+                console.error("Authentification failed");
+                // Clear 'email' and 'token' cookies
+                document.cookie =
+                    "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie =
+                    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                window.location.reload();
+                return;
+            } else {
+                setSocketConnected(true);
+            }
+        });
+
+        socket.on("canvas-palette-update", setColorsFromAPI);
+
+        const statsInterval = setInterval(() => {
+            socket.emit("get-stats");
+        }, 1000 * 60 * 5); // 5 minutes
+
+        return () => {
+            socket.off("connect");
+            socket.off("disconnect");
+            socket.off("auth-callback");
+            socket.off("canvas-palette-update");
+            clearInterval(statsInterval);
+        };
+    }, [token, email]);
+
+    // Initial fetch of the palette
+    useEffect(() => {
+        if (!colors) {
+            API.GET("/canvas/palette").then((res) => {
+                setColorsFromAPI(res);
+            });
+        }
+    }, [colors]);
+
+    useEffect(() => {
+        const handleResize = (e: Event) => {
+            e.preventDefault();
+            setIsMobileView(isMobile.any());
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+
+    // if (!colors || !socketConnected) {
+    //     return <div>Loading...</div>;
+    // }
+
+    const handleColorSelect = (color: number) => {
+        setSelectedColor(color);
     };
-  }, [zoom]);
-  
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(isMobile.any())
+
+    const handleDisplayComponent = (componentName: string) => {
+        if (isMobileView == true) {
+            if (displayComponent === componentName) {
+                setDisplayComponent("none");
+            } else {
+                setDisplayComponent(componentName);
+            }
+        } else {
+            if (displayComponent === componentName) {
+                setDisplayComponent("none");
+            } else {
+                setDisplayComponent(componentName);
+            }
+        }
     };
 
-    window.addEventListener('resize', handleResize)
-
-    return () => {
-        window.removeEventListener('resize', handleResize)
+    const handlePlacePixel = (x: number, y: number) => {
+        socket.emit("place-pixel", x, y, selectedColor, (expiresAt: number) => {
+            const timer =
+                Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
+            setTime(timer);
+        });
     };
-  }, [])
 
-  const handleLogin = (email: string) => {
-    setUserEmail(email.split('@')[0]);
-    setDisplayBtnLogin(false);
-  }
+    return (
+        <>
+            <div className={styles.canvasContainer}>
+                <Canvas
+                    actualColor={selectedColor}
+                    readOnly={!isConnected}
+                    onPlacePixel={handlePlacePixel}
+                    palette={colors ?? []}
+                />
+                {isConnected && (
+                    <Palette
+                        onColorClick={handleColorSelect}
+                        colors={colors}
+                        selectedColor={selectedColor}
+                        isActive={time <= 0}
+                    />
+                )}
+                <Timer
+                    time={time}
+                    setTime={setTime}
+                />
+            </div>
 
-  const handleDisplayComponent = (componentName: string) => {
-    if (isMobileView == true) {
-      if (displayComponent === componentName) {
-        setDisplayComponent("none");
-      } else {
-        setDisplayComponent(componentName);
-      }  
-    }  else {
-      if (displayComponent === componentName) {
-        setDisplayComponent("none");
-      } else {
-        setDisplayComponent(componentName);
-      }  
-    } 
-  }
+            <div className={styles.navbarContainer}>
+                <LeaderboardComponent />
+                <ModalReward />
+                {!isConnected && <LoginComponent />}
+                <ChatComponent
+                    active={isConnected}
+                    userEmail={email ?? "N/A"}
+                />
 
+                {/* Profile button */}
+                {isConnected && displayComponent !== "chat" && (
+                    <button
+                        onClick={() => handleDisplayComponent("profil")}
+                        className={styles.btnProfil}
+                    >
+                        <img
+                            src='/src/assets/user-large.svg'
+                            alt='icone-user-profil'
+                        />
+                    </button>
+                )}
+            </div>
 
+            {displayComponent === "profil" && (
+                <ProfilComponent
+                    userEmail={email}
+                    onHideProfil={() => handleDisplayComponent("none")}
+                />
+            )}
 
-  // affichage (render)
-  return (
-    <div>
-      <div className={styles.testCanvas}>
-        <Canvas actualColor={selectedColor} zoom={zoom} />
-        <Palette onColorClick={handleColorSelect} />
-        <Timer />
-      </div>
-
-      {/* <div id="test-login">
-        <LoginComponent />
-      </div> */}
-      
-      <div className={styles.homepage}>
-        <div className={styles.containerTop}>
-          {isMobile.any() && <button onClick={() => handleDisplayComponent("chat")} className={styles.btnChat}><img src="/src/assets/message.svg" alt="icone-chat" /></button>}
-          {displayComponent !== "profil" && <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}><img src="/src/assets/user-large.svg" alt="icone-user-profil" /></button>}      
-        </div>
-
-        <LeaderboardComponent />
-
-        {displayBtnLogin && <button onClick={() => handleDisplayComponent("login")} className={styles.btnLogin}>Login to draw !</button>}
-
-        {displayComponent === "login" && <LoginComponent onLogin={handleLogin} />}
-        {displayComponent === "profil" && <ProfilComponent userEmail={userEmail} onHideProfil={() => handleDisplayComponent("none")} />}
-        {displayComponent === "chat" && <ChatComponent />}
-        {!isMobile.any() && <ChatComponent userEmail={userEmail} />}
-      </div>
-    </div>
-  );
+            <AssoModal />
+        </>
+    );
 }
 
-export default App
-
+export default App;

@@ -1,15 +1,12 @@
-import React from 'react'
-import styles from '../App.module.css'
+import React from "react";
+import styles from "../styles/palette.module.css";
 
-export default function PalletteColor(props: {onClick(color: string): unknown;color: string}) {
-
-  const handleClick = () => {
-    props.onClick(props.color); // Passez la couleur à la fonction onClick fournie par le parent
-  };
-
-  return (
-    <button className={styles.color} style={{background: props.color}} onClick={handleClick}>
-      
-    </button>
-  )
+export default function PalletteColor(props: { onClick: () => void; color: string; selected: boolean }) {
+    return (
+        <button
+            className={`${styles.color} ${props.selected ? styles.selected : ""}`}
+            style={{ background: props.color }}
+            onClick={props.onClick}
+        ></button>
+    );
 }

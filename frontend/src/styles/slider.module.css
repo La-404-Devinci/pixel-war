@@ -1,0 +1,40 @@
+.carouselBtnLeft,
+.carouselBtnRight {
+    position: absolute;
+    margin-inline: 16px;
+    height: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.carouselBtnLeft {
+    left: 0;
+}
+
+.carouselBtnRight {
+    right: 0;
+}
+
+.slider {
+    margin-bottom: 32px;
+}
+
+.slider p:first-child{
+    font-size: 1.5em;
+}
+
+@media screen and (max-width: 768px){
+    .slider p:first-child{
+        font-size: 1em;
+    }
+}
+
+.slider img {
+    width: 75%;
+}
