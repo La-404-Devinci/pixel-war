@@ -78,7 +78,7 @@ class ChatController {
             data: { lastSentMessageTimes: user.lastSentMessageTimes, messagesSent: user.messagesSent + 1 },
         });
 
-        prisma.logEntry.create({
+        await prisma.logEntry.create({
             data: {
                 devinciEmail: user.devinciEmail,
                 time: new Date().getTime(),

@@ -3,12 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-    const userCount =
-        Number(
-            process.argv
-                .find((arg) => arg.startsWith("userCount="))
-                ?.replace(/^userCount=/, "")
-        ) ?? 10;
+    const userCount = Number(process.argv.find((arg) => arg.startsWith("userCount="))?.replace(/^userCount=/, "")) ?? 10;
     const usersPromise = [] as Promise<unknown>[];
     for (let i = 1; i <= userCount; i++) {
         const user = prisma.account.upsert({

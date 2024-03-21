@@ -127,7 +127,7 @@ class AccountController {
         try {
             const { userId, isMuted } = req.body;
 
-            prisma.account
+            await prisma.account
                 .update({
                     where: {
                         id: userId,
@@ -216,7 +216,7 @@ class AccountController {
                 });
 
                 // Log the action
-                prisma.logEntry.create({
+                await prisma.logEntry.create({
                     data: {
                         devinciEmail: req.account.devinciEmail,
                         time: new Date().getTime(),

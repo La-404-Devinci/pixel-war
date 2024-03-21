@@ -1,8 +1,9 @@
-import React, { forwardRef, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import styles from "../styles/canvas.module.css";
 import { socket } from "../socket";
 import API from "../utils/api";
 import isMobile from "../utils/isMobile";
+import Tooltip, { TooltipSettings } from "./Tooltip";
 
 interface CanvasProps {
     actualColor: number;
@@ -18,6 +19,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const cursorRef = useRef<HTMLDivElement>(null);
     const [zoom, setZoom] = useState(1);
+    const [tooltip, setTooltip] = useState<TooltipSettings | null>(null);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -81,6 +83,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
                     event.touches[0].clientX - event.touches[1].clientX,
                     event.touches[0].clientY - event.touches[1].clientY,
                 );
+
                 if (pinch === true) pinch = distance;
                 const delta = distance - pinch;
                 pinch = distance;
@@ -122,8 +125,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleMouseUp = (event: MouseEvent) => {
-            if (event.button !== 0) return;
-            handleUp();
+            if (event.button === 0) handleUp(event.target !== canvasRef.current && event.target !== cursorRef.current);
         };
 
         const handleTouchUp = (event: TouchEvent) => {
@@ -133,17 +135,20 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
                 return;
             }
 
-            handleUp();
+            if (event.touches.length !== 0) return;
+            handleUp(event.target !== canvasRef.current && event.target !== cursorRef.current);
         };
 
-        const handleUp = () => {
+        const handleUp = (isObstrued: boolean) => {
+            if (lastX === 0 && lastY === 0) return;
+
             // consider drag if the user moved more than 7 pixels
             const drag = Math.abs(startDragX - lastX) > 7 || Math.abs(startDragY - lastY) > 7;
 
             startDragX = 0;
             startDragY = 0;
 
-            if (!drag && !readOnly) {
+            if (!drag && !readOnly && !isObstrued) {
                 const [pixelX, pixelY] = getCursorPosition(lastX, lastY);
                 const cursor = cursorRef.current;
 
@@ -170,6 +175,33 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             setZoom(Math.max(0.1, newZoom));
         };
 
+        const handleSpecial = (event: MouseEvent) => {
+            event.preventDefault();
+
+            const [x, y] = [event.clientX, event.clientY];
+            const [pixelX, pixelY] = getCursorPosition(x, y);
+
+            // TODO: Fetch pixel history from server and display it in a tooltip
+
+            API.GET(`/canvas/history?x=${pixelX}&y=${pixelY}`).then((res) => {
+                if (res.length === 0) return;
+                console.log(res);
+                setTooltip({
+                    title: `History (${res.x}, ${res.y})`,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    value: res.history.map((item: any) => {
+                        return {
+                            name: item.devinciEmail.split("@")[0],
+                            time: new Date(item.time * 1).toLocaleString("fr-FR").slice(0, -3), // DD/MM HH:MM:SS
+                            color: `rgb(${item.action.color.join(",")})`,
+                        };
+                    }),
+                    x: x,
+                    y: y,
+                });
+            });
+        };
+
         // Desktop events
         if (!isMobile.any()) {
             window.addEventListener("mouseup", handleMouseUp);
@@ -184,12 +216,11 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             window.addEventListener("touchstart", handleTouchStart);
         }
 
+        window.addEventListener("contextmenu", handleSpecial);
         window.addEventListener("wheel", handleWheel);
 
         return () => {
             // Desktop events
-            window.removeEventListener("wheel", handleWheel);
-
             window.removeEventListener("mouseup", handleMouseUp);
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mousedown", handleMouseDown);
@@ -198,6 +229,9 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             window.removeEventListener("touchend", handleTouchUp);
             window.removeEventListener("touchmove", handleTouchMove);
             window.removeEventListener("touchstart", handleTouchStart);
+
+            window.removeEventListener("wheel", handleWheel);
+            window.removeEventListener("contextmenu", handleSpecial);
         };
     }, [zoom, onPlacePixel, readOnly]);
 
@@ -232,17 +266,16 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             const newZoom = minScreenSize / maxCanvasSize;
             setZoom(newZoom * 0.9);
 
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            ctx.imageSmoothingEnabled = false;
+
             for (let x = 0; x < width; x++) {
                 for (let y = 0; y < height; y++) {
-                    const colorR = res.pixels[y * 1024 + x];
-                    const colorG = res.pixels[y * 1024 + x + 1];
-                    const colorB = res.pixels[y * 1024 + x + 2];
-
-                    const canvas = canvasRef.current;
-                    if (!canvas) return;
-
-                    const ctx = canvas.getContext("2d");
-                    if (!ctx) return;
+                    const colorR = res.pixels.data[(y * 1024 + x) * 3];
+                    const colorG = res.pixels.data[(y * 1024 + x) * 3 + 1];
+                    const colorB = res.pixels.data[(y * 1024 + x) * 3 + 2];
 
                     ctx.beginPath();
                     ctx.fillStyle = `rgb(${colorR},${colorG},${colorB})`;
@@ -283,10 +316,13 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
     }, [palette, pixelSize]);
 
     return (
-        <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={containerRef}>
-            {!readOnly && <div ref={cursorRef} className={styles.cursor} style={{ width: pixelSize, height: pixelSize }}></div>}
-            <canvas ref={canvasRef} className={styles.game} width={500} height={500}></canvas>
-        </div>
+        <>
+            {tooltip && <Tooltip data={tooltip} setData={setTooltip} />}
+            <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={containerRef}>
+                {!readOnly && <div ref={cursorRef} className={styles.cursor} style={{ width: pixelSize, height: pixelSize }}></div>}
+                <canvas ref={canvasRef} className={styles.game} width={500} height={500}></canvas>
+            </div>
+        </>
     );
 };
 

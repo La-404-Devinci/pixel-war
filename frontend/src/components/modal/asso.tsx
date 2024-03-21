@@ -6,7 +6,6 @@ import { components } from "react-select";
 
 import ModalComponent from "./Modal";
 import API from "../../utils/api";
-import { socket } from "../../socket";
 
 type Option = {
     image: string;

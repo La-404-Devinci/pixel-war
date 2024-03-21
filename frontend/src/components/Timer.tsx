@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import styles from "../styles/palette.module.css";
 
 interface TimerComponentProps {

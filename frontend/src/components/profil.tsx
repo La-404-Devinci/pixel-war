@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import styles from "../styles/profil.module.css";
 import { socket } from "../socket";
 
+import iconX from "../assets/x.svg";
+
 interface ProfilComponentProps {
     userEmail: string | undefined;
     onHideProfil: () => void;
@@ -59,7 +61,7 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
             <div className={styles.profilTitle}>
                 <p>{userEmail.split("@")[0]}</p>
                 <button className={styles.btnClose} onClick={handleClose}>
-                    <img src="/src/assets/x.svg" alt="cross-icon" />
+                    <img src={iconX} alt="cross-icon" />
                 </button>
             </div>
             <div className={styles.containerGrid}>

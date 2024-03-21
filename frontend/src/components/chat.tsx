@@ -5,6 +5,10 @@ import isMobile from "../utils/isMobile";
 import { socket } from "../socket";
 import API from "../utils/api";
 
+import iconMessage from "../assets/message.svg";
+import iconPaperPlane from "../assets/paper-plane.svg";
+import iconChevronDown from "../assets/chevron-down.svg";
+
 interface ChatComponentProps {
     active: boolean;
     userEmail: string;
@@ -31,11 +35,9 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
             if (name.length > 10) name = name.slice(0, 10) + "...";
 
             // Add the message to the chat
-            setChat((chat) =>
-                chat ? [...chat, [name, message]] : [[name, message]]
-            );
+            setChat((chat) => (chat ? [...chat, [name, message]] : [[name, message]]));
         },
-        [userEmail]
+        [userEmail],
     );
 
     // Get messages from API
@@ -51,14 +53,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
     const sendMessage = () => {
         if (message.trim().length === 0) return;
 
-        if (
-            lastMessageTimes.filter((time) => Date.now() - time < 5000)
-                .length >= 3
-        ) {
-            addMessage(
-                "SYSTEM",
-                "Vous envoyez trop de messages, veuillez patienter quelques secondes..."
-            );
+        if (lastMessageTimes.filter((time) => Date.now() - time < 5000).length >= 3) {
+            addMessage("SYSTEM", "Vous envoyez trop de messages, veuillez patienter quelques secondes...");
             return;
         }
 
@@ -83,13 +79,12 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
     };
 
     const toggleChat = () => {
-        setDisplayChat(!displayChat)
-    }
+        setDisplayChat(!displayChat);
+    };
 
     useEffect(() => {
         if (messagesContainerRef.current) {
-            messagesContainerRef.current.scrollTop =
-                messagesContainerRef.current.scrollHeight;
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
 
         // Listen for messages from websocket
@@ -112,73 +107,50 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
 
     useEffect(() => {
         !isMobileView && setDisplayChat(true);
-    }, [isMobileView])
+    }, [isMobileView]);
 
     const chatStyles = isMobileView ? chatStylesMobile : chatStylesDesktop;
 
     return (
         <>
+            {isMobileView && (
+                <button onClick={toggleChat} className={chatStylesMobile.btnChat}>
+                    <img src={iconMessage} alt="icone-chat" />
+                </button>
+            )}
 
-            {isMobileView && <button
-                onClick={toggleChat}
-                className={chatStylesMobile.btnChat}
-            >
-                <img
-                    src='/src/assets/message.svg'
-                    alt='icone-chat'
-                />
-            </button>}
-            
-            {displayChat && <div className={chatStyles.chat}>
-                <div
-                    className={`${chatStyles.messages} ${
-                        isExpanded && chatStyles.expanded
-                    }`}
-                    ref={messagesContainerRef}
-                >
-                    {chat?.map((chatMessage, index) => (
-                        <div key={index}>
-                            {" "}
-                            <span>{chatMessage[0]}:</span> {chatMessage[1]}
-                        </div>
-                    ))}
+            {displayChat && (
+                <div className={chatStyles.chat}>
+                    <div className={`${chatStyles.messages} ${isExpanded && chatStyles.expanded}`} ref={messagesContainerRef}>
+                        {chat?.map((chatMessage, index) => (
+                            <div key={index}>
+                                {" "}
+                                <span>{chatMessage[0]}:</span> {chatMessage[1]}
+                            </div>
+                        ))}
+                    </div>
+                    <div className={chatStyles.input}>
+                        <input
+                            type="text"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder={active ? "Entrez votre message..." : "Connectez-vous"}
+                            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                            readOnly={!active}
+                        />
+                        {active && (
+                            <button onClick={sendMessage}>
+                                <img src={iconPaperPlane} alt="logo-avion-papier" />
+                            </button>
+                        )}
+                        {!isMobileView && (
+                            <button onClick={toggleShow} className={isExpanded ? chatStyles.reversed : undefined}>
+                                <img src={iconChevronDown} alt="chevron-down" />
+                            </button>
+                        )}
+                    </div>
                 </div>
-                <div className={chatStyles.input}>
-                    <input
-                        type='text'
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder={
-                            active
-                                ? "Entrez votre message..."
-                                : "Connectez-vous"
-                        }
-                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                        readOnly={!active}
-                    />
-                    {active && (
-                        <button onClick={sendMessage}>
-                            <img
-                                src='/src/assets/paper-plane.svg'
-                                alt='logo-avion-papier'
-                            />
-                        </button>
-                    )}
-                    {!isMobileView && (
-                        <button
-                            onClick={toggleShow}
-                            className={
-                                isExpanded ? chatStyles.reversed : undefined
-                            }
-                        >
-                            <img
-                                src='/src/assets/chevron-down.svg'
-                                alt='chevron-down'
-                            />
-                        </button>
-                    )}
-                </div>
-            </div>}
+            )}
         </>
     );
 };

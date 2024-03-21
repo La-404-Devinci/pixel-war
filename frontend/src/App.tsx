@@ -13,6 +13,8 @@ import Timer from "./components/Timer";
 import AssoModal from "./components/modal/asso";
 import API from "./utils/api";
 
+import iconUserLarge from "./assets/user-large.svg";
+
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cookies = document.cookie.split(";");
@@ -28,7 +30,6 @@ function App() {
     }
 
     const isConnected = email !== undefined && token !== undefined;
-    const [socketConnected, setSocketConnected] = useState(false);
 
     const [selectedColor, setSelectedColor] = useState(0);
     const [displayComponent, setDisplayComponent] = useState("none");
@@ -47,7 +48,7 @@ function App() {
             // Authentification
             if (!token || !email) {
                 console.error("Missing token or email");
-                setSocketConnected(true);
+                // setSocketConnected(true);
                 return;
             }
 
@@ -69,7 +70,7 @@ function App() {
                 window.location.reload();
                 return;
             } else {
-                setSocketConnected(true);
+                // setSocketConnected(true);
             }
         });
 
@@ -160,7 +161,7 @@ function App() {
                 {/* Profile button */}
                 {isConnected && displayComponent !== "chat" && (
                     <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
-                        <img src="/src/assets/user-large.svg" alt="icone-user-profil" />
+                        <img src={iconUserLarge} alt="icone-user-profil" />
                     </button>
                 )}
             </div>

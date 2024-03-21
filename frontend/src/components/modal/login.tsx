@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "../../styles/modal/login.module.css";
 import API from "../../utils/api";
 import ModalComponent from "./Modal";
+import iconX from "../../assets/x.svg";
 
 const LoginComponent = () => {
     const [email, setEmail] = useState("");
@@ -48,7 +49,7 @@ const LoginComponent = () => {
                 modalBtnClassName={styles.btnLogin}
                 titleContent="Connexion"
                 titleClassName={styles.loginTitle}
-                closeBtnContent={<img src="/src/assets/x.svg" alt="Close button" />}
+                closeBtnContent={<img src={iconX} alt="Close button" />}
                 optCloseBtnClassName={styles.close}
             >
                 <div className={styles.login}>

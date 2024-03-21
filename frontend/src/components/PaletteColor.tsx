@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "../styles/palette.module.css";
 
 export default function PalletteColor(props: { onClick: () => void; color: string; selected: boolean }) {

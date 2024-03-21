@@ -3,6 +3,9 @@ import styles from "../styles/modal/leaderboard.module.css";
 import { socket } from "../socket";
 import classementItem from "../../../common/interfaces/classementItem.interface";
 
+import iconAngleDown from "../assets/angle-down.svg";
+import iconAngleUp from "../assets/angle-up.svg";
+
 const LeaderboardComponent = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [classement, setClassement] = useState<classementItem[]>([]);
@@ -26,10 +29,10 @@ const LeaderboardComponent = () => {
 
     return (
         <div className={styles.leaderboard}>
-                <button onClick={handleExpand} className={styles.btnExpand}>
-                    <img src={isExpanded ? "/src/assets/angle-up.svg" : "/src/assets/angle-down.svg"} alt="arrow-down" />
-                    Classement
-                </button>
+            <button onClick={handleExpand} className={styles.btnExpand}>
+                <img src={isExpanded ? iconAngleUp : iconAngleDown} alt="arrow-down" />
+                Classement
+            </button>
             {isExpanded && (
                 <div className={styles.expanded}>
                     {classement.length === 0 && <p>Le classement est vide</p>}

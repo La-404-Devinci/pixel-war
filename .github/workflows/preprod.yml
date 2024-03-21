@@ -1,0 +1,30 @@
+name: "Deploy to 404 Test Server"
+
+on:
+    push:
+        branches:
+            - pre-prod
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.HOST }}
+                  username: ${{ secrets.USERNAME }}
+                  key: ${{ secrets.KEY }}
+                  script: |
+                      cd ${{ secrets.PREPROD_DIR }}
+                      git pull
+                      cd frontend
+                      npm install
+                      npm run build
+                      cd ../backend
+                      docker compose up -d
+                      npm install
+                      npm run build
+                      screen -S 404 -X quit
+                      screen -S 404 -d -m npm start
+                      echo "Deployed!"

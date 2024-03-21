@@ -11,8 +11,8 @@ class CanvasController {
     private static _canvas: Canvas = {
         pixels: Buffer.alloc(1024 * 1024 * 3), // 3 bytes per pixel (RGB)
         changes: 0,
-        width: 128, // Soft-width limit
-        height: 128, // Soft-height limit
+        width: 16, // Soft-width limit
+        height: 16, // Soft-height limit
         cooldown: 5, // Pixel placement cooldown in seconds
     };
 
@@ -27,6 +27,11 @@ class CanvasController {
         [0, 255, 255], // #00FFFF
         [255, 0, 255], // #FF00FF
     ];
+
+    public static init() {
+        // Fill the canvas with white pixels
+        CanvasController._canvas.pixels.fill(255);
+    }
 
     /**
      * Get the canvas image
@@ -101,7 +106,7 @@ class CanvasController {
         if (!color) return callback(0);
 
         // Log the pixel placement
-        prisma.logEntry.create({
+        await prisma.logEntry.create({
             data: {
                 devinciEmail: user.devinciEmail,
                 time: new Date().getTime(),
@@ -115,7 +120,6 @@ class CanvasController {
             },
         });
 
-        // Set the pixel
         CanvasController._canvas.pixels.writeUInt8(color[0], pixelIndex);
         CanvasController._canvas.pixels.writeUInt8(color[1], pixelIndex + 1);
         CanvasController._canvas.pixels.writeUInt8(color[2], pixelIndex + 2);
@@ -143,6 +147,49 @@ class CanvasController {
         callback(new Date().getTime() + CanvasController._canvas.cooldown * 1000);
     }
 
+    /**
+     * Get the pixel history
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async getPixelHistory(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            const { x, y }: { x: number; y: number } = req.query as unknown as { x: number; y: number };
+
+            // ! Note: this is trash code, but it's the only way to do it :(
+
+            const history = await prisma.$queryRawUnsafe(
+                `SELECT * FROM LogEntry
+                WHERE action LIKE '%"type":"pixel_placement","x":${x},"y":${y}%'
+                ORDER BY "time" DESC
+                LIMIT 5`,
+            );
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const parsedHistory = (history as any).map((entry: { [x: string]: any }) => {
+                // Remove unnecessary data
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { id, ip, ...data } = entry;
+
+                // Serialize time
+                const time = entry.time.toString();
+                const action = JSON.parse(data.action);
+                return { ...data, time, action };
+            });
+
+            res.status(200).json({
+                x,
+                y,
+                history: parsedHistory,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     // Admin routes
     /**
      * Reset the canvas
@@ -154,7 +201,7 @@ class CanvasController {
      */
     public static async resetCanvas(req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
-            prisma.logEntry.create({
+            await prisma.logEntry.create({
                 data: {
                     devinciEmail: "anon",
                     time: new Date().getTime(),
@@ -198,7 +245,7 @@ class CanvasController {
             CanvasController._canvas.width = width;
             CanvasController._canvas.height = height;
 
-            prisma.logEntry.create({
+            await prisma.logEntry.create({
                 data: {
                     devinciEmail: "null",
                     time: new Date().getTime(),
@@ -235,7 +282,7 @@ class CanvasController {
 
             CanvasController._canvas.cooldown = cooldown;
 
-            prisma.logEntry.create({
+            await prisma.logEntry.create({
                 data: {
                     devinciEmail: "anon",
                     time: new Date().getTime(),
@@ -287,7 +334,7 @@ class CanvasController {
                 newPalette.push(color);
             }
 
-            prisma.logEntry.create({
+            await prisma.logEntry.create({
                 data: {
                     devinciEmail: "null",
                     time: new Date().getTime(),
