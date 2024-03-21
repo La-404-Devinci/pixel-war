@@ -184,8 +184,6 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             const [x, y] = [event.clientX, event.clientY];
             const [pixelX, pixelY] = getCursorPosition(x, y);
 
-            // TODO: Fetch pixel history from server and display it in a tooltip
-
             API.GET(`/canvas/history?x=${pixelX}&y=${pixelY}`).then((res) => {
                 if (res.length === 0) return;
                 console.log(res);
