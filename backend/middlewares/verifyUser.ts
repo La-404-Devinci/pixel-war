@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const verifyUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         const token = req.cookies.token;
-        const devinciEmail = req.cookies.devinciEmail;
+        const devinciEmail = req.cookies.email;
 
         if (!token) return res.status(401).send("Authorization token required");
         if (!devinciEmail) return res.status(401).send("Devinci email required");
