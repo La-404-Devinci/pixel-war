@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import styles from "../styles/canvas.module.css";
 import { socket } from "../socket";
 import API from "../utils/api";
@@ -132,7 +132,7 @@ const Canvas = ({
             handleUp();
         };
 
-        const handleTouchUp = (event: TouchEvent) => {
+        const handleTouchUp = () => {
             // if (pinch) {
             //     event.preventDefault();
             //     pinch = false;
@@ -248,7 +248,7 @@ const Canvas = ({
                 height * pixelSize
             );
             const newZoom = minScreenSize / maxCanvasSize;
-            setZoom(newZoom * 0.9);
+            containerRef.current!.style.transform = `scale(${newZoom * 0.9})`;
 
             for (let x = 0; x < width; x++) {
                 for (let y = 0; y < height; y++) {
@@ -310,7 +310,7 @@ const Canvas = ({
 
     //TODO: zoom to center of pinch
     usePinch(
-        ({offset: [d] }) => {
+        ({ offset: [d] }) => {
             containerRef.current!.style.transform = `scale(${d})`;
         },
         {

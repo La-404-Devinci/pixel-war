@@ -6,7 +6,6 @@ import { components } from "react-select";
 
 import ModalComponent from "./Modal";
 import API from "../../utils/api";
-import { socket } from "../../socket";
 
 type Option = {
     image: string;
@@ -67,35 +66,57 @@ export default function AssoModal() {
             <ModalComponent
                 forceOpen={true}
                 modalComponentClassName={styles.modalAsso}
-                titleClassName="Une asso ?"
-                titleContent="Une asso ?"
+                titleClassName='Une asso ?'
+                titleContent='Une asso ?'
                 textContent="Si vous faites partie d'une association, entrez la juste ici pour la représenter."
                 closeBtnContent="Je n'ai pas d'association"
                 linkAsCloseBtn={true}
             >
                 <AsyncSelect
-                    placeholder="Choisissez votre association !"
+                    placeholder='Choisissez votre association !'
                     loadOptions={(inputValue, callback) => {
                         console.log(inputValue);
                         if (!inputValue) return callback(options);
-                        callback(options.filter((i: Option) => i.label.toLowerCase().includes(inputValue.toLowerCase())));
+                        callback(
+                            options.filter((i: Option) =>
+                                i.label
+                                    .toLowerCase()
+                                    .includes(inputValue.toLowerCase())
+                            )
+                        );
                     }}
                     defaultOptions={true}
                     openMenuOnClick
                     components={{
                         Option: (props) => (
-                            <components.Option {...props} className={styles.option}>
-                                <img src={props.data.image} alt={props.data.label} />
+                            <components.Option
+                                {...props}
+                                className={styles.option}
+                            >
+                                <img
+                                    src={props.data.image}
+                                    alt={props.data.label}
+                                />
                                 <span>{props.data.label}</span>
                             </components.Option>
                         ),
                     }}
-                    noOptionsMessage={() => <p>Aucune association ne correspond à votre recherche.</p>}
+                    noOptionsMessage={() => (
+                        <p>
+                            Aucune association ne correspond à votre recherche.
+                        </p>
+                    )}
                     blurInputOnSelect={true}
                     onChange={(e) => setSelectedAsso(e?.value || null)}
-                    value={options.find((option) => option.value === selectedAsso)}
+                    value={options.find(
+                        (option) => option.value === selectedAsso
+                    )}
                 />
-                <button className={styles.chooseAssoBtn} onClick={handleAssoChange} disabled={!selectedAsso}>
+                <button
+                    className={styles.chooseAssoBtn}
+                    onClick={handleAssoChange}
+                    disabled={!selectedAsso}
+                >
                     C'est parti !
                 </button>
             </ModalComponent>

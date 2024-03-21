@@ -28,7 +28,7 @@ function App() {
     }
 
     const isConnected = email !== undefined && token !== undefined;
-    const [socketConnected, setSocketConnected] = useState(false);
+    const [setSocketConnected] = useState(false);
 
     const [selectedColor, setSelectedColor] = useState(0);
     const [displayComponent, setDisplayComponent] = useState("none");

@@ -8,7 +8,7 @@ const LeaderboardComponent = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [classement, setClassement] = useState<classementItem[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isMobileView, setIsMobileView] = useState(isMobile.any());
+    const [isMobileView] = useState(isMobile.any());
 
     useEffect(() => {
         function onclassementUpdate(data: classementItem[]) {
@@ -26,15 +26,17 @@ const LeaderboardComponent = () => {
         setIsExpanded(!isExpanded);
     };
 
-    
-
     return (
         <>
-            <div className={(!isMobileView ? styles.leaderboard : "")}>
+            <div className={!isMobileView ? styles.leaderboard : ""}>
                 {isMobileView ? (
                     <button
                         onClick={handleExpand}
-                        className={styles.btnExpandMobile + " " + (isExpanded ? styles.active : "")}
+                        className={
+                            styles.btnExpandMobile +
+                            " " +
+                            (isExpanded ? styles.active : "")
+                        }
                     >
                         <img
                             src='/src/assets/podium.svg'

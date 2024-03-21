@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import styles from "../styles/palette.module.css";
 
 interface TimerComponentProps {
@@ -10,7 +10,9 @@ const Timer: React.FC<TimerComponentProps> = ({ time, setTime }) => {
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
-        return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        return `${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}`;
     };
 
     useEffect(() => {
