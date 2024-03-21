@@ -1,5 +1,5 @@
 import express from "express";
-import { array } from "french-badwords-list";
+import cookieParser from "cookie-parser";
 import http from "http";
 import { Socket } from "socket.io";
 import dotenv from "dotenv";
@@ -27,6 +27,7 @@ const server = http.createServer(app);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Fix proxy ip
 app.set("trust proxy", true);
