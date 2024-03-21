@@ -20,6 +20,8 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const cursorRef = useRef<HTMLDivElement>(null);
 
+    const zoom = useRef(1);
+
     const [tooltip, setTooltip] = useState<TooltipSettings | null>(null);
 
     useEffect(() => {
@@ -33,7 +35,6 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         let lastY = 0;
         let startDragX = 0;
         let startDragY = 0;
-        let zoom = 1;
 
         const getCursorPosition = (x: number, y: number) => {
             const canvas = canvasRef.current;
@@ -42,8 +43,8 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             const relativeX = x - canvas.getBoundingClientRect().left;
             const relativeY = y - canvas.getBoundingClientRect().top;
 
-            const zoomX = relativeX / zoom;
-            const zoomY = relativeY / zoom;
+            const zoomX = relativeX / zoom.current;
+            const zoomY = relativeY / zoom.current;
 
             const pixelX = Math.floor(zoomX / pixelSize);
             const pixelY = Math.floor(zoomY / pixelSize);
@@ -142,10 +143,10 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             // Multiplicateur de zoom arbitraire
             const zoomFactor = 0.1;
             // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
-            zoom = event.deltaY < 0 ? zoom + zoomFactor : zoom - zoomFactor;
+            zoom.current = event.deltaY < 0 ? zoom.current + zoomFactor : zoom.current - zoomFactor;
 
-            if (zoom < 0.1) zoom = 0.1;
-            container.style.transform = `scale(${zoom})`;
+            if (zoom.current < 0.1) zoom.current = 0.1;
+            container.style.transform = `scale(${zoom.current})`;
         };
 
         const handleSpecial = (event: MouseEvent) => {
@@ -234,8 +235,8 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             // Get zoom
             const minScreenSize = Math.min(window.innerWidth, window.innerHeight);
             const maxCanvasSize = Math.max(width * pixelSize, height * pixelSize);
-            const newZoom = minScreenSize / maxCanvasSize;
-            containerRef.current!.style.transform = `scale(${newZoom * 0.9})`;
+            zoom.current = minScreenSize / maxCanvasSize;
+            containerRef.current!.style.transform = `scale(${zoom.current * 0.9})`;
 
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
@@ -286,10 +287,11 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
     }, [palette, pixelSize]);
 
-    //TODO: zoom to center of pinch
     usePinch(
         ({ offset: [d] }) => {
-            containerRef.current!.style.transform = `scale(${d})`;
+            zoom.current += d;
+            if (zoom.current < 0.1) zoom.current = 0.1;
+            containerRef.current!.style.transform = `scale(${zoom.current})`;
         },
         {
             target: containerRef,
