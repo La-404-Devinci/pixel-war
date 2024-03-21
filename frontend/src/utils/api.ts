@@ -1,9 +1,8 @@
-const baseUrl = "http://localhost:3000";
-// TODO: Move this to a .env file
+import env from "../env";
 
 export default abstract class API {
     static async POST(path: string, body: object) {
-        const data = await fetch(baseUrl + path, {
+        const data = await fetch(env.apiUrl + path, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -21,7 +20,7 @@ export default abstract class API {
     }
 
     static async GET(path: string) {
-        const data = await fetch(baseUrl + path, {
+        const data = await fetch(env.apiUrl + path, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

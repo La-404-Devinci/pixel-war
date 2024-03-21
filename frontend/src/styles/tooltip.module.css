@@ -1,0 +1,69 @@
+.wrapper {
+    position: fixed;
+    z-index: 9998;
+    background-color: #00000001;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.container {
+    position: absolute;
+    width: 0px;
+    height: 0px;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 16px;
+}
+
+.tooltip {
+    position: relative;
+    z-index: 9998;
+    background-color: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0px 0px 8px 0px #0003;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.tooltip > h6 {
+    font-size: 16px;
+}
+
+.tooltip > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.item > div {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.item > p {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item > p span {
+    margin-left: 4px;
+    font-weight: normal;
+    opacity: 0.5;
+}

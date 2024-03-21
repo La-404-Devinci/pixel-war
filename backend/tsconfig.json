@@ -31,11 +31,7 @@
         "baseUrl": "./" /* Specify the base directory to resolve non-relative module names. */,
         // "paths": {},                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
         // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
-        "typeRoots": ["./@types", "./node_modules/@types"] /* Specify multiple folders that act like './node_modules/@types'. */,
-        "types": [
-            "./@types/express.d.ts",
-            "./@types/french-badwords-list.d.ts"
-        ] /* Specify type package names to be included without being referenced in a source file. */,
+        "typeRoots": ["@types", "./node_modules/@types"] /* Specify multiple folders that act like './node_modules/@types'. */,
         // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */
         // "allowImportingTsExtensions": true,               /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
@@ -58,7 +54,7 @@
         // "sourceMap": true,                                /* Create source map files for emitted JavaScript files. */
         // "inlineSourceMap": true,                          /* Include sourcemap files inside the emitted JavaScript. */
         // "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
-        // "outDir": "./",                                   /* Specify an output folder for all emitted files. */
+        "outDir": "./dist/",
         // "removeComments": true,                           /* Disable emitting comments. */
         // "noEmit": true,                                   /* Disable emitting files from a compilation. */
         // "importHelpers": true,                            /* Allow importing helper functions from tslib once per project, instead of including them per-file. */
@@ -109,7 +105,7 @@
         "skipDefaultLibCheck": false /* Skip type checking .d.ts files that are included with TypeScript. */,
         "skipLibCheck": false /* Skip type checking all .d.ts files. */
     },
-    "include": ["**/*.ts", "./@types/*.d.ts"],
+    "include": ["**/*.ts", "@types/*.d.ts"],
     "exclude": ["node_modules", "dist", "out", "build"],
     "ts-node": {
         "files": true

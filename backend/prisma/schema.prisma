@@ -27,7 +27,7 @@ model Account {
 model LogEntry {
     id           Int    @id @default(autoincrement())
     devinciEmail String
-    time         Int
+    time         BigInt
     ip           String
     action       Json
 }

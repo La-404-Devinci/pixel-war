@@ -13,6 +13,8 @@ import Timer from "./components/Timer";
 import AssoModal from "./components/modal/asso";
 import API from "./utils/api";
 
+import iconUserLarge from "./assets/user-large.svg";
+
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cookies = document.cookie.split(";");
@@ -28,7 +30,6 @@ function App() {
     }
 
     const isConnected = email !== undefined && token !== undefined;
-    const [socketConnected, setSocketConnected] = useState(false);
 
     const [selectedColor, setSelectedColor] = useState(0);
     const [displayComponent, setDisplayComponent] = useState("none");
@@ -47,7 +48,7 @@ function App() {
             // Authentification
             if (!token || !email) {
                 console.error("Missing token or email");
-                setSocketConnected(true);
+                // setSocketConnected(true);
                 return;
             }
 
@@ -64,14 +65,12 @@ function App() {
             if (!success) {
                 console.error("Authentification failed");
                 // Clear 'email' and 'token' cookies
-                document.cookie =
-                    "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                document.cookie =
-                    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 window.location.reload();
                 return;
             } else {
-                setSocketConnected(true);
+                // setSocketConnected(true);
             }
         });
 
@@ -138,8 +137,7 @@ function App() {
 
     const handlePlacePixel = (x: number, y: number) => {
         socket.emit("place-pixel", x, y, selectedColor, (expiresAt: number) => {
-            const timer =
-                Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
+            const timer = Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
             setTime(timer);
         });
     };
@@ -147,55 +145,28 @@ function App() {
     return (
         <>
             <div className={styles.canvasContainer}>
-                <Canvas
-                    actualColor={selectedColor}
-                    readOnly={!isConnected}
-                    onPlacePixel={handlePlacePixel}
-                    palette={colors ?? []}
-                />
+                <Canvas actualColor={selectedColor} readOnly={!isConnected} onPlacePixel={handlePlacePixel} palette={colors ?? []} />
                 {isConnected && (
-                    <Palette
-                        onColorClick={handleColorSelect}
-                        colors={colors}
-                        selectedColor={selectedColor}
-                        isActive={time <= 0}
-                    />
+                    <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} isActive={time <= 0} />
                 )}
-                <Timer
-                    time={time}
-                    setTime={setTime}
-                />
+                <Timer time={time} setTime={setTime} />
             </div>
 
             <div className={styles.navbarContainer}>
                 <LeaderboardComponent />
                 <ModalReward />
                 {!isConnected && <LoginComponent />}
-                <ChatComponent
-                    active={isConnected}
-                    userEmail={email ?? "N/A"}
-                />
+                <ChatComponent active={isConnected} userEmail={email ?? "N/A"} />
 
                 {/* Profile button */}
                 {isConnected && displayComponent !== "chat" && (
-                    <button
-                        onClick={() => handleDisplayComponent("profil")}
-                        className={styles.btnProfil}
-                    >
-                        <img
-                            src='/src/assets/user-large.svg'
-                            alt='icone-user-profil'
-                        />
+                    <button onClick={() => handleDisplayComponent("profil")} className={styles.btnProfil}>
+                        <img src={iconUserLarge} alt="icone-user-profil" />
                     </button>
                 )}
             </div>
 
-            {displayComponent === "profil" && (
-                <ProfilComponent
-                    userEmail={email}
-                    onHideProfil={() => handleDisplayComponent("none")}
-                />
-            )}
+            {displayComponent === "profil" && <ProfilComponent userEmail={email} onHideProfil={() => handleDisplayComponent("none")} />}
 
             <AssoModal />
         </>

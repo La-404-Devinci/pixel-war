@@ -1,4 +1,5 @@
 import express from "express";
+import { array } from "french-badwords-list";
 import http from "http";
 import { Socket } from "socket.io";
 import dotenv from "dotenv";
@@ -16,6 +17,9 @@ import DemoController from "./controllers/Demo";
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Init database
+CanvasController.init();
 
 // Create Express app
 const app = express();
@@ -93,6 +97,7 @@ app.post("/auth/send-magic-link", AccountController.sendMagicLink);
 app.get("/auth/login", AccountController.login);
 app.get("/canvas/image", CanvasController.getCanvasImage);
 app.get("/canvas/palette", CanvasController.getCanvasPalette);
+app.get("/canvas/history", CanvasController.getPixelHistory);
 
 // Asso routes
 if (process.env.DEMO !== "true") {
@@ -107,7 +112,6 @@ app.get("/messages", ChatController.getMessages);
 // Admin routes
 const router = express.Router();
 
-router.use(verifyUser);
 router.use(verifyAdmin);
 
 router.post("auth/ban", AccountController.banUser);

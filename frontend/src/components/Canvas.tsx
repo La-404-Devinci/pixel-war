@@ -3,6 +3,7 @@ import styles from "../styles/canvas.module.css";
 import { socket } from "../socket";
 import API from "../utils/api";
 import isMobile from "../utils/isMobile";
+import Tooltip, { TooltipSettings } from "./Tooltip";
 import { usePinch } from "@use-gesture/react";
 
 interface CanvasProps {
@@ -12,17 +13,14 @@ interface CanvasProps {
     palette: string[];
 }
 
-const Canvas = ({
-    actualColor,
-    readOnly,
-    onPlacePixel,
-    palette,
-}: CanvasProps) => {
+const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) => {
     const pixelSize = 20;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const cursorRef = useRef<HTMLDivElement>(null);
+
+    const [tooltip, setTooltip] = useState<TooltipSettings | null>(null);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -88,6 +86,7 @@ const Canvas = ({
             //         event.touches[0].clientY - event.touches[1].clientY,
             //     );
             //     if (pinch === true) pinch = distance;
+
             //     const delta = distance - pinch;
             //     pinch = distance;
 
@@ -128,8 +127,7 @@ const Canvas = ({
         };
 
         const handleMouseUp = (event: MouseEvent) => {
-            if (event.button !== 0) return;
-            handleUp();
+            if (event.button === 0) handleUp(event.target !== canvasRef.current && event.target !== cursorRef.current);
         };
 
         const handleTouchUp = (event: TouchEvent) => {
@@ -139,28 +137,26 @@ const Canvas = ({
             //     return;
             // }
 
-            handleUp();
+            if (event.touches.length !== 0) return;
+            handleUp(event.target !== canvasRef.current && event.target !== cursorRef.current);
         };
 
-        const handleUp = () => {
+        const handleUp = (isObstrued: boolean) => {
+            if (lastX === 0 && lastY === 0) return;
+
             // consider drag if the user moved more than 7 pixels
-            const drag =
-                Math.abs(startDragX - lastX) > 7 ||
-                Math.abs(startDragY - lastY) > 7;
+            const drag = Math.abs(startDragX - lastX) > 7 || Math.abs(startDragY - lastY) > 7;
 
             startDragX = 0;
             startDragY = 0;
 
-            if (!drag && !readOnly) {
+            if (!drag && !readOnly && !isObstrued) {
                 const [pixelX, pixelY] = getCursorPosition(lastX, lastY);
                 const cursor = cursorRef.current;
 
                 if (cursor) {
                     // Place pixel if the cursor is at the same position
-                    if (
-                        cursor.style.left === pixelX * pixelSize + "px" &&
-                        cursor.style.top === pixelY * pixelSize + "px"
-                    ) {
+                    if (cursor.style.left === pixelX * pixelSize + "px" && cursor.style.top === pixelY * pixelSize + "px") {
                         onPlacePixel(pixelX, pixelY);
                         return;
                     }
@@ -182,6 +178,33 @@ const Canvas = ({
             container.style.transform = `scale(${zoom})`;
         };
 
+        const handleSpecial = (event: MouseEvent) => {
+            event.preventDefault();
+
+            const [x, y] = [event.clientX, event.clientY];
+            const [pixelX, pixelY] = getCursorPosition(x, y);
+
+            // TODO: Fetch pixel history from server and display it in a tooltip
+
+            API.GET(`/canvas/history?x=${pixelX}&y=${pixelY}`).then((res) => {
+                if (res.length === 0) return;
+                console.log(res);
+                setTooltip({
+                    title: `History (${res.x}, ${res.y})`,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    value: res.history.map((item: any) => {
+                        return {
+                            name: item.devinciEmail.split("@")[0],
+                            time: new Date(item.time * 1).toLocaleString("fr-FR").slice(0, -3), // DD/MM HH:MM:SS
+                            color: `rgb(${item.action.color.join(",")})`,
+                        };
+                    }),
+                    x: x,
+                    y: y,
+                });
+            });
+        };
+
         // Desktop events
         if (!isMobile.any()) {
             window.addEventListener("mouseup", handleMouseUp);
@@ -196,12 +219,11 @@ const Canvas = ({
             window.addEventListener("touchstart", handleTouchStart);
         }
 
+        window.addEventListener("contextmenu", handleSpecial);
         window.addEventListener("wheel", handleWheel);
 
         return () => {
             // Desktop events
-            window.removeEventListener("wheel", handleWheel);
-
             window.removeEventListener("mouseup", handleMouseUp);
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mousedown", handleMouseDown);
@@ -210,6 +232,9 @@ const Canvas = ({
             window.removeEventListener("touchend", handleTouchUp);
             window.removeEventListener("touchmove", handleTouchMove);
             window.removeEventListener("touchstart", handleTouchStart);
+
+            window.removeEventListener("wheel", handleWheel);
+            window.removeEventListener("contextmenu", handleSpecial);
         };
     }, [onPlacePixel, readOnly]);
 
@@ -239,37 +264,25 @@ const Canvas = ({
             }
 
             // Get zoom
-            const minScreenSize = Math.min(
-                window.innerWidth,
-                window.innerHeight
-            );
-            const maxCanvasSize = Math.max(
-                width * pixelSize,
-                height * pixelSize
-            );
+            const minScreenSize = Math.min(window.innerWidth, window.innerHeight);
+            const maxCanvasSize = Math.max(width * pixelSize, height * pixelSize);
             const newZoom = minScreenSize / maxCanvasSize;
-            setZoom(newZoom * 0.9);
+            containerRef.current!.style.transform = `scale(${newZoom * 0.9})`;
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            ctx.imageSmoothingEnabled = false;
 
             for (let x = 0; x < width; x++) {
                 for (let y = 0; y < height; y++) {
-                    const colorR = res.pixels[y * 1024 + x];
-                    const colorG = res.pixels[y * 1024 + x + 1];
-                    const colorB = res.pixels[y * 1024 + x + 2];
-
-                    const canvas = canvasRef.current;
-                    if (!canvas) return;
-
-                    const ctx = canvas.getContext("2d");
-                    if (!ctx) return;
+                    const colorR = res.pixels.data[(y * 1024 + x) * 3];
+                    const colorG = res.pixels.data[(y * 1024 + x) * 3 + 1];
+                    const colorB = res.pixels.data[(y * 1024 + x) * 3 + 2];
 
                     ctx.beginPath();
                     ctx.fillStyle = `rgb(${colorR},${colorG},${colorB})`;
-                    ctx.fillRect(
-                        x * pixelSize,
-                        y * pixelSize,
-                        pixelSize,
-                        pixelSize
-                    );
+                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
                 }
             }
         });
@@ -284,24 +297,21 @@ const Canvas = ({
     }, [actualColor, palette]);
 
     useEffect(() => {
-        socket.on(
-            "canvas-pixel-update",
-            (x: number, y: number, color: number[]) => {
-                const canvas = canvasRef.current;
-                if (!canvas) return;
+        socket.on("canvas-pixel-update", (x: number, y: number, color: number[]) => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
 
-                const ctx = canvas.getContext("2d");
-                if (!ctx) return;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
 
-                ctx.beginPath();
-                ctx.fillStyle = "rgb(" + color.join(",") + ")";
+            ctx.beginPath();
+            ctx.fillStyle = "rgb(" + color.join(",") + ")";
 
-                const xCoord = x * pixelSize;
-                const yCoord = y * pixelSize;
+            const xCoord = x * pixelSize;
+            const yCoord = y * pixelSize;
 
-                ctx.fillRect(xCoord, yCoord, pixelSize, pixelSize);
-            }
-        );
+            ctx.fillRect(xCoord, yCoord, pixelSize, pixelSize);
+        });
 
         return () => {
             socket.off("canvas-pixel-update");
@@ -310,34 +320,23 @@ const Canvas = ({
 
     //TODO: zoom to center of pinch
     usePinch(
-        ({offset: [d] }) => {
+        ({ offset: [d] }) => {
             containerRef.current!.style.transform = `scale(${d})`;
         },
         {
             target: containerRef,
             eventOptions: { passive: false },
-        }
+        },
     );
 
     return (
-        <div
-            className={styles.canvas}
-            ref={containerRef}
-        >
-            {!readOnly && (
-                <div
-                    ref={cursorRef}
-                    className={styles.cursor}
-                    style={{ width: pixelSize, height: pixelSize }}
-                ></div>
-            )}
-            <canvas
-                ref={canvasRef}
-                className={styles.game}
-                width={500}
-                height={500}
-            ></canvas>
-        </div>
+        <>
+            {tooltip && <Tooltip data={tooltip} setData={setTooltip} />}
+            <div className={styles.canvas} ref={containerRef}>
+                {!readOnly && <div ref={cursorRef} className={styles.cursor} style={{ width: pixelSize, height: pixelSize }}></div>}
+                <canvas ref={canvasRef} className={styles.game} width={500} height={500}></canvas>
+            </div>
+        </>
     );
 };
 
