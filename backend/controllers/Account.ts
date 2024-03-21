@@ -23,7 +23,7 @@ class AccountController {
     public static async sendMagicLink(req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
             const { email } = req.body;
-            const expression: RegExp = /^[a-zA-Z0-9._-]+@edu\.devinci\.fr$/;
+            const expression: RegExp = /^[a-zA-Z0-9._-]+@(edu\.)?devinci\.fr$/;
 
             if (!expression.test(email)) {
                 return res.status(400).send("Email non valide");
