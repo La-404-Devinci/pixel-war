@@ -4,6 +4,7 @@ import { socket } from "../socket";
 import API from "../utils/api";
 import isMobile from "../utils/isMobile";
 import Tooltip, { TooltipSettings } from "./Tooltip";
+import { usePinch } from "@use-gesture/react";
 
 interface CanvasProps {
     actualColor: number;
@@ -18,7 +19,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const cursorRef = useRef<HTMLDivElement>(null);
-    const [zoom, setZoom] = useState(1);
+
     const [tooltip, setTooltip] = useState<TooltipSettings | null>(null);
 
     useEffect(() => {
@@ -26,13 +27,14 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         const canvas = canvasRef.current;
         if (!container || !canvas) return;
 
-        let pinch: boolean | number = false;
+        // let pinch: boolean | number = false;
         let canvasX = 0;
         let canvasY = 0;
         let lastX = 0;
         let lastY = 0;
         let startDragX = 0;
         let startDragY = 0;
+        let zoom = 1;
 
         const getCursorPosition = (x: number, y: number) => {
             const canvas = canvasRef.current;
@@ -56,11 +58,11 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleTouchStart = (event: TouchEvent) => {
-            if (event.touches.length > 1) {
-                event.preventDefault();
-                pinch = true;
-                return;
-            }
+            // if (event.touches.length > 1) {
+            //     event.preventDefault();
+            //     pinch = true;
+            //     return;
+            // }
 
             handleDown(event.touches[0].clientX, event.touches[0].clientY);
         };
@@ -77,22 +79,22 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleTouchMove = (event: TouchEvent) => {
-            if (pinch) {
-                event.preventDefault();
-                const distance = Math.hypot(
-                    event.touches[0].clientX - event.touches[1].clientX,
-                    event.touches[0].clientY - event.touches[1].clientY,
-                );
+            // if (pinch) {
+            //     event.preventDefault();
+            //     const distance = Math.hypot(
+            //         event.touches[0].clientX - event.touches[1].clientX,
+            //         event.touches[0].clientY - event.touches[1].clientY,
+            //     );
+            //     if (pinch === true) pinch = distance;
 
-                if (pinch === true) pinch = distance;
-                const delta = distance - pinch;
-                pinch = distance;
+            //     const delta = distance - pinch;
+            //     pinch = distance;
 
-                const newZoom = zoom - delta * 0.01;
-                setZoom(Math.max(0.1, newZoom));
+            //     const newZoom = zoom - delta * 0.01;
+            //     setZoom(Math.max(0.1, newZoom));
 
-                return;
-            }
+            //     return;
+            // }
 
             handleMove(event.touches[0].clientX, event.touches[0].clientY);
         };
@@ -129,11 +131,11 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleTouchUp = (event: TouchEvent) => {
-            if (pinch) {
-                event.preventDefault();
-                pinch = false;
-                return;
-            }
+            // if (pinch) {
+            //     event.preventDefault();
+            //     pinch = false;
+            //     return;
+            // }
 
             if (event.touches.length !== 0) return;
             handleUp(event.target !== canvasRef.current && event.target !== cursorRef.current);
@@ -170,9 +172,10 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             // Multiplicateur de zoom arbitraire
             const zoomFactor = 0.1;
             // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
-            const newZoom = event.deltaY > 0 ? zoom - zoomFactor : zoom + zoomFactor;
-            // Limiter le zoom à un minimum de 0.1 pour éviter les valeurs non valides
-            setZoom(Math.max(0.1, newZoom));
+            zoom = event.deltaY > 0 ? zoom + zoomFactor : zoom - zoomFactor;
+
+            if (zoom < 0.1) zoom = 0.1;
+            container.style.transform = `scale(${zoom})`;
         };
 
         const handleSpecial = (event: MouseEvent) => {
@@ -233,7 +236,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             window.removeEventListener("wheel", handleWheel);
             window.removeEventListener("contextmenu", handleSpecial);
         };
-    }, [zoom, onPlacePixel, readOnly]);
+    }, [onPlacePixel, readOnly]);
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -264,7 +267,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             const minScreenSize = Math.min(window.innerWidth, window.innerHeight);
             const maxCanvasSize = Math.max(width * pixelSize, height * pixelSize);
             const newZoom = minScreenSize / maxCanvasSize;
-            setZoom(newZoom * 0.9);
+            containerRef.current!.style.transform = `scale(${newZoom * 0.9})`;
 
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
@@ -315,10 +318,21 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
     }, [palette, pixelSize]);
 
+    //TODO: zoom to center of pinch
+    usePinch(
+        ({ offset: [d] }) => {
+            containerRef.current!.style.transform = `scale(${d})`;
+        },
+        {
+            target: containerRef,
+            eventOptions: { passive: false },
+        },
+    );
+
     return (
         <>
             {tooltip && <Tooltip data={tooltip} setData={setTooltip} />}
-            <div className={styles.canvas} style={{ transform: `scale(${zoom})` }} ref={containerRef}>
+            <div className={styles.canvas} ref={containerRef}>
                 {!readOnly && <div ref={cursorRef} className={styles.cursor} style={{ width: pixelSize, height: pixelSize }}></div>}
                 <canvas ref={canvasRef} className={styles.game} width={500} height={500}></canvas>
             </div>

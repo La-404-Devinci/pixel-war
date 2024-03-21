@@ -114,7 +114,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
     return (
         <>
             {isMobileView && (
-                <button onClick={toggleChat} className={chatStylesMobile.btnChat}>
+                <button onClick={toggleChat} className={chatStyles.btnChat + " " + (displayChat ? chatStyles.active : "")}>
                     <img src={iconMessage} alt="icone-chat" />
                 </button>
             )}
