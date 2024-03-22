@@ -35,7 +35,7 @@ const data = [
         value: "esn-devinci",
     },
     {
-        image: "https://www.forum-associatif-numerique.fr/uploads/leoandco/logos/4104fb90-61191add21f8f.png",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR4Xa4NuzHl05RP3hAVyWZelme-c7OkS2xzsEhCYuzHg&s",
         label: "Léo&Co",
         value: "leoandco",
     },
@@ -121,8 +121,13 @@ const data = [
     },
     {
         image: "https://www.forum-associatif-numerique.fr/uploads/tedxpulv/logos/TEDXPLV2022-110-1200x700-631a2cf0badbc.jpg",
-        label: "TEDxPLV",
-        value: "tedxpulv",
+        label: "TEDxPLV (Talks)",
+        value: "tedxpulv-talks",
+    },
+    {
+        image: "https://www.forum-associatif-numerique.fr/uploads/slide-session/logos/LOGO-COULEUR-Lisa-Kintrup-612be533bc5e3.png",
+        label: "Slide Session",
+        value: "slide-session",
     },
     {
         image: "https://www.forum-associatif-numerique.fr/uploads/devinci-lumiere/logos/logo-64f1aa23e9ccb.png",
@@ -283,6 +288,16 @@ const data = [
         image: "https://www.forum-associatif-numerique.fr/uploads/leo-tactical/logos/Logo-LT-631250e1d6047.png",
         label: "Leo Tactical",
         value: "leo-tactical",
+    },
+    {
+        image: "https://boulanger.scene7.com/is/image/Boulanger/4242005327720_h_f_l_0?wid=500&hei=500",
+        label: "Refregirateur",
+        value: "frigo",
+    },
+    {
+        image: "https://pbs.twimg.com/media/FTBCQeJVUAA3zkl.jpg",
+        label: "L.A.B.",
+        value: "lab",
     },
 ];
 

@@ -8,8 +8,6 @@ interface TimerComponentProps {
 const Timer: React.FC<TimerComponentProps> = ({ time }) => {
     const [now, setNow] = useState(new Date().getTime() / 1000);
 
-    console.log(time, now);
-
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
         const seconds = Math.round(time % 60);
