@@ -19,11 +19,11 @@ export default function AssoModal() {
 
     useEffect(() => {
         API.GET("/asso")
-            .then((res) => {
-                if (!res) {
+            .then((myRes) => {
+                if (!myRes.association) {
                     API.GET("/assos")
-                        .then((res) => {
-                            setOptions(res);
+                        .then((dataRes) => {
+                            setOptions(dataRes);
                         })
                         .catch((err) => {
                             console.error(err);

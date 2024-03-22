@@ -246,7 +246,9 @@ class AccountController {
      */
     public static async getAssociation(req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
-            res.status(200).send(req.account.association);
+            res.status(200).json({
+                association: req.account.association,
+            });
         } catch (error) {
             next(error);
         }
