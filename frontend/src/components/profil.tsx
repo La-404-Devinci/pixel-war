@@ -13,6 +13,7 @@ interface ProfilComponentProps {
 const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymous", onHideProfil }) => {
     const [posedPixel, setPosedPixel] = useState(0);
     const [messageSent, setMessageSent] = useState(0);
+    const [association, setAssociation] = useState(null);
     const [sinceLastPixel, setSinceLastPixel] = useState("N/A");
     const [pixelByHour, setPixelByHour] = useState("N/A");
 
@@ -20,6 +21,7 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
         socket.on("user-data-update", (data) => {
             setMessageSent(data.messagesSent);
             setPosedPixel(data.placedPixels);
+            setAssociation(data.association);
 
             if (data.lastPixelTime) {
                 const placementDelta = (Date.now() - Date.parse(data.lastPixelTime as string)) / 1000; // seconds
@@ -76,6 +78,9 @@ const ProfilComponent: React.FC<ProfilComponentProps> = ({ userEmail = "Anonymou
 
                 <p>{pixelByHour}</p>
                 <p>Pixes par heure (en moyenne)</p>
+
+                <p>{association ?? "Non affilié"}</p>
+                <p>Votre association</p>
             </div>
             <button className={styles.btnLogOut} onClick={handleLogout}>
                 Déconnexion
