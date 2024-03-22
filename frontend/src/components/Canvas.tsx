@@ -157,7 +157,6 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
 
             API.GET(`/canvas/history?x=${pixelX}&y=${pixelY}`).then((res) => {
                 if (res.length === 0) return;
-                console.log(res);
                 setTooltip({
                     title: `History (${res.x}, ${res.y})`,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any

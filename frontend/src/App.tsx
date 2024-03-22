@@ -44,7 +44,6 @@ function App() {
     // Socket events
     useEffect(() => {
         socket.on("connect", () => {
-            console.log("Connected to server");
             // Authentification
             if (!token || !email) {
                 console.error("Missing token or email");
@@ -55,10 +54,6 @@ function App() {
             socket.emit("auth", token, email);
             socket.emit("get-classement");
             socket.emit("get-stats");
-        });
-
-        socket.on("disconnect", () => {
-            console.log("Disconnected from server");
         });
 
         socket.on("auth-callback", (success: boolean) => {
