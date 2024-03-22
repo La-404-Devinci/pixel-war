@@ -99,6 +99,13 @@ class WSS {
     static async updatePixelPlacementCooldown(time: number) {
         this.io.emit("pixel-placement-cooldown-update", time);
     }
+
+    /**
+     * Sends an 'force-refresh' event to all connected clients.
+     */
+    static async forceRefresh() {
+        this.io.emit("force-refresh");
+    }
 }
 
 export default WSS;

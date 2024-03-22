@@ -215,9 +215,10 @@ class CanvasController {
             });
 
             CanvasController._canvas.changes = 0;
-            CanvasController._canvas.pixels.fill(0);
+            CanvasController._canvas.pixels.fill(255);
 
             WSS.resetCanvas();
+            WSS.forceRefresh();
 
             res.status(200).send("Canvas reset");
         } catch (error) {
@@ -261,6 +262,7 @@ class CanvasController {
             });
 
             WSS.updateCanvasSize(width, height);
+            WSS.forceRefresh();
 
             res.status(200).send("Canvas size changed");
         } catch (error) {

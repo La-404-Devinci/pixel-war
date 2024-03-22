@@ -69,6 +69,10 @@ function App() {
             }
         });
 
+        socket.on("force-refresh", () => {
+            window.location.reload();
+        });
+
         socket.on("canvas-palette-update", setColorsFromAPI);
 
         const statsInterval = setInterval(() => {
