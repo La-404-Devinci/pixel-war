@@ -84,3 +84,14 @@ span {
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+.notifcation{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #ff0000;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translate(50%, -50%);
+}
