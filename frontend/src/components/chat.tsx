@@ -18,10 +18,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
     const [chat, setChat] = useState<[string, string][] | undefined>(undefined);
     const [message, setMessage] = useState<string>("");
     const [isMobileView, setIsMobileView] = useState(isMobile.any());
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const [lastMessageTimes, setLastMessageTimes] = useState<number[]>([]);
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
-    const [displayChat, setDisplayChat] = useState(false);
+    const [displayChat, setDisplayChat] = useState<boolean>(false);
+    const [notification, setNotification] = useState<boolean>(false);
 
     const addMessage = useCallback(
         (email: string, message: string) => {
@@ -80,6 +81,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
 
     const toggleChat = () => {
         setDisplayChat(!displayChat);
+        setNotification(false);
     };
 
     useEffect(() => {
@@ -90,6 +92,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
         // Listen for messages from websocket
         socket.on("message", (email: string, message: string) => {
             addMessage(email, message);
+            if (isExpanded) return;
+            setNotification(true);
         });
 
         // Handle window resize
@@ -103,7 +107,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
             window.removeEventListener("resize", handleResize);
             socket.off("message");
         };
-    }, [addMessage]);
+    }, [addMessage, isExpanded]);
 
     useEffect(() => {
         !isMobileView && setDisplayChat(true);
@@ -113,11 +117,14 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
 
     return (
         <>
+        <div>
             {isMobileView && (
                 <button onClick={toggleChat} className={chatStyles.btnChat + " " + (displayChat ? chatStyles.active : "")}>
                     <img src={iconMessage} alt="icone-chat" />
                 </button>
             )}
+            {notification && isMobileView && <div className={chatStyles.notification}></div>}
+        </div>
 
             {displayChat && (
                 <div className={chatStyles.chat}>
@@ -148,6 +155,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
                                 <img src={iconChevronDown} alt="chevron-down" />
                             </button>
                         )}
+                        {notification && <div className={chatStyles.notification}></div>}
                     </div>
                 </div>
             )}
