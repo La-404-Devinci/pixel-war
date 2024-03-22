@@ -234,8 +234,8 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
             // Get zoom
             const minScreenSize = Math.min(window.innerWidth, window.innerHeight);
             const maxCanvasSize = Math.max(width * pixelSize, height * pixelSize);
-            zoom.current = minScreenSize / maxCanvasSize;
-            containerRef.current!.style.transform = `scale(${zoom.current * 0.9})`;
+            zoom.current = (minScreenSize / maxCanvasSize) * 0.9;
+            containerRef.current!.style.transform = `scale(${zoom.current})`;
 
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
