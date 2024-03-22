@@ -18,6 +18,8 @@ export default function AssoModal() {
     const [options, setOptions] = useState<Option[]>([]);
 
     useEffect(() => {
+        if (localStorage.getItem("dontShowAssoModal")) return;
+
         API.GET("/asso")
             .then((myRes) => {
                 if (!myRes.association) {
@@ -44,6 +46,7 @@ export default function AssoModal() {
             .then(() => {
                 setSelectedAsso(null);
                 setOptions([]);
+                localStorage.setItem("dontShowAssoModal", "true");
             })
             .catch((err) => {
                 console.error(err);
