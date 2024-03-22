@@ -288,7 +288,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
 
     usePinch(
         ({ offset: [d] }) => {
-            zoom.current += d;
+            zoom.current = d;
             if (zoom.current < 0.1) zoom.current = 0.1;
             containerRef.current!.style.transform = `scale(${zoom.current})`;
         },
