@@ -115,14 +115,14 @@ const router = express.Router();
 
 router.use(verifyAdmin);
 
-router.post("auth/ban", AccountController.banUser);
-router.post("auth/mute", AccountController.muteUser);
-router.post("canvas/reset", CanvasController.resetCanvas);
-router.post("canvas/size", CanvasController.changeCanvasSize);
-router.post("canvas/countdown", CanvasController.changePixelPlacementCooldown);
-router.post("canvas/palette", CanvasController.editCanvasColorPalette);
+router.post("/auth/ban", AccountController.banUser);
+router.post("/auth/mute", AccountController.muteUser);
+router.post("/canvas/reset", CanvasController.resetCanvas);
+router.post("/canvas/size", CanvasController.changeCanvasSize);
+router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
+router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
 
-app.use("/a/", router);
+app.use("/a", router);
 
 // Goofy routes
 app.get("/admin", GoofyController.getAdminPage);

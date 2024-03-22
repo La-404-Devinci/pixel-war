@@ -45,12 +45,12 @@ class AccountController {
             const message = {
                 from: process.env.EMAIL_FROM,
                 to: email,
-                subject: "Lien pour se connecter",
+                subject: "PIXELWAR - Rejoins-nous !",
                 html: `Clique pour te connecter: <a href="${link}">${link}</a>`,
             };
 
             await transporter.sendMail(message);
-            res.status(200).send("Lien envoyé. Regardez vos mails.");
+            res.status(200).send({ moyai: "🗿" });
         } catch (error) {
             next(error);
         }
