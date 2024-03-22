@@ -345,7 +345,7 @@ class CanvasController {
             });
 
             WSS.updateColorPalette(colors);
-            this._palette = colors as [number, number, number][];
+            this._palette = colors;
 
             res.status(200).send("Palette updated");
         } catch (error) {
