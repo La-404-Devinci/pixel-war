@@ -11,21 +11,15 @@ class CanvasController {
     private static _canvas: Canvas = {
         pixels: Buffer.alloc(1024 * 1024 * 3), // 3 bytes per pixel (RGB)
         changes: 0,
-        width: 16, // Soft-width limit
-        height: 16, // Soft-height limit
-        cooldown: 5, // Pixel placement cooldown in seconds
+        width: 50, // Soft-width limit
+        height: 50, // Soft-height limit
+        cooldown: 120, // Pixel placement cooldown in seconds
     };
 
     private static _palette: [number, number, number][] = [
         [255, 255, 255], // #FFFFFF
-        [192, 192, 192], // #C0C0C0
-        [0, 0, 0], // #000000
-        [255, 0, 0], // #FF0000
-        [0, 255, 0], // #00FF00
-        [0, 0, 255], // #0000FF
-        [255, 255, 0], // #FFFF00
-        [0, 255, 255], // #00FFFF
-        [255, 0, 255], // #FF00FF
+        [255, 255, 255], // #FFFFFF
+        [255, 255, 255], // #FFFFFF
     ];
 
     public static init() {
