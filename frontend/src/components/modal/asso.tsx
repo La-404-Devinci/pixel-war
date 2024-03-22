@@ -20,9 +20,7 @@ export default function AssoModal() {
     useEffect(() => {
         API.GET("/asso")
             .then((res) => {
-                if (res) {
-                    setSelectedAsso(res);
-
+                if (!res) {
                     API.GET("/assos")
                         .then((res) => {
                             setOptions(res);

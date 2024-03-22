@@ -1,5 +1,5 @@
 import express from "express";
-import assos from "../database/assos.json";
+import assos from "../database/assos";
 
 class AssosController {
     /**
