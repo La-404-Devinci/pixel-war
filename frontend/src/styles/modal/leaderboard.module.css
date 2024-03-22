@@ -44,9 +44,10 @@
     -webkit-backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
 }
-
 
 @media screen and (max-width: 768px) {
     .leaderboard {
@@ -65,7 +66,7 @@
     position: relative;
 }
 
-.active{
+.active {
     z-index: 2;
 }
 
