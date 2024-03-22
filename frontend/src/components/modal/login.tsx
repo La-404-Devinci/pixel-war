@@ -32,7 +32,7 @@ const LoginComponent = () => {
         } else {
             API.POST("/auth/send-magic-link", { email })
                 .then(() => {
-                    setMessage("Email envoyé. Regardez vos mails.");
+                    setMessage("Un lien de connexion a été envoyé à votre email! N'oubliez pas de vérifier vos spams.");
                     setIsEmailValid(true);
                 })
                 .catch(() => {
