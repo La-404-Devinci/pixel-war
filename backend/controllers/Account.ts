@@ -203,7 +203,10 @@ class AccountController {
         try {
             const { association } = req.body;
 
-            if (!association) return res.status(400).send("Association is required");
+            if (!association)
+                return res.status(400).json({
+                    message: "Association is required",
+                });
 
             try {
                 await prisma.account.update({
@@ -227,9 +230,13 @@ class AccountController {
                     },
                 });
 
-                res.status(200).send("Association updated");
+                res.status(200).json({
+                    message: "Association updated",
+                });
             } catch (error) {
-                res.status(500).send("Unable to connect to the database");
+                res.status(500).json({
+                    message: "Unable to connect to the database",
+                });
             }
         } catch (error) {
             next(error);
