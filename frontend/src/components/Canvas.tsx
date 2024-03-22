@@ -58,6 +58,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleTouchStart = (event: TouchEvent) => {
+            event.preventDefault();
             handleDown(event.touches[0].clientX, event.touches[0].clientY);
         };
 
