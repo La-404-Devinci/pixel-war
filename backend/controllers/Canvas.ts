@@ -163,7 +163,9 @@ class CanvasController {
 
             const history = await prisma.$queryRawUnsafe(
                 `SELECT * FROM LogEntry
-                WHERE action LIKE '%"type":"pixel_placement","x":${x},"y":${y}%'
+                WHERE action LIKE '%"type":"pixel_placement"%'
+                AND action LIKE '%"x":${x}%'
+                AND action LIKE '%"y":${y}%'
                 ORDER BY "time" DESC
                 LIMIT 5`,
             );
