@@ -215,9 +215,10 @@ class CanvasController {
             });
 
             CanvasController._canvas.changes = 0;
-            CanvasController._canvas.pixels.fill(0);
+            CanvasController._canvas.pixels.fill(255);
 
             WSS.resetCanvas();
+            WSS.forceRefresh();
 
             res.status(200).send("Canvas reset");
         } catch (error) {
@@ -261,6 +262,7 @@ class CanvasController {
             });
 
             WSS.updateCanvasSize(width, height);
+            WSS.forceRefresh();
 
             res.status(200).send("Canvas size changed");
         } catch (error) {
@@ -330,12 +332,6 @@ class CanvasController {
                 });
             });
 
-            const newPalette: number[][] = [];
-
-            for (const color of colors) {
-                newPalette.push(color);
-            }
-
             await prisma.logEntry.create({
                 data: {
                     devinciEmail: "null",
@@ -343,12 +339,13 @@ class CanvasController {
                     ip: req.ip || "Unknown",
                     action: {
                         type: "update_palette",
-                        palette: newPalette,
+                        palette: colors,
                     },
                 },
             });
 
-            WSS.updateColorPalette(newPalette);
+            WSS.updateColorPalette(colors);
+            this._palette = colors as [number, number, number][];
 
             res.status(200).send("Palette updated");
         } catch (error) {
