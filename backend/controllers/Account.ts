@@ -46,7 +46,11 @@ class AccountController {
                 from: process.env.EMAIL_FROM,
                 to: email,
                 subject: "PIXELWAR - Rejoins-nous !",
-                html: `Clique pour te connecter: <a href="${link}">${link}</a>`,
+                html: `
+                <h1>PIXELWAR</h1>
+                <p>Bienvenue sur la PIXEL//WAR !</p>
+                <p>Clique sur le lien ci-dessous pour te connecter :</p>
+                <a href="${link}">${link}</a>`,
             };
 
             await transporter.sendMail(message);
