@@ -330,12 +330,6 @@ class CanvasController {
                 });
             });
 
-            const newPalette: number[][] = [];
-
-            for (const color of colors) {
-                newPalette.push(color);
-            }
-
             await prisma.logEntry.create({
                 data: {
                     devinciEmail: "null",
@@ -343,12 +337,13 @@ class CanvasController {
                     ip: req.ip || "Unknown",
                     action: {
                         type: "update_palette",
-                        palette: newPalette,
+                        palette: colors,
                     },
                 },
             });
 
-            WSS.updateColorPalette(newPalette);
+            WSS.updateColorPalette(colors);
+            this._palette = colors as [number, number, number][];
 
             res.status(200).send("Palette updated");
         } catch (error) {
