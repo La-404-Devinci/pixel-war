@@ -138,7 +138,7 @@ function App() {
     const handlePlacePixel = (x: number, y: number) => {
         socket.emit("place-pixel", x, y, selectedColor, (expiresAt: number) => {
             const timer = Math.floor((expiresAt - new Date().getTime()) / 1000) + 1;
-            setTime(timer);
+            setTime(new Date().getTime() / 1000 + timer);
         });
     };
 
@@ -149,7 +149,7 @@ function App() {
                 {isConnected && (
                     <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} isActive={time <= 0} />
                 )}
-                <Timer time={time} setTime={setTime} />
+                <Timer time={time} />
             </div>
 
             <div className={styles.navbarContainer}>
