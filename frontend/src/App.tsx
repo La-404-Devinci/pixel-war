@@ -44,6 +44,8 @@ function App() {
     // Socket events
     useEffect(() => {
         socket.on("connect", () => {
+            socket.emit("get-classement");
+
             // Authentification
             if (!token || !email) {
                 console.error("Missing token or email");
@@ -52,7 +54,6 @@ function App() {
             }
 
             socket.emit("auth", token, email);
-            socket.emit("get-classement");
             socket.emit("get-stats");
         });
 
