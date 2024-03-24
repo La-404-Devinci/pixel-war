@@ -1,20 +1,29 @@
 import PaletteColor from "./PaletteColor";
 import styles from "../styles/palette.module.css";
+import { useEffect, useState } from "react";
 
 export default function Palette({
     onColorClick,
     colors = [],
     selectedColor,
-    isActive,
+    time,
 }: {
     onColorClick(color: number): unknown;
     colors?: string[];
     selectedColor: number;
-    isActive: boolean;
+    time: number;
 }) {
-    // useState (array of colors | null)
+    const [now, setNow] = useState(new Date().getTime() / 1000);
 
-    // useEffect (fetch colors from backend)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setNow(new Date().getTime() / 1000);
+        }, 1000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
 
     function handleRenderColors() {
         // conditional rendering (if colors === null, return loading)
@@ -34,8 +43,8 @@ export default function Palette({
         <div
             className={styles.colorPalette}
             style={{
-                opacity: isActive ? 1 : 0.7,
-                pointerEvents: isActive ? "auto" : "none",
+                opacity: time <= now ? 1 : 0.7,
+                pointerEvents: time <= now ? "auto" : "none",
             }}
         >
             {handleRenderColors()}

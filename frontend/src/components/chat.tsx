@@ -48,6 +48,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
             res.map((message: [string, string]) => {
                 addMessage(message[0], message[1]);
             });
+            setNotification(true);
         });
     }, [chat, addMessage]);
 
@@ -76,12 +77,13 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
     };
 
     const toggleShow = () => {
+        setNotification(false);
         setIsExpanded(!isExpanded);
     };
 
     const toggleChat = () => {
-        setDisplayChat(!displayChat);
         setNotification(false);
+        setDisplayChat(!displayChat);
     };
 
     useEffect(() => {
@@ -92,8 +94,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
         // Listen for messages from websocket
         socket.on("message", (email: string, message: string) => {
             addMessage(email, message);
-            if (isExpanded) return;
-            setNotification(true);
+            setNotification(!isExpanded);
         });
 
         // Handle window resize
@@ -114,8 +115,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
     }, [isMobileView]);
 
     const chatStyles = isMobileView ? chatStylesMobile : chatStylesDesktop;
-
-    console.log(notification);
 
     return (
         <>

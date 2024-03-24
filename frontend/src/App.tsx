@@ -146,9 +146,7 @@ function App() {
         <>
             <div className={styles.canvasContainer}>
                 <Canvas actualColor={selectedColor} readOnly={!isConnected} onPlacePixel={handlePlacePixel} palette={colors ?? []} />
-                {isConnected && (
-                    <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} isActive={time <= 0} />
-                )}
+                {isConnected && <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} time={time} />}
                 <Timer time={time} />
             </div>
 
