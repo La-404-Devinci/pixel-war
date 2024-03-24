@@ -37,6 +37,8 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         let startDragY = 0;
 
         const getCursorPosition = (x: number, y: number) => {
+            console.log(x, y);
+
             const canvas = canvasRef.current;
             if (!canvas) return [0, 0];
 
@@ -70,6 +72,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleMouseMove = (event: MouseEvent) => {
+            console.log(event);
             handleMove(event.clientX, event.clientY);
         };
 
@@ -176,6 +179,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
 
         // Desktop events
         if (!isMobile.any()) {
+            console.log("Desktop");
             window.addEventListener("mouseup", handleMouseUp);
             window.addEventListener("mousemove", handleMouseMove);
             window.addEventListener("mousedown", handleMouseDown);
@@ -183,6 +187,7 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
 
         // Mobile events
         else {
+            console.log("Mobile");
             window.addEventListener("touchend", handleTouchUp);
             window.addEventListener("touchmove", handleTouchMove);
             window.addEventListener("touchstart", handleTouchStart);

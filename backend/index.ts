@@ -160,10 +160,12 @@ server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-// Start backup probe (every 3 minutes)
+// Start backup probe
 setInterval(
     () => {
         CanvasController.backup();
     },
-    1000 * 60 * 3,
+    1000 * parseInt(process.env.BACKUP_INTERVAL || "180"),
 );
+
+console.log(`Backup probe started every ${process.env.BACKUP_INTERVAL || "180"} seconds`);

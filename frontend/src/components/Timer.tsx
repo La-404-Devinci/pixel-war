@@ -6,13 +6,13 @@ interface TimerComponentProps {
 }
 
 const Timer: React.FC<TimerComponentProps> = ({ time }) => {
-    const [now, setNow] = useState(new Date().getTime() / 1000);
-
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
         const seconds = Math.round(time % 60);
         return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
     };
+
+    const [now, setNow] = useState(new Date().getTime() / 1000);
 
     useEffect(() => {
         const interval = setInterval(() => {
