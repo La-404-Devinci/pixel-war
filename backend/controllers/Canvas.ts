@@ -1,6 +1,8 @@
 import type express from "express";
 import type SocketIO from "socket.io";
 import { PrismaClient } from "@prisma/client";
+import fs from "fs";
+import path from "path";
 
 import WSS from "../server/Websocket";
 import Canvas from "../models/Canvas";
@@ -22,9 +24,39 @@ class CanvasController {
         [255, 255, 255], // #FFFFFF
     ];
 
+    private static _lastPixelTimeCache: { [email: string]: Date } = {};
+
     public static init() {
         // Fill the canvas with white pixels
         CanvasController._canvas.pixels.fill(255);
+    }
+
+    public static restore() {
+        const backupFolder = process.env.BACKUP_FOLDER || "backups";
+        const files = fs.readdirSync(backupFolder);
+
+        const latestFile = files.reduce((prev, curr) => {
+            const prevStats = fs.statSync(path.join(backupFolder, prev));
+            const currStats = fs.statSync(path.join(backupFolder, curr));
+            return prevStats.mtimeMs > currStats.mtimeMs ? prev : curr;
+        });
+
+        const filePath = path.join(backupFolder, latestFile);
+        const fileData = fs.readFileSync(filePath);
+
+        console.log(`Restoring canvas from ${filePath} (modified ${new Date(fs.statSync(filePath).mtimeMs).toLocaleString()})`);
+
+        const canvasData = JSON.parse(fileData.toString());
+        CanvasController._canvas = canvasData.canvas;
+        CanvasController._palette = canvasData.palette;
+    }
+
+    public static backup() {
+        const backupFolder = process.env.BACKUP_FOLDER || "backups";
+        const backupPath = path.join(backupFolder, `${new Date().getTime()}.json`);
+
+        console.log(`Backing up canvas to ${backupPath}`);
+        fs.writeFileSync(backupPath, JSON.stringify({ canvas: CanvasController._canvas, palette: CanvasController._palette }));
     }
 
     /**
@@ -81,6 +113,19 @@ class CanvasController {
         if (!user) return callback(0);
         if (user.isBanned) return callback(0);
 
+        // Check from the cache if the user timer is elapsed
+        if (
+            CanvasController._lastPixelTimeCache[user.devinciEmail] &&
+            CanvasController._lastPixelTimeCache[user.devinciEmail].getTime() >
+                new Date().getTime() - CanvasController._canvas.cooldown * 1000
+        ) {
+            // Return the "expires at" time
+            return callback(CanvasController._lastPixelTimeCache[user.devinciEmail].getTime() + CanvasController._canvas.cooldown * 1000);
+        }
+
+        // Update the cache
+        CanvasController._lastPixelTimeCache[user.devinciEmail] = new Date();
+
         // Check if the user timer is elapsed
         if (
             user.lastPixelTime &&
@@ -104,7 +149,7 @@ class CanvasController {
             data: {
                 devinciEmail: user.devinciEmail,
                 time: new Date().getTime(),
-                ip: socket.handshake.address,
+                ip: socket.handshake.headers["x-forwarded-for"]?.toString() || socket.handshake.address,
                 action: {
                     type: "pixel_placement",
                     x,

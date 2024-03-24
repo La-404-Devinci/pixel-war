@@ -20,6 +20,7 @@ dotenv.config();
 
 // Init database
 CanvasController.init();
+CanvasController.restore();
 
 // Create Express app
 const app = express();
@@ -49,6 +50,13 @@ WSS.io.on("connection", (socket: Socket) => {
     console.log(`Socket connected from ${ip} using ${userAgent}`);
 
     try {
+        // Log every event
+        socket.onAny((eventName, ...args) => {
+            console.log(
+                `${new Date().toISOString()} | ${ip} ${socket.data.email || "unauthenticated"} | ${eventName} ${JSON.stringify(args)}`,
+            );
+        });
+
         socket.on("auth", (...data) => {
             const [token, email] = data;
             AccountController.authSocket(socket, [token, email]);
@@ -121,6 +129,10 @@ router.post("/canvas/reset", CanvasController.resetCanvas);
 router.post("/canvas/size", CanvasController.changeCanvasSize);
 router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
 router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
+router.post("/canvas/backup", async (req, res) => {
+    CanvasController.backup();
+    res.send("Backup done");
+});
 
 app.use("/a", router);
 
@@ -147,3 +159,11 @@ const port = process.env.PORT || 3000;
 server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+// Start backup probe (every 3 minutes)
+setInterval(
+    () => {
+        CanvasController.backup();
+    },
+    1000 * 60 * 3,
+);
