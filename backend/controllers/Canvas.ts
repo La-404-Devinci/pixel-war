@@ -159,8 +159,8 @@ class CanvasController {
             return callback(CanvasController._lastPixelTimeCache[user.devinciEmail] + CanvasController._canvas.cooldown * 1000);
         }
 
-        // Update the cache
-        CanvasController._lastPixelTimeCache[user.devinciEmail] = new Date().getTime();
+        // Update the cache (only for non-admins)
+        if (!user.isAdmin) CanvasController._lastPixelTimeCache[user.devinciEmail] = new Date().getTime();
 
         // Check if the user timer is elapsed
         if (
