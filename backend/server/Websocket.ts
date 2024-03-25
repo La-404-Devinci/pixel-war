@@ -48,6 +48,13 @@ class WSS {
     }
 
     /**
+     * Sends an 'updateConnectedUsers' event to all connected clients.
+     */
+    static async updateConnectedUsers() {
+        this.io.emit("connected-users-update", this.io.engine.clientsCount);
+    }
+
+    /**
      * Sends a 'resetCanvas' event to all connected clients.
      */
     static async resetCanvas() {

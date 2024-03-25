@@ -48,6 +48,7 @@ WSS.io.on("connection", (socket: Socket) => {
     const ip = socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
     const userAgent = socket.handshake.headers["user-agent"];
     console.log(`Socket connected from ${ip} using ${userAgent}`);
+    WSS.updateConnectedUsers();
 
     try {
         // Log every event
@@ -86,6 +87,7 @@ WSS.io.on("connection", (socket: Socket) => {
 
     socket.on("disconnect", () => {
         console.log("Socket disconnected");
+        WSS.updateConnectedUsers();
     });
 });
 
