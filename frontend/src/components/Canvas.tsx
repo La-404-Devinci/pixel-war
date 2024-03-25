@@ -37,8 +37,6 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         let startDragY = 0;
 
         const getCursorPosition = (x: number, y: number) => {
-            console.log(x, y);
-
             const canvas = canvasRef.current;
             if (!canvas) return [0, 0];
 
@@ -72,7 +70,6 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleMouseMove = (event: MouseEvent) => {
-            console.log(event);
             handleMove(event.clientX, event.clientY);
         };
 
@@ -144,8 +141,10 @@ const Canvas = ({ actualColor, readOnly, onPlacePixel, palette }: CanvasProps) =
         };
 
         const handleWheel = (event: WheelEvent) => {
+            if (event.target !== canvasRef.current && event.target !== cursorRef.current) return;
+
             // Multiplicateur de zoom arbitraire
-            const zoomFactor = 0.1;
+            const zoomFactor = 0.035;
             // Si la molette de la souris est déplacée vers le haut, zoom avant, sinon zoom arrière
             zoom.current = event.deltaY < 0 ? zoom.current + zoomFactor : zoom.current - zoomFactor;
 

@@ -147,16 +147,18 @@ class CanvasController {
             },
         });
 
-        if (!user) return callback(0);
-        if (user.isBanned) return callback(0);
+        if (!user) return callback(-1);
+        if (user.isBanned) return callback(-1);
 
         // Check from the cache if the user timer is elapsed
         if (
             CanvasController._lastPixelTimeCache[user.devinciEmail] &&
             CanvasController._lastPixelTimeCache[user.devinciEmail] > new Date().getTime() - CanvasController._canvas.cooldown * 1000
         ) {
-            // Return the "expires at" time
-            return callback(CanvasController._lastPixelTimeCache[user.devinciEmail] + CanvasController._canvas.cooldown * 1000);
+            // Return the remaining time
+            const expiresAt = CanvasController._lastPixelTimeCache[user.devinciEmail] + CanvasController._canvas.cooldown * 1000;
+            const remainingTime = expiresAt - new Date().getTime();
+            return callback(remainingTime);
         }
 
         // Update the cache (only for non-admins)
@@ -167,18 +169,20 @@ class CanvasController {
             user.lastPixelTime &&
             new Date(user.lastPixelTime).getTime() > new Date().getTime() - CanvasController._canvas.cooldown * 1000
         ) {
-            // Return the "expires at" time
-            return callback(new Date(user.lastPixelTime).getTime() + CanvasController._canvas.cooldown * 1000);
+            // Return the remaining time
+            const expiresAt = new Date(user.lastPixelTime).getTime() + CanvasController._canvas.cooldown * 1000;
+            const remainingTime = expiresAt - new Date().getTime();
+            return callback(remainingTime);
         }
 
-        if (x < 0 || y < 0 || x >= CanvasController._canvas.width || y >= CanvasController._canvas.height) return callback(0);
+        if (x < 0 || y < 0 || x >= CanvasController._canvas.width || y >= CanvasController._canvas.height) return callback(-1);
 
         // Get pixel index (from the canvas buffer)
         const pixelIndex = (y * 1024 + x) * 3;
 
         // Get palette item
         const color = CanvasController._palette[palette];
-        if (!color) return callback(0);
+        if (!color) return callback(-1);
 
         // Log the pixel placement
         await prisma.logEntry.create({
@@ -218,8 +222,8 @@ class CanvasController {
         WSS.updateUserData(socket, user);
         WSS.updateClassement();
 
-        // Send the "expires at" time
-        callback(new Date().getTime() + CanvasController._canvas.cooldown * 1000);
+        // Send the remaining time
+        callback(CanvasController._canvas.cooldown * 1000);
     }
 
     /**
@@ -250,6 +254,9 @@ class CanvasController {
                 // Remove unnecessary data
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id, ip, ...data } = entry;
+
+                console.log(data);
+                console.log(data.action);
 
                 // Serialize time
                 const time = entry.time.toString();

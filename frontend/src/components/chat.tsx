@@ -23,6 +23,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
     const [displayChat, setDisplayChat] = useState<boolean>(false);
     const [notification, setNotification] = useState<boolean>(false);
+    const connectedUsers = useRef<number>(0);
 
     const addMessage = useCallback(
         (email: string, message: string) => {
@@ -40,6 +41,14 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
         },
         [userEmail],
     );
+
+    useEffect(() => {
+        socket.on("connected-users-update", (count) => {
+            connectedUsers.current = count;
+        });
+
+        socket.emit("get-stats");
+    }, []);
 
     // Get messages from API
     useEffect(() => {
@@ -86,10 +95,18 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
         setDisplayChat(!displayChat);
     };
 
-    useEffect(() => {
+    const scrollToBottom = () => {
         if (messagesContainerRef.current) {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [chat]);
+
+    useEffect(() => {
+        scrollToBottom();
 
         // Listen for messages from websocket
         socket.on("message", (email: string, message: string) => {
@@ -140,7 +157,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
                             type="text"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            placeholder={active ? "Entrez votre message..." : "Connectez-vous"}
+                            placeholder={
+                                active
+                                    ? `Parlez à ${connectedUsers.current} personnes`
+                                    : `Connectez-vous et parlez à ${connectedUsers.current} personnes`
+                            }
                             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                             readOnly={!active}
                         />

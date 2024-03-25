@@ -13,11 +13,11 @@ export default function Palette({
     selectedColor: number;
     time: number;
 }) {
-    const [now, setNow] = useState(new Date().getTime() / 1000);
+    const [now, setNow] = useState(new Date().getTime());
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setNow(new Date().getTime() / 1000);
+            setNow(new Date().getTime());
         }, 1000);
 
         return () => {
