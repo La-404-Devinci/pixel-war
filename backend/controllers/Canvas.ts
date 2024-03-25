@@ -255,13 +255,9 @@ class CanvasController {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id, ip, ...data } = entry;
 
-                console.log(data);
-                console.log(data.action);
-
                 // Serialize time
                 const time = entry.time.toString();
-                const action = JSON.parse(data.action);
-                return { ...data, time, action };
+                return { ...data, time };
             });
 
             res.status(200).json({
