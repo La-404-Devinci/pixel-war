@@ -86,10 +86,18 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ active, userEmail }) => {
         setDisplayChat(!displayChat);
     };
 
-    useEffect(() => {
+    const scrollToBottom = () => {
         if (messagesContainerRef.current) {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [chat]);
+
+    useEffect(() => {
+        scrollToBottom();
 
         // Listen for messages from websocket
         socket.on("message", (email: string, message: string) => {
