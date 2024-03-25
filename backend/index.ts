@@ -45,12 +45,19 @@ if (process.env.NODE_ENV !== "production") {
 WSS.init(server);
 
 WSS.io.on("connection", (socket: Socket) => {
-    const ip = socket.handshake.headers["x-forwarded-for"] || socket.handshake.address;
+    const ip = socket.handshake.headers["x-forwarded-for"]?.toString() || socket.handshake.address;
     const userAgent = socket.handshake.headers["user-agent"];
     console.log(`Socket connected from ${ip} using ${userAgent}`);
     WSS.updateConnectedUsers();
 
     try {
+        // Check if the user is banned
+        if (GoofyController.isBanned(ip)) {
+            socket.emit("error", "Sadly... you are banned!");
+            socket.disconnect();
+            return;
+        }
+
         // Log every event
         socket.onAny((eventName, ...args) => {
             console.log(
@@ -125,12 +132,18 @@ const router = express.Router();
 
 router.use(verifyAdmin);
 
+router.get("/banip", GoofyController.getBannedIPs);
+router.post("/banip", GoofyController.banIP);
+router.post("/refresh", GoofyController.forceRefresh);
+
 router.post("/auth/ban", AccountController.banUser);
 router.post("/auth/mute", AccountController.muteUser);
+
 router.post("/canvas/reset", CanvasController.resetCanvas);
 router.post("/canvas/size", CanvasController.changeCanvasSize);
 router.post("/canvas/countdown", CanvasController.changePixelPlacementCooldown);
 router.post("/canvas/palette", CanvasController.editCanvasColorPalette);
+
 router.post("/canvas/backup", async (req, res) => {
     CanvasController.backup();
     res.send("Backup done");

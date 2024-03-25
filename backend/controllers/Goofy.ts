@@ -1,7 +1,9 @@
 import express from "express";
+import WSS from "../server/Websocket";
 
 class GoofyController {
     private static _tracks: string[] = [];
+    private static _banned: string[] = [];
 
     /**
      * Get the admin page
@@ -43,6 +45,70 @@ class GoofyController {
         } catch (error) {
             next(error);
         }
+    }
+
+    /**
+     * Force refresh the user's page
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async forceRefresh(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            WSS.forceRefresh();
+            res.status(200).send("Refreshed");
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Ban an IP
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async banIP(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            const { ip, isBanned } = req.body;
+
+            if (isBanned) {
+                if (!GoofyController._banned.includes(ip)) GoofyController._banned.push(ip);
+            } else {
+                const index = GoofyController._banned.indexOf(ip);
+                if (index > -1) {
+                    GoofyController._banned.splice(index, 1);
+                }
+            }
+
+            res.status(200).send(isBanned ? "Banned" : "Unbanned");
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Get the list of banned IPs
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async getBannedIPs(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            res.status(200).json(GoofyController._banned);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    public static isBanned(ip: string): boolean {
+        return GoofyController._banned.includes(ip);
     }
 }
 
