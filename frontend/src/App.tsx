@@ -137,7 +137,7 @@ function App() {
 
     const handlePlacePixel = (x: number, y: number) => {
         socket.emit("place-pixel", x, y, selectedColor, (expiresIn: number) => {
-            const expiresAt = new Date().getTime() + expiresIn;
+            const expiresAt = new Date().getTime() + expiresIn - 1000;
             setTime(expiresAt);
         });
     };
