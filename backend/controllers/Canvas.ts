@@ -245,7 +245,7 @@ class CanvasController {
                 WHERE action LIKE '%"type": "pixel_placement"%'
                 AND action LIKE '%"x": ${x}%'
                 AND action LIKE '%"y": ${y}%'
-                ORDER BY "time" DESC
+                ORDER BY "time" ASC
                 LIMIT 5`,
             );
 
