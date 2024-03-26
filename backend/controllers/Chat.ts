@@ -111,6 +111,27 @@ class ChatController {
     public static async getMessages(req: express.Request, res: express.Response) {
         res.json(ChatController._messageHistory);
     }
+
+    /**
+     * Clears the message history
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async clearMessages(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            ChatController._messageHistory = [["SYSTEM@SERVER", "The message history has been cleared"]];
+            WSS.forceRefresh();
+
+            res.status(200).json({
+                message: "Message history cleared",
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default ChatController;
