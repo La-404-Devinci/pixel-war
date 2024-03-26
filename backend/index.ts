@@ -135,6 +135,7 @@ router.use(verifyAdmin);
 router.get("/banip", GoofyController.getBannedIPs);
 router.post("/banip", GoofyController.banIP);
 router.post("/refresh", GoofyController.forceRefresh);
+router.post("/clearchat", ChatController.clearMessages);
 
 router.post("/auth/ban", AccountController.banUser);
 router.post("/auth/mute", AccountController.muteUser);

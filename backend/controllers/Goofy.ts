@@ -38,7 +38,8 @@ class GoofyController {
                 <img src="${gifs[Math.floor(Math.random() * gifs.length)]}" alt="Goofy" style="width: 300px; height: 300px; margin-bottom: 20px;">
                 <h1>Goofy ahh hecker</h1>
                 <p>There are ${GoofyController._tracks.length} hacker(s) trying to hack the server</p>
-                <p><b>Here are their IPs:</b><br/>${GoofyController._tracks.join("<br/>")}</p>
+                <p><b>Btw here are the banned IPs:</b></p>
+                <p>${GoofyController._banned.join(", ")}</p>
                 <p>Good luck!</p>
             </div>
         `);
