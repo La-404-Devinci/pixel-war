@@ -116,6 +116,7 @@ app.get("/auth/login", AccountController.login);
 app.get("/canvas/image", CanvasController.getCanvasImage);
 app.get("/canvas/palette", CanvasController.getCanvasPalette);
 app.get("/canvas/history", CanvasController.getPixelHistory);
+app.get("/toast", GoofyController.getToast);
 
 // Asso routes
 if (process.env.DEMO !== "true") {
@@ -136,6 +137,7 @@ router.get("/banip", GoofyController.getBannedIPs);
 router.post("/banip", GoofyController.banIP);
 router.post("/refresh", GoofyController.forceRefresh);
 router.post("/clearchat", ChatController.clearMessages);
+router.post("/toast", GoofyController.sendToast);
 
 router.post("/auth/ban", AccountController.banUser);
 router.post("/auth/mute", AccountController.muteUser);

@@ -1,0 +1,43 @@
+.toast {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 4px;
+    position: fixed;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 8px;
+    padding: 8px 16px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: slideIn 2.5s forwards, fadeOut 0.5s 5s forwards;
+}
+
+@keyframes slideIn {
+    0% {
+        top: -100px;
+    }
+    50% {
+        top: 32px;
+    }
+    60% {
+        background: white;
+    }
+    60.01% {
+        background: red;
+    }
+    100% {
+        background: white;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}

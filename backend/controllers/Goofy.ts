@@ -4,6 +4,7 @@ import WSS from "../server/Websocket";
 class GoofyController {
     private static _tracks: string[] = [];
     private static _banned: string[] = [];
+    private static _toast?: string = undefined;
 
     /**
      * Get the admin page
@@ -110,6 +111,45 @@ class GoofyController {
 
     public static isBanned(ip: string): boolean {
         return GoofyController._banned.includes(ip);
+    }
+
+    /**
+     * Edit the toast message
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async sendToast(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            const { toast } = req.body;
+
+            GoofyController._toast = toast;
+            WSS.broadcastToast(toast);
+
+            res.status(200).send("Toast sent");
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Get the toast message
+     * @server HTTP
+     *
+     * @param req The Express request object
+     * @param res The Express response object
+     * @param next The Express next function
+     */
+    public static async getToast(req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            res.status(200).json({
+                toast: GoofyController._toast || null,
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 }
 

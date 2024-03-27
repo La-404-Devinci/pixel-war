@@ -71,6 +71,14 @@ class WSS {
     }
 
     /**
+     * Broadcast a toast change to everyone
+     * @param toast The new toast message
+     */
+    static async broadcastToast(toast: string) {
+        this.io.emit("toast", toast);
+    }
+
+    /**
      * Sends an 'updateCanvasPixel' event to all connected clients.
      * @param x The x coordinate of the pixel
      * @param y The y coordinate of the pixel
