@@ -99,17 +99,21 @@ class ChatController {
         WSS.updateUserData(socket, user);
 
         // Send message to discord (using the webhook)
-        fetch(process.env.DISCORD_WEBHOOK_URL as string, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                avatar_url: `https://ui-avatars.com/api/?name=${user.devinciEmail}&background=0D8ABC&color=fff`,
-                username: user.devinciEmail,
-                content: cleanMessage,
-            }),
-        });
+        try {
+            await fetch(process.env.DISCORD_WEBHOOK_URL as string, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    avatar_url: `https://ui-avatars.com/api/?name=${user.devinciEmail}&background=0D8ABC&color=fff`,
+                    username: user.devinciEmail,
+                    content: cleanMessage,
+                }),
+            });
+        } catch (error) {
+            console.error("Error sending message to Discord", error);
+        }
 
         callback(true);
     }
