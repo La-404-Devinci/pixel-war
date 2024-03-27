@@ -14,6 +14,7 @@ import AssoModal from "./components/modal/asso";
 import API from "./utils/api";
 
 import iconUserLarge from "./assets/user-large.svg";
+import ToastComponent from "./components/toast";
 
 function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -149,6 +150,8 @@ function App() {
                 {isConnected && <Palette onColorClick={handleColorSelect} colors={colors} selectedColor={selectedColor} time={time} />}
                 <Timer time={time} />
             </div>
+
+            <ToastComponent />
 
             <div className={styles.navbarContainer}>
                 <LeaderboardComponent />
