@@ -98,6 +98,19 @@ class ChatController {
         WSS.broadcastMessage(user.devinciEmail, cleanMessage);
         WSS.updateUserData(socket, user);
 
+        // Send message to discord (using the webhook)
+        fetch(process.env.DISCORD_WEBHOOK_URL as string, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                avatar_url: `https://ui-avatars.com/api/?name=${user.devinciEmail}&background=0D8ABC&color=fff`,
+                username: user.devinciEmail,
+                content: cleanMessage,
+            }),
+        });
+
         callback(true);
     }
 
