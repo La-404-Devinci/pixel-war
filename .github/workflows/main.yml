@@ -26,6 +26,6 @@ jobs:
                       docker compose up -d
                       npm install
                       npm run build
-                      screen -S 404 -X quit -L ../../last_log.txt
-                      screen -S 404 -d -m npm start
+                      screen -S 404 -X quit
+                      screen -S 404 -d -L ../../last_log.txt -m npm start
                       echo "Deployed!"
