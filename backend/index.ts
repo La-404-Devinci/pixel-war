@@ -66,51 +66,26 @@ WSS.io.on("connection", (socket: Socket) => {
         });
 
         socket.on("auth", (...data) => {
-            try {
-                const [token, email] = data;
-                AccountController.authSocket(socket, [token, email]);
-            } catch (e) {
-                console.error("SCKT-ERR:", e);
-                console.log("SCKT-ERR: place-pixel email", socket.data.email);
-            }
+            const [token, email] = data;
+            AccountController.authSocket(socket, [token, email]);
         });
 
         socket.on("place-pixel", (...data) => {
-            try {
-                const [x, y, color, callback] = data;
-                CanvasController.placePixel(socket, [x, y, color, callback]);
-            } catch (e) {
-                console.error("SCKT-ERR:", e);
-                console.log("SCKT-ERR: place-pixel email", socket.data.email);
-            }
+            const [x, y, color, callback] = data;
+            CanvasController.placePixel(socket, [x, y, color, callback]);
         });
 
         socket.on("message", (...data) => {
-            try {
-                const [message, callback] = data;
-                ChatController.broadcastMessage(socket, [message, callback]);
-            } catch (e) {
-                console.error("SCKT-ERR:", e);
-                console.log("SCKT-ERR: place-pixel email", socket.data.email);
-            }
+            const [message, callback] = data;
+            ChatController.broadcastMessage(socket, [message, callback]);
         });
 
         socket.on("get-stats", () => {
-            try {
-                AccountController.getStats(socket);
-            } catch (e) {
-                console.error("SCKT-ERR:", e);
-                console.log("SCKT-ERR: place-pixel email", socket.data.email);
-            }
+            AccountController.getStats(socket);
         });
 
         socket.on("get-classement", () => {
-            try {
-                WSS.updateClassement(socket);
-            } catch (e) {
-                console.error("SCKT-ERR:", e);
-                console.log("SCKT-ERR: place-pixel email", socket.data.email);
-            }
+            WSS.updateClassement(socket);
         });
     } catch (e) {
         socket.emit("error", "An error occurred");

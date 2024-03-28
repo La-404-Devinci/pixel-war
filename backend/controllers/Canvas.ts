@@ -140,6 +140,15 @@ class CanvasController {
      * @param data The payload
      */
     public static async placePixel(socket: SocketIO.Socket, [x, y, palette, callback]: [number, number, number, (timer: number) => void]) {
+        if (!callback) {
+            console.error("Missing callback");
+            return;
+        }
+
+        if (!socket.data.email) {
+            return callback(-1);
+        }
+
         // Get the user
         const user = await prisma.account.findFirst({
             where: {
